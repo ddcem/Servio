@@ -2,7 +2,7 @@ using Servio.Model.Enums;
 
 namespace Servio.Services.Database.Entities;
 
-public class Reservation
+public class Reservation : IEntity
 {
     public int Id { get; set; }
     public int TableId { get; set; }

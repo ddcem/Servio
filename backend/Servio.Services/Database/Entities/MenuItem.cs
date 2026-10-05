@@ -1,6 +1,6 @@
 namespace Servio.Services.Database.Entities;
 
-public class MenuItem
+public class MenuItem : IEntity
 {
     public int Id { get; set; }
     public string Name { get; set; } = string.Empty;

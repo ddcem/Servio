@@ -1,3 +1,5 @@
+using Microsoft.EntityFrameworkCore;
+using Npgsql;
 using Servio.Model.Exceptions;
 using Servio.Model.Responses;
 
@@ -25,13 +27,19 @@ public class ExceptionHandlingMiddleware(RequestDelegate next, ILogger<Exception
                 NotFoundException => (StatusCodes.Status404NotFound, ex.Message),
                 AuthenticationException => (StatusCodes.Status401Unauthorized, ex.Message),
                 ForbiddenException => (StatusCodes.Status403Forbidden, ex.Message),
+                PaymentProviderException => (StatusCodes.Status502BadGateway, ex.Message),
+                // Safety net for races that slip past the service checks (two users saving at the same moment).
+                DbUpdateException { InnerException: PostgresException { SqlState: PostgresErrorCodes.UniqueViolation } } =>
+                    (StatusCodes.Status409Conflict, "This record was just changed by someone else. Reload and try again."),
+                DbUpdateException { InnerException: PostgresException { SqlState: PostgresErrorCodes.ForeignKeyViolation } } =>
+                    (StatusCodes.Status409Conflict, "This record is used by other data and cannot be changed or deleted."),
                 OperationCanceledException when context.RequestAborted.IsCancellationRequested => (499, "Request was cancelled."),
                 _ => (StatusCodes.Status500InternalServerError, UnexpectedErrorMessage)
             };
 
-            if (statusCode == StatusCodes.Status500InternalServerError)
+            if (statusCode is StatusCodes.Status500InternalServerError or StatusCodes.Status409Conflict)
             {
-                logger.LogError(ex, "Unhandled exception for {Method} {Path}{Query} (user: {User}, trace: {TraceId})",
+                logger.LogError(ex, "Request failed for {Method} {Path}{Query} (user: {User}, trace: {TraceId})",
                     context.Request.Method, context.Request.Path, context.Request.QueryString,
                     context.User.Identity?.Name ?? "anonymous", context.TraceIdentifier);
             }

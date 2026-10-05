@@ -2,7 +2,7 @@ using Servio.Model.Enums;
 
 namespace Servio.Services.Database.Entities;
 
-public class Notification
+public class Notification : IEntity
 {
     public int Id { get; set; }
     public int UserId { get; set; }

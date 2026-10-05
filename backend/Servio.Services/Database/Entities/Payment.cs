@@ -2,7 +2,7 @@ using Servio.Model.Enums;
 
 namespace Servio.Services.Database.Entities;
 
-public class Payment
+public class Payment : IEntity
 {
     public int Id { get; set; }
     public int OrderId { get; set; }

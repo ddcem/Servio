@@ -253,6 +253,9 @@ namespace Servio.Services.Database.Migrations
                     b.Property<int>("CurrencyId")
                         .HasColumnType("integer");
 
+                    b.Property<int>("GuestCount")
+                        .HasColumnType("integer");
+
                     b.Property<DateTime>("OpenedAt")
                         .HasColumnType("timestamp with time zone");
 
@@ -450,6 +453,9 @@ namespace Servio.Services.Database.Migrations
 
                     b.Property<DateTime>("ExpiresAt")
                         .HasColumnType("timestamp with time zone");
+
+                    b.Property<int>("FailedAttempts")
+                        .HasColumnType("integer");
 
                     b.Property<DateTime?>("UsedAt")
                         .HasColumnType("timestamp with time zone");

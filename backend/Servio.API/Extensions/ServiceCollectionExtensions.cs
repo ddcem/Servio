@@ -1,18 +1,35 @@
 using System.Text;
+using System.Text.Json.Serialization;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi;
+using Servio.API.Hubs;
+using Servio.API.Realtime;
 using Servio.Model.Configuration;
 using Servio.Model.Responses;
 using Servio.Services.Auth;
+using Servio.Services.Common;
 using Servio.Services.Configuration;
 using Servio.Services.Database;
 using Servio.Services.Database.Entities;
 using Servio.Services.Database.Seed;
+using Servio.Services.Menu;
 using Servio.Services.Messaging;
+using Servio.Services.Notifications;
+using Servio.Services.Orders;
+using Servio.Services.Payments;
+using Servio.Services.Payments.PayPal;
+using Servio.Services.Recommendations;
+using Servio.Services.Reports;
+using Servio.Services.ReferenceData;
+using Servio.Services.Reservations;
+using Servio.Services.Settings;
+using Servio.Services.Tables;
+using Servio.Services.Users;
 
 namespace Servio.API.Extensions;
 
@@ -42,6 +59,20 @@ public static class ServiceCollectionExtensions
             o.EmailQueue = configuration.GetRequired(EnvKeys.RabbitMqEmailQueue);
         });
 
+        services.Configure<PayPalOptions>(o =>
+        {
+            o.BaseUrl = configuration.GetRequired(EnvKeys.PayPalBaseUrl);
+            o.ClientId = configuration.GetRequired(EnvKeys.PayPalClientId);
+            o.ClientSecret = configuration.GetRequired(EnvKeys.PayPalClientSecret);
+            o.ReturnUrl = configuration.GetRequired(EnvKeys.PayPalReturnUrl);
+            o.CancelUrl = configuration.GetRequired(EnvKeys.PayPalCancelUrl);
+        });
+
+        services.Configure<RestaurantOptions>(o =>
+        {
+            o.TimeZoneId = configuration.GetRequired(EnvKeys.RestaurantTimeZone);
+        });
+
         return services;
     }
 
@@ -60,10 +91,41 @@ public static class ServiceCollectionExtensions
         services.AddSingleton<IPasswordHasher<User>, PasswordHasher<User>>();
         services.AddSingleton<IJwtTokenService, JwtTokenService>();
         services.AddSingleton<IMessagePublisher, RabbitMqPublisher>();
+        services.AddSingleton<IRestaurantClock, RestaurantClock>();
+        services.AddSingleton<IRealtimeNotifier, SignalRNotifier>();
 
         services.AddScoped<ICurrentUserService, CurrentUserService>();
         services.AddScoped<ISessionValidator, SessionValidator>();
+        services.AddScoped<INotificationDispatcher, NotificationDispatcher>();
         services.AddScoped<IAuthService, AuthService>();
+
+        services.AddScoped<LookupService<Role>>();
+        services.AddScoped<LookupService<PreparationStation>>();
+        services.AddScoped<LookupService<PaymentMethod>>();
+        services.AddScoped<ITableAreaService, TableAreaService>();
+        services.AddScoped<IItemTagService, ItemTagService>();
+        services.AddScoped<IMenuCategoryService, MenuCategoryService>();
+        services.AddScoped<ICurrencyService, CurrencyService>();
+
+        services.AddScoped<ISettingsService, SettingsService>();
+        services.AddScoped<IUserService, UserService>();
+        services.AddScoped<IProfileService, ProfileService>();
+        services.AddScoped<IMenuItemService, MenuItemService>();
+        services.AddScoped<IRestaurantTableService, RestaurantTableService>();
+        services.AddScoped<IReservationService, ReservationService>();
+        services.AddScoped<IOrderService, OrderService>();
+        services.AddScoped<IOrderTicketService, OrderTicketService>();
+        services.AddScoped<INotificationService, NotificationService>();
+        services.AddScoped<IPaymentService, PaymentService>();
+        services.AddScoped<IRecommendationService, RecommendationService>();
+        services.AddScoped<IReportService, ReportService>();
+
+        services.AddHttpClient<IPayPalClient, PayPalClient>((provider, client) =>
+        {
+            var baseUrl = provider.GetRequiredService<IOptions<PayPalOptions>>().Value.BaseUrl.TrimEnd('/');
+            client.BaseAddress = new Uri(baseUrl + "/");
+            client.Timeout = TimeSpan.FromSeconds(30);
+        });
 
         return services;
     }
@@ -90,6 +152,31 @@ public static class ServiceCollectionExtensions
                 };
                 o.Events = new JwtBearerEvents
                 {
+                    // 401 and 403 carry the same JSON error shape as every other error, so the apps can show it.
+                    OnChallenge = async context =>
+                    {
+                        context.HandleResponse();
+                        context.Response.StatusCode = StatusCodes.Status401Unauthorized;
+                        await context.Response.WriteAsJsonAsync(
+                            new ErrorResponse("Your session has expired or you are not logged in. Please log in again."));
+                    },
+                    OnForbidden = async context =>
+                    {
+                        context.Response.StatusCode = StatusCodes.Status403Forbidden;
+                        await context.Response.WriteAsJsonAsync(
+                            new ErrorResponse("Your role does not have permission for this action."));
+                    },
+                    // WebSocket clients cannot send headers, so the hub accepts the token from the query string.
+                    OnMessageReceived = context =>
+                    {
+                        var accessToken = context.Request.Query["access_token"];
+                        if (!string.IsNullOrEmpty(accessToken) && context.HttpContext.Request.Path.StartsWithSegments(NotificationHub.Path))
+                        {
+                            context.Token = accessToken;
+                        }
+
+                        return Task.CompletedTask;
+                    },
                     // Tokens of logged-out sessions are rejected even before they expire.
                     OnTokenValidated = async context =>
                     {
@@ -125,6 +212,7 @@ public static class ServiceCollectionExtensions
     public static IServiceCollection AddServioControllers(this IServiceCollection services)
     {
         services.AddControllers()
+            .AddJsonOptions(o => o.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter()))
             .ConfigureApiBehaviorOptions(o =>
             {
                 // Validation errors are returned in the same shape as all other errors.
@@ -141,6 +229,13 @@ public static class ServiceCollectionExtensions
                 };
             });
 
+        return services;
+    }
+
+    public static IServiceCollection AddServioSignalR(this IServiceCollection services)
+    {
+        services.AddSignalR()
+            .AddJsonProtocol(o => o.PayloadSerializerOptions.Converters.Add(new JsonStringEnumConverter()));
         return services;
     }
 

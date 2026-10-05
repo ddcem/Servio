@@ -2,11 +2,12 @@ using Servio.Model.Enums;
 
 namespace Servio.Services.Database.Entities;
 
-public class Order
+public class Order : IEntity
 {
     public int Id { get; set; }
     public string OrderNumber { get; set; } = string.Empty;
     public int TableId { get; set; }
+    public int GuestCount { get; set; }
     public int WaiterId { get; set; }
     public OrderStatus Status { get; set; }
     public decimal Subtotal { get; set; }

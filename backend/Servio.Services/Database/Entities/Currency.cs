@@ -1,6 +1,6 @@
 namespace Servio.Services.Database.Entities;
 
-public class Currency
+public class Currency : IEntity
 {
     public int Id { get; set; }
     public string Code { get; set; } = string.Empty;

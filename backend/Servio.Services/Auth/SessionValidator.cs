@@ -31,5 +31,19 @@ public class SessionValidator(ServioDbContext context, IMemoryCache cache) : ISe
 
     public void MarkRevoked(string jti) => cache.Set(CacheKey(jti), false, CacheDuration);
 
+    public async Task RevokeUserSessionsAsync(int userId, string? exceptJti = null, CancellationToken cancellationToken = default)
+    {
+        var now = DateTime.UtcNow;
+        var sessions = await context.UserSessions
+            .Where(x => x.UserId == userId && x.RevokedAt == null && x.ExpiresAt > now && x.TokenJti != exceptJti)
+            .ToListAsync(cancellationToken);
+
+        foreach (var session in sessions)
+        {
+            session.RevokedAt = now;
+            MarkRevoked(session.TokenJti);
+        }
+    }
+
     private static string CacheKey(string jti) => $"session:{jti}";
 }

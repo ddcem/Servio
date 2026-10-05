@@ -2,7 +2,7 @@ using Servio.Model.Enums;
 
 namespace Servio.Services.Database.Entities;
 
-public class OrderTicketStatusHistory
+public class OrderTicketStatusHistory : IEntity
 {
     public int Id { get; set; }
     public int OrderTicketId { get; set; }

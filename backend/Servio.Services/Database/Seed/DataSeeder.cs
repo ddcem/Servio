@@ -3,6 +3,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using Servio.Model.Constants;
 using Servio.Model.Enums;
+using Servio.Services.Common;
 using Servio.Services.Database.Entities;
 
 namespace Servio.Services.Database.Seed;
@@ -11,7 +12,11 @@ namespace Servio.Services.Database.Seed;
 /// Seeds all data needed to run and test the application. Runs once, on an empty database.
 /// Passwords are hashed with the same IPasswordHasher used at runtime.
 /// </summary>
-public class DataSeeder(ServioDbContext context, IPasswordHasher<User> passwordHasher, ILogger<DataSeeder> logger)
+public class DataSeeder(
+    ServioDbContext context,
+    IPasswordHasher<User> passwordHasher,
+    IRestaurantClock clock,
+    ILogger<DataSeeder> logger)
 {
     private const string TestPassword = "test";
 
@@ -46,6 +51,8 @@ public class DataSeeder(ServioDbContext context, IPasswordHasher<User> passwordH
             UpdatedAt = DateTime.UtcNow
         });
         await context.SaveChangesAsync(cancellationToken);
+
+        await new HistorySeeder(context, clock).SeedAsync(cancellationToken);
 
         await transaction.CommitAsync(cancellationToken);
         logger.LogInformation("Database seeded");
@@ -189,6 +196,8 @@ public class DataSeeder(ServioDbContext context, IPasswordHasher<User> passwordH
             Price = i.Price,
             Category = categories[i.Category],
             Tags = i.Tags.Select(t => tags[t]).ToList(),
+            Image = SeedImages.ForMenuItem(i.Name),
+            ImageContentType = SeedImages.ContentType,
             CreatedAt = now
         }));
     }

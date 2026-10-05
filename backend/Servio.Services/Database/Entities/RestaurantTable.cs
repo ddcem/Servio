@@ -1,6 +1,6 @@
 namespace Servio.Services.Database.Entities;
 
-public class RestaurantTable
+public class RestaurantTable : IEntity
 {
     public int Id { get; set; }
     public int Number { get; set; }

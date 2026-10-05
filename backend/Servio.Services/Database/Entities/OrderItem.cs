@@ -1,6 +1,6 @@
 namespace Servio.Services.Database.Entities;
 
-public class OrderItem
+public class OrderItem : IEntity
 {
     public int Id { get; set; }
     public int OrderId { get; set; }

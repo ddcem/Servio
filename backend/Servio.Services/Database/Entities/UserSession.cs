@@ -1,6 +1,6 @@
 namespace Servio.Services.Database.Entities;
 
-public class UserSession
+public class UserSession : IEntity
 {
     public int Id { get; set; }
     public int UserId { get; set; }

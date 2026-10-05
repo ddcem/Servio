@@ -22,6 +22,7 @@ public static class EnvKeys
     public const string JwtAudience = "JWT_AUDIENCE";
     public const string JwtExpiresMinutes = "JWT_EXPIRES_MINUTES";
     public const string CorsAllowedOrigins = "CORS_ALLOWED_ORIGINS";
+    public const string RestaurantTimeZone = "RESTAURANT_TIME_ZONE";
 
     public const string PayPalBaseUrl = "PAYPAL_BASE_URL";
     public const string PayPalClientId = "PAYPAL_CLIENT_ID";
