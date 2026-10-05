@@ -1,0 +1,6 @@
+<Solution>
+  <Project Path="Servio.API/Servio.API.csproj" />
+  <Project Path="Servio.Model/Servio.Model.csproj" />
+  <Project Path="Servio.Services/Servio.Services.csproj" />
+  <Project Path="Servio.Worker/Servio.Worker.csproj" />
+</Solution>

@@ -1,0 +1,77 @@
+services:
+  servio-db:
+    image: postgres:17.6
+    container_name: servio-db
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: ${DB_NAME}
+      POSTGRES_USER: ${DB_USER}
+      POSTGRES_PASSWORD: ${DB_PASSWORD}
+    ports:
+      - "${DB_HOST_PORT}:5432"
+    volumes:
+      - servio-db-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${DB_USER} -d ${DB_NAME}"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+    networks:
+      - servio-net
+
+  servio-rabbitmq:
+    image: rabbitmq:4.1-management
+    container_name: servio-rabbitmq
+    restart: unless-stopped
+    environment:
+      RABBITMQ_DEFAULT_USER: ${RABBITMQ_USER}
+      RABBITMQ_DEFAULT_PASS: ${RABBITMQ_PASSWORD}
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+    healthcheck:
+      test: ["CMD", "rabbitmq-diagnostics", "-q", "ping"]
+      interval: 10s
+      timeout: 10s
+      retries: 10
+    networks:
+      - servio-net
+
+  servio-api:
+    build:
+      context: ./backend
+      dockerfile: Servio.API/Dockerfile
+    container_name: servio-api
+    restart: unless-stopped
+    env_file: .env
+    environment:
+      ASPNETCORE_URLS: http://+:${API_PORT}
+    ports:
+      - "${API_PORT}:${API_PORT}"
+    depends_on:
+      servio-db:
+        condition: service_healthy
+      servio-rabbitmq:
+        condition: service_healthy
+    networks:
+      - servio-net
+
+  servio-worker:
+    build:
+      context: ./backend
+      dockerfile: Servio.Worker/Dockerfile
+    container_name: servio-worker
+    restart: unless-stopped
+    env_file: .env
+    depends_on:
+      servio-rabbitmq:
+        condition: service_healthy
+    networks:
+      - servio-net
+
+volumes:
+  servio-db-data:
+
+networks:
+  servio-net:
+    driver: bridge
