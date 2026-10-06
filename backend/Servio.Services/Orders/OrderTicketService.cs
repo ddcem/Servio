@@ -59,6 +59,7 @@ public class OrderTicketService(
             .OrderBy(i => i.Id)
             .Select(i => new OrderTicketItemResponse
             {
+                MenuItemId = i.MenuItemId,
                 MenuItemName = i.MenuItem.Name,
                 Quantity = i.Quantity,
                 Note = i.Note

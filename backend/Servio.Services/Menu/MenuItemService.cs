@@ -1,5 +1,6 @@
 using System.Linq.Expressions;
 using Microsoft.EntityFrameworkCore;
+using Servio.Model.Enums;
 using Servio.Model.Exceptions;
 using Servio.Model.Requests;
 using Servio.Model.Responses;
@@ -48,6 +49,10 @@ public class MenuItemService(
                 IsAvailableToday = x.IsAvailableToday,
                 HasImage = x.Image != null,
                 IsFavorite = x.FavoritedBy.Any(u => u.Id == userId),
+                SoldByMeCount = Context.OrderItems
+                    .Where(i => i.MenuItemId == x.Id && i.Order.WaiterId == userId
+                                && i.Order.Status != OrderStatus.Cancelled && i.OrderTicket.Status != TicketStatus.Cancelled)
+                    .Sum(i => (int?)i.Quantity) ?? 0,
                 Tags = x.Tags.OrderBy(t => t.Name).Select(t => new LookupResponse { Id = t.Id, Name = t.Name }).ToList()
             };
         }

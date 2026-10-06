@@ -1,6 +1,7 @@
 name: servio_shared
-description: "A new Flutter package project."
-version: 0.0.1
+description: "Shared API client, models, realtime updates, theme and widgets for the Servio apps."
+version: 1.0.0
+publish_to: none
 homepage:
 
 environment:
@@ -10,6 +11,10 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
+  http: ^1.6.0
+  intl: ^0.20.3
+  provider: ^6.1.5+1
+  signalr_netcore: ^1.4.4
 
 dev_dependencies:
   flutter_test:

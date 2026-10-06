@@ -426,9 +426,10 @@ public class PaymentService(
         }
     }
 
+    /// <summary>The tip is a percentage of the subtotal (before tax), as shown on the checkout screen.</summary>
     private static (decimal TipAmount, decimal Amount) CalculateAmount(Order order, int tipPercent)
     {
-        var tipAmount = Money.Percent(order.Total, tipPercent);
+        var tipAmount = Money.Percent(order.Subtotal, tipPercent);
         return (tipAmount, order.Total + tipAmount);
     }
 

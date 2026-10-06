@@ -1,5 +1,38 @@
-/// A Calculator.
-class Calculator {
-  /// Returns [value] plus 1.
-  int addOne(int value) => value + 1;
-}
+/// Shared code of the Servio desktop and mobile apps.
+library;
+
+export 'src/api/api_client.dart';
+export 'src/api/api_exception.dart';
+export 'src/auth/auth_provider.dart';
+export 'src/auth/notification_center.dart';
+export 'src/models/enums.dart';
+export 'src/models/json.dart' show enumToApi;
+export 'src/models/menu_item.dart';
+export 'src/models/notification.dart';
+export 'src/models/order.dart';
+export 'src/models/paged_result.dart';
+export 'src/models/payment.dart';
+export 'src/models/reference_data.dart';
+export 'src/models/reports.dart';
+export 'src/models/reservation.dart';
+export 'src/models/restaurant_table.dart';
+export 'src/models/user.dart';
+export 'src/providers/base_provider.dart';
+export 'src/providers/menu_item_provider.dart';
+export 'src/providers/notification_provider.dart';
+export 'src/providers/order_provider.dart';
+export 'src/providers/payment_provider.dart';
+export 'src/providers/reference_providers.dart';
+export 'src/providers/report_provider.dart';
+export 'src/providers/table_provider.dart';
+export 'src/providers/user_provider.dart';
+export 'src/realtime/realtime_service.dart';
+export 'src/theme/servio_colors.dart';
+export 'src/theme/servio_theme.dart';
+export 'src/utils/formatters.dart';
+export 'src/utils/roles.dart';
+export 'src/utils/validators.dart';
+export 'src/widgets/auth_image.dart';
+export 'src/widgets/dialogs.dart';
+export 'src/widgets/feedback.dart';
+export 'src/widgets/states.dart';

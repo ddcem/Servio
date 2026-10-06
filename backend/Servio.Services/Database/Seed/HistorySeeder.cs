@@ -344,7 +344,7 @@ public class HistorySeeder(ServioDbContext context, IRestaurantClock clock)
     {
         int[] tips = [0, 0, 0, 0, 10, 10, 10, 15, 15, 20];
         var tipPercent = tips[_random.Next(tips.Length)];
-        var tipAmount = Money.Percent(order.Total, tipPercent);
+        var tipAmount = Money.Percent(order.Subtotal, tipPercent);
         var amount = order.Total + tipAmount;
         var cashReceived = Math.Ceiling(amount / 5m) * 5m + (_random.NextDouble() < 0.3 ? 10m : 0m);
 

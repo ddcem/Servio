@@ -16,5 +16,8 @@ public class MenuItemResponse
     public bool IsAvailableToday { get; set; }
     public bool HasImage { get; set; }
     public bool IsFavorite { get; set; }
+
+    /// <summary>How many of this item the logged-in waiter has sold, shown on the favorites cards.</summary>
+    public int SoldByMeCount { get; set; }
     public List<LookupResponse> Tags { get; set; } = [];
 }
