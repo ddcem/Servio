@@ -4,6 +4,7 @@ import 'package:servio_shared/servio_shared.dart';
 
 import '../widgets/gradient_app_bar.dart';
 import 'paypal_checkout_screen.dart';
+import 'receipt_screen.dart';
 
 enum _Method { cash, card }
 
@@ -30,8 +31,8 @@ class _PaymentScreenState extends State<PaymentScreen> {
 
   String _money(double value) => Formatters.money(value, _order.currencySymbol);
 
-  /// Same as the server: the tip is a percentage of the subtotal, rounded to cents.
-  double get _tip => (_order.subtotal * _tipPercent).roundToDouble() / 100;
+  /// Same as the server: the tip is a percentage of the bill, rounded to cents.
+  double get _tip => (_order.total * _tipPercent).roundToDouble() / 100;
   double get _amount => _order.total + _tip;
   double get _cashReceived => double.tryParse(_cash) ?? 0;
   double get _change => _cashReceived - _amount;
@@ -52,7 +53,14 @@ class _PaymentScreenState extends State<PaymentScreen> {
     });
   }
 
+  /// Payments cannot be undone from the app (only the admin can refund), so the waiter confirms first.
+  Future<bool> _confirm(String message) =>
+      confirmAction(context, title: 'Take payment?', message: message, confirmLabel: 'Confirm');
+
   Future<void> _payCash() async {
+    final tip = _tipPercent > 0 ? ' including a ${_money(_tip)} tip' : '';
+    final change = _change > 0.004 ? ' Give ${_money(_change)} change.' : '';
+    if (!await _confirm('Record a cash payment of ${_money(_amount)}$tip for table ${_order.tableNumber}?$change')) return;
     setState(() => _busy = true);
     try {
       final payment = await _payments.payCash(_order.id, _tipPercent, _cashReceived);
@@ -65,6 +73,8 @@ class _PaymentScreenState extends State<PaymentScreen> {
   }
 
   Future<void> _payCard() async {
+    final tip = _tipPercent > 0 ? ' including a ${_money(_tip)} tip' : '';
+    if (!await _confirm('Charge ${_money(_amount)}$tip for table ${_order.tableNumber} through PayPal?')) return;
     setState(() => _busy = true);
     try {
       final checkout = await _payments.startPayPal(_order.id, _tipPercent);
@@ -107,7 +117,7 @@ class _PaymentScreenState extends State<PaymentScreen> {
   }
 
   Future<void> _done(Payment payment) async {
-    await showDialog<void>(
+    final showReceipt = await showDialog<bool>(
       context: context,
       barrierDismissible: false,
       builder: (context) => AlertDialog(
@@ -122,10 +132,25 @@ class _PaymentScreenState extends State<PaymentScreen> {
             if (payment.changeGiven != null) _line('Change', _money(payment.changeGiven!), bold: true),
           ],
         ),
-        actions: [FilledButton(onPressed: () => Navigator.pop(context), child: const Text('Done'))],
+        actions: [
+          OutlinedButton.icon(
+            onPressed: () => Navigator.pop(context, true),
+            icon: const Icon(Icons.receipt_long_outlined),
+            label: const Text('Receipt'),
+          ),
+          FilledButton(onPressed: () => Navigator.pop(context, false), child: const Text('Done')),
+        ],
       ),
     );
-    if (mounted) Navigator.of(context).popUntil((route) => route.isFirst);
+    if (!mounted) return;
+    final navigator = Navigator.of(context)..popUntil((route) => route.isFirst);
+    if (showReceipt == true) {
+      navigator.push(
+        MaterialPageRoute(
+          builder: (_) => ReceiptScreen(paymentId: payment.id, title: 'Table ${payment.tableNumber} · ${payment.orderNumber}'),
+        ),
+      );
+    }
   }
 
   @override
@@ -174,11 +199,13 @@ class _PaymentScreenState extends State<PaymentScreen> {
                   const SizedBox(height: 6),
                   for (final item in _order.items) _line('${item.menuItemName} × ${item.quantity}', _money(item.lineTotal)),
                   const Divider(height: 20),
-                  _line('Subtotal', _money(_order.subtotal), muted: true),
-                  _line('Tax (${_percent(_order.taxRate)})', _money(_order.taxAmount), muted: true),
-                  if (_tipPercent > 0) _line('Tip ($_tipPercent%)', _money(_tip), muted: true),
-                  const Divider(height: 20),
-                  _line('Total', _money(_amount), bold: true, size: 18),
+                  _line('Bill', _money(_order.total), bold: _tipPercent == 0, size: _tipPercent == 0 ? 18 : 14),
+                  VatNote(total: _order.total, taxRate: _order.taxRate, currency: _order.currencySymbol),
+                  if (_tipPercent > 0) ...[
+                    _line('Tip ($_tipPercent%)', _money(_tip), muted: true),
+                    const Divider(height: 20),
+                    _line('Total to pay', _money(_amount), bold: true, size: 18),
+                  ],
                   const SizedBox(height: 18),
                   const Text('Tip Amount', style: TextStyle(fontWeight: FontWeight.w600)),
                   const SizedBox(height: 8),
@@ -360,8 +387,6 @@ class _PaymentScreenState extends State<PaymentScreen> {
       ],
     );
   }
-
-  static String _percent(double value) => value == value.roundToDouble() ? '${value.toInt()}%' : '$value%';
 
   static Widget _line(String label, String value, {bool bold = false, bool muted = false, double size = 14}) => Padding(
     padding: const EdgeInsets.symmetric(vertical: 3),

@@ -16,7 +16,7 @@ class CartLine {
 class Cart extends ChangeNotifier {
   Cart({required this.taxRate});
 
-  /// In percent, e.g. 17.
+  /// VAT included in the prices, in percent, e.g. 17.
   final double taxRate;
 
   final List<CartLine> _lines = [];
@@ -27,9 +27,8 @@ class Cart extends ChangeNotifier {
   int get itemCount => _lines.fold(0, (sum, line) => sum + line.quantity);
   List<int> get menuItemIds => [for (final line in _lines) line.item.id];
 
-  double get subtotal => _round(_lines.fold(0.0, (sum, line) => sum + line.lineTotal));
-  double get tax => _round(subtotal * taxRate / 100);
-  double get total => subtotal + tax;
+  /// Menu prices include VAT, so the total is simply the sum of the items.
+  double get total => _round(_lines.fold(0.0, (sum, line) => sum + line.lineTotal));
 
   int quantityOf(int menuItemId) => _lines.where((line) => line.item.id == menuItemId).firstOrNull?.quantity ?? 0;
 

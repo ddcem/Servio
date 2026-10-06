@@ -17,6 +17,7 @@ dependencies:
   servio_shared:
     path: ../servio_shared
   image_picker: ^1.2.4
+  printing: ^5.15.1
 
 dev_dependencies:
   flutter_test:

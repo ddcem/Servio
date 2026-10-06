@@ -6,7 +6,7 @@ public class SalesReportResponse
     public DateOnly To { get; set; }
     public string CurrencySymbol { get; set; } = string.Empty;
 
-    /// <summary>Totals of paid orders, including tax and excluding tips.</summary>
+    /// <summary>Totals of paid orders (prices include VAT), excluding tips.</summary>
     public decimal Revenue { get; set; }
     public decimal TaxCollected { get; set; }
     public decimal Tips { get; set; }

@@ -141,8 +141,18 @@ class _MenuScreenState extends State<MenuScreen> {
   }
 
   Future<void> _openCart() async {
-    final send = await showCartSheet(context, cart: _cart!, currency: _currency, order: widget.order);
-    if (send == true) await _send();
+    final cart = _cart!;
+    final send = await showCartSheet(context, cart: cart, currency: _currency, order: widget.order);
+    if (send != true || !mounted) return;
+    final confirmed = await confirmAction(
+      context,
+      title: 'Send order?',
+      message:
+          'Send ${cart.itemCount} items (${Formatters.money(cart.total, _currency)}) for table ${widget.tableNumber} '
+          'to the kitchen and bar? Items cannot be removed once preparation starts.',
+      confirmLabel: 'Send Order',
+    );
+    if (confirmed) await _send();
   }
 
   Future<void> _send() async {

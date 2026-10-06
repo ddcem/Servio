@@ -19,7 +19,7 @@ public class SalesReportDocument(SalesReportResponse report, string restaurantNa
                 ("Paid orders", report.OrderCount.ToString(CultureInfo.InvariantCulture)),
                 ("Average bill", Amount(report.AverageBill)),
                 ("Guests served", report.GuestCount.ToString(CultureInfo.InvariantCulture)),
-                ("Tax collected", Amount(report.TaxCollected)),
+                ("VAT (included)", Amount(report.TaxCollected)),
                 ("Tips", Amount(report.Tips)),
                 ("Refunds", Amount(report.Refunds)),
                 ("Net revenue", Amount(report.NetRevenue))));

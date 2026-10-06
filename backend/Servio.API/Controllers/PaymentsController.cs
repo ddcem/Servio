@@ -6,6 +6,7 @@ using Servio.Model.Requests;
 using Servio.Model.Responses;
 using Servio.Model.SearchObjects;
 using Servio.Services.Payments;
+using Servio.Services.Payments.Receipts;
 
 namespace Servio.API.Controllers;
 
@@ -14,7 +15,7 @@ namespace Servio.API.Controllers;
 /// </summary>
 [Route("api/payments")]
 [Authorize(Roles = Roles.Admin + "," + Roles.Waiter)]
-public class PaymentsController(IPaymentService service) : BaseReadController<PaymentResponse, PaymentSearchObject>(service)
+public class PaymentsController(IPaymentService service, IReceiptService receipts) : BaseReadController<PaymentResponse, PaymentSearchObject>(service)
 {
     [HttpPost("cash")]
     [Authorize(Roles = Roles.Waiter)]
@@ -35,6 +36,11 @@ public class PaymentsController(IPaymentService service) : BaseReadController<Pa
     [Authorize(Roles = Roles.Waiter)]
     public async Task<ActionResult<PaymentResponse>> Cancel(int id, CancellationToken cancellationToken) =>
         Ok(await service.CancelAsync(id, cancellationToken));
+
+    /// <summary>The guest's receipt (PDF) with the VAT included in the total broken out.</summary>
+    [HttpGet("{id:int}/receipt")]
+    public async Task<IActionResult> GetReceipt(int id, CancellationToken cancellationToken) =>
+        File(await receipts.GetPdfAsync(id, cancellationToken), "application/pdf", $"servio-receipt-{id}.pdf");
 
     [HttpPost("{id:int}/refunds")]
     [Authorize(Roles = Roles.Admin)]

@@ -12,6 +12,7 @@ public class SettingsUpdateRequest
     [Range(1, int.MaxValue, ErrorMessage = "Choose a currency from the list.")]
     public int? CurrencyId { get; set; }
 
+    /// <summary>VAT included in the menu prices, in percent.</summary>
     [Required(ErrorMessage = "Tax rate is required.")]
     [Range(typeof(decimal), "0", "100", ErrorMessage = "Tax rate must be a percentage between 0 and 100, e.g. 17.")]
     public decimal? TaxRate { get; set; }

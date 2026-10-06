@@ -36,3 +36,4 @@ export 'src/widgets/auth_image.dart';
 export 'src/widgets/dialogs.dart';
 export 'src/widgets/feedback.dart';
 export 'src/widgets/states.dart';
+export 'src/widgets/vat_note.dart';

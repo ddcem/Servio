@@ -9,6 +9,7 @@ import 'active_orders_screen.dart';
 import 'menu_screen.dart';
 import 'notifications_screen.dart';
 import 'onboarding_screen.dart';
+import 'order_history_screen.dart';
 import 'profile_screen.dart';
 import 'table_order_screen.dart';
 
@@ -135,10 +136,15 @@ class _TablesScreenState extends State<TablesScreen> {
             icon: const Icon(Icons.more_vert, color: Colors.white),
             onSelected: (value) => switch (value) {
               'profile' => _open(const ProfileScreen()),
+              'history' => _open(const OrderHistoryScreen()),
               'guide' => _open(OnboardingScreen(onDone: () => Navigator.of(context).pop())),
               _ => _logout(),
             },
             itemBuilder: (_) => const [
+              PopupMenuItem(
+                value: 'history',
+                child: ListTile(leading: Icon(Icons.history), title: Text('Order history')),
+              ),
               PopupMenuItem(
                 value: 'profile',
                 child: ListTile(leading: Icon(Icons.person_outline), title: Text('My profile')),

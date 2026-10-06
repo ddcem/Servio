@@ -171,9 +171,6 @@ class _CartSheet extends StatelessWidget {
               child: Column(
                 children: [
                   if (order != null) _row('Already on ${order!.orderNumber}', _money(order!.total)),
-                  _row('Subtotal', _money(cart.subtotal)),
-                  _row('Tax (${_percent(cart.taxRate)})', _money(cart.tax)),
-                  const Divider(height: 20),
                   Row(
                     children: [
                       Expanded(
@@ -184,6 +181,10 @@ class _CartSheet extends StatelessWidget {
                       ),
                       Text(_money(cart.total), style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold)),
                     ],
+                  ),
+                  Align(
+                    alignment: Alignment.centerLeft,
+                    child: VatNote(total: cart.total, taxRate: cart.taxRate, currency: currency),
                   ),
                   const SizedBox(height: 8),
                   if (!cart.isEmpty)
@@ -210,8 +211,6 @@ class _CartSheet extends StatelessWidget {
       ),
     ),
   );
-
-  static String _percent(double value) => value == value.roundToDouble() ? '${value.toInt()}%' : '$value%';
 
   static Widget _row(String label, String value) => Padding(
     padding: const EdgeInsets.symmetric(vertical: 3),

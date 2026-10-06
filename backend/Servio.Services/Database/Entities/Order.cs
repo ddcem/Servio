@@ -10,9 +10,13 @@ public class Order : IEntity
     public int GuestCount { get; set; }
     public int WaiterId { get; set; }
     public OrderStatus Status { get; set; }
+    /// <summary>Sum of the items at menu prices, which include VAT.</summary>
     public decimal Subtotal { get; set; }
+    /// <summary>VAT rate in percent, copied from the settings when the order was opened.</summary>
     public decimal TaxRate { get; set; }
+    /// <summary>The VAT contained in <see cref="Total"/> (shown on the receipt; not added on top).</summary>
     public decimal TaxAmount { get; set; }
+    /// <summary>Amount due before the tip; equal to <see cref="Subtotal"/> because prices include VAT.</summary>
     public decimal Total { get; set; }
     public int CurrencyId { get; set; }
     public DateTime OpenedAt { get; set; }

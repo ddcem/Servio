@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
+import 'package:printing/printing.dart';
 import 'package:provider/provider.dart';
 import 'package:servio_shared/servio_shared.dart';
 
@@ -259,6 +260,16 @@ class _OrderDetailsDialogState extends State<OrderDetailsDialog> {
     }
   }
 
+  /// Opens the guest's receipt in the print dialog, which can also save it as a PDF.
+  Future<void> _printReceipt(Payment payment) async {
+    try {
+      final bytes = await context.read<PaymentProvider>().getReceiptPdf(payment.id);
+      await Printing.layoutPdf(name: 'servio-receipt-${payment.orderNumber}.pdf', onLayout: (_) async => bytes);
+    } catch (e) {
+      if (mounted) showError(context, e);
+    }
+  }
+
   Future<void> _refund(Payment payment) async {
     final refunded = await showDialog<bool>(
       context: context,
@@ -329,9 +340,11 @@ class _OrderDetailsDialogState extends State<OrderDetailsDialog> {
               trailing: Text(money(item.lineTotal)),
             ),
           const Divider(),
-          _totalRow('Subtotal', money(order.subtotal)),
-          _totalRow('Tax (${order.taxRate.toStringAsFixed(order.taxRate % 1 == 0 ? 0 : 2)}%)', money(order.taxAmount)),
           _totalRow('Total', money(order.total), bold: true),
+          Align(
+            alignment: Alignment.centerRight,
+            child: VatNote(total: order.total, taxRate: order.taxRate, currency: symbol),
+          ),
           const SizedBox(height: 16),
           const Text('Kitchen and bar tickets', style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600)),
           const SizedBox(height: 8),
@@ -363,6 +376,16 @@ class _OrderDetailsDialogState extends State<OrderDetailsDialog> {
                         ),
                         Text(p.status.label),
                         const SizedBox(width: 12),
+                        if (p.status == PaymentStatus.completed ||
+                            p.status == PaymentStatus.partiallyRefunded ||
+                            p.status == PaymentStatus.refunded) ...[
+                          OutlinedButton.icon(
+                            onPressed: () => _printReceipt(p),
+                            icon: const Icon(Icons.receipt_long_outlined),
+                            label: const Text('Receipt'),
+                          ),
+                          const SizedBox(width: 8),
+                        ],
                         Tooltip(
                           message: p.canRefund
                               ? 'Refund up to ${money(p.refundableAmount)}'

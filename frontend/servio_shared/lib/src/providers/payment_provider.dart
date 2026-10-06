@@ -1,3 +1,5 @@
+import 'dart:typed_data';
+
 import '../api/api_client.dart';
 import '../models/payment.dart';
 import 'base_provider.dart';
@@ -22,6 +24,9 @@ class PaymentProvider extends ReadProvider<Payment> {
       fromJson(await api.post('$endpoint/$paymentId/paypal/capture') as Map<String, dynamic>);
 
   Future<Payment> cancel(int paymentId) async => fromJson(await api.post('$endpoint/$paymentId/cancel') as Map<String, dynamic>);
+
+  /// The guest's receipt as a PDF; available once the payment is completed.
+  Future<Uint8List> getReceiptPdf(int paymentId) => api.getBytes('$endpoint/$paymentId/receipt');
 
   Future<Payment> refund(int paymentId, double amount, String reason) async =>
       fromJson(await api.post('$endpoint/$paymentId/refunds', {'amount': amount, 'reason': reason}) as Map<String, dynamic>);

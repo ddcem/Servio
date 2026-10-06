@@ -13,9 +13,9 @@ import 'package:shared_preferences/shared_preferences.dart';
 /// Prints the screen as base64 PNG lines (`SHOT:name:chunk`), which the host reassembles,
 /// because the app and its files are removed from the device when the test ends.
 Future<void> shot(WidgetTester tester, String name) async {
-  await tester.pumpAndSettle(const Duration(milliseconds: 300));
+  await settle(tester);
   await Future<void>.delayed(const Duration(milliseconds: 1200));
-  await tester.pumpAndSettle();
+  await settle(tester);
   final view = tester.binding.renderViews.first;
   final layer = view.debugLayer! as OffsetLayer;
   final ratio = view.flutterView.devicePixelRatio;
@@ -30,6 +30,15 @@ Future<void> shot(WidgetTester tester, String name) async {
   print('SHOT:$name:END');
 }
 
+/// Waits for animations, but gives up after a few seconds: spinners never settle.
+Future<void> settle(WidgetTester tester) async {
+  try {
+    await tester.pumpAndSettle(const Duration(milliseconds: 100), EnginePhase.sendSemanticsUpdate, const Duration(seconds: 5));
+  } on FlutterError {
+    // Still animating (e.g. a progress indicator); take the screen as it is.
+  }
+}
+
 Future<void> waitFor(WidgetTester tester, Finder finder, {int seconds = 20}) async {
   for (var i = 0; i < seconds * 4; i++) {
     await tester.pump(const Duration(milliseconds: 250));
@@ -41,7 +50,7 @@ Future<void> waitFor(WidgetTester tester, Finder finder, {int seconds = 20}) asy
 
 Future<void> tapAndSettle(WidgetTester tester, Finder finder) async {
   await tester.ensureVisible(finder);
-  await tester.pumpAndSettle();
+  await settle(tester);
   await tester.tap(finder);
   await tester.pump(const Duration(milliseconds: 500));
 }

@@ -71,7 +71,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
     final confirmed = await confirmAction(
       context,
       title: 'Save settings?',
-      message: 'New orders use the new tax rate and currency. Open orders keep the values they were opened with.',
+      message: 'New orders use the new VAT rate and currency. Open orders keep the values they were opened with.',
       confirmLabel: 'Save Settings',
     );
     if (!confirmed || !mounted) return;
@@ -85,7 +85,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
       });
       if (!mounted) return;
       setState(() => _settings = saved);
-      showSuccess(context, 'Settings saved: ${saved.restaurantName}, ${saved.currencyCode}, tax ${_taxRate.text}%.');
+      showSuccess(context, 'Settings saved: ${saved.restaurantName}, ${saved.currencyCode}, VAT ${_taxRate.text}%.');
     } catch (e) {
       _server.set(e);
       _formKey.currentState!.validate();
@@ -164,8 +164,12 @@ class _SettingsScreenState extends State<SettingsScreen> {
                             const SizedBox(height: 16),
                             TextFormField(
                               controller: _taxRate,
-                              decoration: const InputDecoration(labelText: 'Tax rate (%)', hintText: 'e.g. 17'),
-                              validator: (value) => _server['TaxRate'] ?? Validators.decimal(value, 'Tax rate', min: 0, max: 100),
+                              decoration: const InputDecoration(
+                                labelText: 'VAT rate (%)',
+                                hintText: 'e.g. 17',
+                                helperText: 'Included in menu prices; receipts show how much of the total is VAT',
+                              ),
+                              validator: (value) => _server['TaxRate'] ?? Validators.decimal(value, 'VAT rate', min: 0, max: 100),
                             ),
                             const SizedBox(height: 12),
                             Text(

@@ -23,6 +23,7 @@ using Servio.Services.Notifications;
 using Servio.Services.Orders;
 using Servio.Services.Payments;
 using Servio.Services.Payments.PayPal;
+using Servio.Services.Payments.Receipts;
 using Servio.Services.Recommendations;
 using Servio.Services.Reports;
 using Servio.Services.ReferenceData;
@@ -117,6 +118,7 @@ public static class ServiceCollectionExtensions
         services.AddScoped<IOrderTicketService, OrderTicketService>();
         services.AddScoped<INotificationService, NotificationService>();
         services.AddScoped<IPaymentService, PaymentService>();
+        services.AddScoped<IReceiptService, ReceiptService>();
         services.AddScoped<IRecommendationService, RecommendationService>();
         services.AddScoped<IReportService, ReportService>();
 
