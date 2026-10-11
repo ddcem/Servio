@@ -85,17 +85,6 @@ public class AuthService(
         sessionValidator.MarkRevoked(jti);
     }
 
-    public async Task<UserResponse> GetCurrentUserAsync(CancellationToken cancellationToken = default)
-    {
-        var user = await context.Users
-            .AsNoTracking()
-            .Include(x => x.Role)
-            .FirstOrDefaultAsync(x => x.Id == currentUser.UserId, cancellationToken)
-            ?? throw new NotFoundException("User was not found.");
-
-        return user.ToResponse();
-    }
-
     public async Task<MessageResponse> ForgotPasswordAsync(ForgotPasswordRequest request, CancellationToken cancellationToken = default)
     {
         var email = request.Email.Trim().ToLower();

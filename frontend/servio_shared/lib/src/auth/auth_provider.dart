@@ -29,8 +29,6 @@ class AuthProvider extends ChangeNotifier {
     return message;
   }
 
-  bool hasRole(String role) => _user?.role == role;
-
   /// Logs in and checks that the role may use this app; [allowedRoles] is empty for any role.
   Future<void> login(String username, String password, {Set<String> allowedRoles = const {}}) async {
     final json = await api.post('auth/login', {'username': username.trim(), 'password': password}) as Map<String, dynamic>;

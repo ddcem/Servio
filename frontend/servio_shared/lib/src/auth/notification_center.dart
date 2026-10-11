@@ -10,9 +10,8 @@ import '../realtime/realtime_service.dart';
 /// over SignalR, so the count updates without a manual refresh.
 class NotificationCenter extends ChangeNotifier {
   NotificationCenter(this.provider, this.realtime) {
-    _subscription = realtime.notifications.listen((notification) {
+    _subscription = realtime.notifications.listen((_) {
       _unreadCount++;
-      _latest = notification;
       notifyListeners();
     });
   }
@@ -22,16 +21,8 @@ class NotificationCenter extends ChangeNotifier {
   late final StreamSubscription<AppNotification> _subscription;
 
   int _unreadCount = 0;
-  AppNotification? _latest;
 
   int get unreadCount => _unreadCount;
-
-  /// The most recent notification pushed while the app is open; null once shown.
-  AppNotification? takeLatest() {
-    final latest = _latest;
-    _latest = null;
-    return latest;
-  }
 
   Future<void> refreshCount() async {
     _unreadCount = await provider.getUnreadCount();
@@ -53,7 +44,6 @@ class NotificationCenter extends ChangeNotifier {
 
   void reset() {
     _unreadCount = 0;
-    _latest = null;
     notifyListeners();
   }
 

@@ -8,8 +8,6 @@ public static class Languages
 
     public static readonly IReadOnlyList<string> Supported = [English, Bosnian];
 
-    public static bool IsSupported(string? code) => code is not null && Supported.Contains(code);
-
     /// <summary>"bs-BA", "BS" or "hr" → "bs"; anything unknown → English.</summary>
     public static string Normalize(string? code)
     {

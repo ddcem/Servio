@@ -2,13 +2,18 @@ using Microsoft.EntityFrameworkCore;
 using QuestPDF.Fluent;
 using Servio.Model.Enums;
 using Servio.Model.Exceptions;
+using Servio.Services.Auth;
 using Servio.Services.Common;
 using Servio.Services.Database;
 using Servio.Services.Settings;
 
 namespace Servio.Services.Payments.Receipts;
 
-public class ReceiptService(ServioDbContext context, ISettingsService settingsService, IRestaurantClock clock) : IReceiptService
+public class ReceiptService(
+    ServioDbContext context,
+    ISettingsService settingsService,
+    IRestaurantClock clock,
+    ICurrentUserService currentUser) : IReceiptService
 {
     private static readonly PaymentStatus[] PaidStatuses = [PaymentStatus.Completed, PaymentStatus.PartiallyRefunded, PaymentStatus.Refunded];
 
@@ -16,6 +21,7 @@ public class ReceiptService(ServioDbContext context, ISettingsService settingsSe
     {
         var payment = await context.Payments
             .AsNoTracking()
+            .VisibleTo(currentUser)
             .Where(x => x.Id == paymentId)
             .Select(x => new
             {

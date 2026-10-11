@@ -38,6 +38,8 @@ public class PaymentService(
 
     protected override string EntityName => "Payment";
 
+    protected override IQueryable<Payment> Query => Context.Payments.VisibleTo(currentUser);
+
     protected override Expression<Func<Payment, PaymentResponse>> Projection => x => new PaymentResponse
     {
         Id = x.Id,

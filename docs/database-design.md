@@ -218,7 +218,11 @@ Saved in the DB, then pushed live via SignalR. The phone shows a local notificat
 
 ---
 
-## 2. Reference tables (each gets full CRUD on desktop)
+## 2. Reference tables
+
+Menu categories, item tags, table areas and currencies have full CRUD on the desktop app. Roles, preparation
+stations and payment methods are system lists: the code relies on their names (role-based authorization, kitchen/bar
+routing, the cash and PayPal flows), so the desktop app shows them read-only with an explanation.
 
 | Table | Columns | Seed |
 |---|---|---|

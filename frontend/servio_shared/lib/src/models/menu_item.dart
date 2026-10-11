@@ -53,23 +53,6 @@ class MenuItem {
   final List<Lookup> tags;
 
   bool get isDrink => courseType == CourseType.drink;
-
-  MenuItem copyWith({bool? isFavorite, bool? isAvailableToday}) => MenuItem(
-    id: id,
-    name: name,
-    description: description,
-    price: price,
-    categoryId: categoryId,
-    categoryName: categoryName,
-    courseType: courseType,
-    preparationStationId: preparationStationId,
-    preparationStationName: preparationStationName,
-    isAvailableToday: isAvailableToday ?? this.isAvailableToday,
-    hasImage: hasImage,
-    isFavorite: isFavorite ?? this.isFavorite,
-    soldByMeCount: soldByMeCount,
-    tags: tags,
-  );
 }
 
 /// An upselling suggestion with the explanation shown to the waiter.

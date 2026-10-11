@@ -204,18 +204,6 @@ docker-compose.yml           svi backend servisi
 .env-tajne.zip               konfiguracijska datoteka .env (zaštićena šifrom)
 ```
 
-## Testovi
-
-End-to-end testovi pokreću stvarne aplikacije nad pokrenutim backendom:
-
-```bash
-cd frontend/servio_mobile
-flutter test integration_test/waiter_flow_test.dart -d <android-device-id>   # vidjeti: flutter devices
-
-cd ../servio_desktop
-flutter test integration_test/screens_test.dart -d windows      # ili -d macos
-```
-
 ## Rješavanje problema
 
 | Problem | Rješenje |
@@ -224,4 +212,5 @@ flutter test integration_test/screens_test.dart -d windows      # ili -d macos
 | Port je već zauzet | Promijenite `API_PORT` ili `DB_HOST_PORT` u `.env`, a novi port API-ja proslijedite sa `--dart-define`. Port 5000 se ne koristi jer ga macOS koristi za AirPlay. |
 | PayPal stranica se ne učitava u emulatoru | Emulator treba pristup internetu; PayPal sandbox radi na `sandbox.paypal.com`. |
 | E-mailovi ne stižu | Provjerite SMTP vrijednosti u `.env` i `docker compose logs servio-worker`. |
+| U logu `servio-api` pri prvom pokretanju piše `Failed executing DbCommand ... __EFMigrationsHistory` | Očekivano: EF Core prvo provjerava tabelu migracija koja na praznoj bazi još ne postoji, zatim je kreira i primjenjuje migracije. Log nakon toga završava sa `Database seeded`. |
 | Ponovni početak sa svježim demo podacima | `docker compose down -v` pa `docker compose up -d --build`. |
