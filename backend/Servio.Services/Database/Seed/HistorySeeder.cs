@@ -1,8 +1,10 @@
 using Microsoft.EntityFrameworkCore;
 using Servio.Model.Constants;
 using Servio.Model.Enums;
+using Servio.Model.Localization;
 using Servio.Services.Common;
 using Servio.Services.Database.Entities;
+using Servio.Services.Localization;
 using Servio.Services.Orders;
 
 namespace Servio.Services.Database.Seed;
@@ -317,8 +319,15 @@ public class HistorySeeder(ServioDbContext context, IRestaurantClock clock)
             {
                 User = waiter,
                 Type = NotificationType.TicketReady,
-                Title = $"Table {order.Table.Number} – {(isKitchen ? "food" : "drinks")} ready",
-                Body = $"Ticket {ticket.TicketNumber} is ready {(isKitchen ? "in the kitchen" : "at the bar")}.",
+                // Same wording as live notifications (OrderTicketService), in the waiter's language.
+                Title = Translator.Render(
+                    new LocalizedText(isKitchen ? "Table {0} – food ready" : "Table {0} – drinks ready", order.Table.Number),
+                    waiter.PreferredLanguage),
+                Body = Translator.Render(
+                    new LocalizedText(isKitchen ? "Ready in the kitchen: {0} (ticket {1})." : "Ready at the bar: {0} (ticket {1}).",
+                        string.Join(", ", order.Items.Where(i => i.OrderTicket == ticket).Select(i => $"{i.MenuItem.Name} ×{i.Quantity}")),
+                        ticket.TicketNumber),
+                    waiter.PreferredLanguage),
                 OrderTicket = ticket,
                 CreatedAt = ticket.ReadyAt.Value
             });

@@ -2,6 +2,7 @@ using System.Globalization;
 using QuestPDF.Fluent;
 using QuestPDF.Infrastructure;
 using Servio.Model.Responses;
+using Servio.Services.Localization;
 
 namespace Servio.Services.Reports.Pdf;
 
@@ -38,11 +39,11 @@ public class SalesReportDocument(SalesReportResponse report, string restaurantNa
 
             ReportLayout.Section(col, "Payments by method", c => ReportLayout.Table(c,
                 ["Method", "Payments", "Amount (incl. tips)"],
-                report.PaymentMethods.Select(x => new[] { x.PaymentMethod, x.PaymentCount.ToString(), Amount(x.Amount) })));
+                report.PaymentMethods.Select(x => new[] { Translator.T(x.PaymentMethod), x.PaymentCount.ToString(), Amount(x.Amount) })));
 
             ReportLayout.Section(col, "Daily revenue", c => ReportLayout.Table(c,
                 ["Date", "Orders", "Revenue"],
-                report.Daily.Select(x => new[] { x.Date.ToString("ddd, dd.MM.yyyy", CultureInfo.InvariantCulture), x.OrderCount.ToString(), Amount(x.Revenue) })));
+                report.Daily.Select(x => new[] { ReportLayout.Day(x.Date), x.OrderCount.ToString(), Amount(x.Revenue) })));
         }));
     }
 }

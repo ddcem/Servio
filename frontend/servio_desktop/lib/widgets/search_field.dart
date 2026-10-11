@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
+import 'package:servio_shared/servio_shared.dart';
 
 /// Search box that reports the text once the user stops typing.
 class SearchField extends StatefulWidget {
@@ -61,7 +62,7 @@ class FilterDropdown<T> extends StatelessWidget {
       isExpanded: true,
       decoration: InputDecoration(labelText: label, isDense: true),
       items: [
-        DropdownMenuItem<T?>(value: null, child: const Text('All')),
+        DropdownMenuItem<T?>(value: null, child: Text(l10n.all)),
         ...items.entries.map(
           (e) => DropdownMenuItem<T?>(
             value: e.key,

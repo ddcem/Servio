@@ -78,15 +78,15 @@ class _OrdersScreenState extends State<OrdersScreen> {
       firstDate: now.subtract(const Duration(days: 365)),
       lastDate: now,
       initialDateRange: _range,
-      helpText: 'Orders opened between',
+      helpText: l10n.ordersOpenedBetween,
     );
     if (range != null) _filter(() => _range = range);
   }
 
   @override
   Widget build(BuildContext _) => AdminPage(
-    title: 'Orders & Payments',
-    subtitle: 'Every bill with its items, kitchen/bar tickets, payments and refunds',
+    title: l10n.ordersAndPayments,
+    subtitle: l10n.ordersSubtitle,
     child: ListView(
       padding: const EdgeInsets.all(28),
       children: [
@@ -95,20 +95,22 @@ class _OrdersScreenState extends State<OrdersScreen> {
           runSpacing: 12,
           crossAxisAlignment: WrapCrossAlignment.center,
           children: [
-            SearchField(hint: 'Order number or table', onChanged: (value) => _filter(() => _search = value)),
+            SearchField(hint: l10n.orderNumberOrTable, onChanged: (value) => _filter(() => _search = value)),
             FilterDropdown<OrderStatus>(
               label: 'Status',
               value: _status,
-              items: const {OrderStatus.open: 'Open', OrderStatus.completed: 'Paid', OrderStatus.cancelled: 'Cancelled'},
+              items: {OrderStatus.open: l10n.open, OrderStatus.completed: l10n.paid, OrderStatus.cancelled: l10n.cancelled},
               onChanged: (value) => _filter(() => _status = value),
             ),
             OutlinedButton.icon(
               onPressed: _pickRange,
               icon: const Icon(Icons.date_range),
-              label: Text(_range == null ? 'Any date' : '${Formatters.date(_range!.start)} – ${Formatters.date(_range!.end)}'),
+              label: Text(
+                _range == null ? l10n.anyDate : l10n.dateRange(Formatters.date(_range!.start), Formatters.date(_range!.end)),
+              ),
             ),
             if (_range != null)
-              IconButton(tooltip: 'Clear dates', onPressed: () => _filter(() => _range = null), icon: const Icon(Icons.clear)),
+              IconButton(tooltip: l10n.clearDates, onPressed: () => _filter(() => _range = null), icon: const Icon(Icons.clear)),
           ],
         ),
         const SizedBox(height: 20),
@@ -119,27 +121,27 @@ class _OrdersScreenState extends State<OrdersScreen> {
 
   Widget _buildTable() {
     if (_error != null && _result == null) return ErrorView(error: _error!, onRetry: _load);
-    if (_result == null) return const LoadingView();
+    if (_result == null) return LoadingView();
     if (_result!.items.isEmpty) {
-      return const EmptyView(icon: Icons.receipt_long_outlined, message: 'No orders match the filters.');
+      return EmptyView(icon: Icons.receipt_long_outlined, message: l10n.noOrdersMatch);
     }
 
     return Panel(
-      padding: const EdgeInsets.all(8),
+      padding: EdgeInsets.all(8),
       child: Column(
         children: [
           WideTable(
             child: DataTable(
               showCheckboxColumn: false,
-              headingTextStyle: const TextStyle(fontWeight: FontWeight.w600, color: ServioColors.textMuted),
-              columns: const [
-                DataColumn(label: Text('ORDER')),
-                DataColumn(label: Text('TABLE')),
-                DataColumn(label: Text('WAITER')),
-                DataColumn(label: Text('OPENED')),
-                DataColumn(label: Text('ITEMS'), numeric: true),
-                DataColumn(label: Text('TOTAL'), numeric: true),
-                DataColumn(label: Text('STATUS')),
+              headingTextStyle: TextStyle(fontWeight: FontWeight.w600, color: ServioColors.textMuted),
+              columns: [
+                DataColumn(label: Text(l10n.columnOrderNumber)),
+                DataColumn(label: Text(l10n.columnTable)),
+                DataColumn(label: Text(l10n.columnWaiter)),
+                DataColumn(label: Text(l10n.columnOpened)),
+                DataColumn(label: Text(l10n.columnItems), numeric: true),
+                DataColumn(label: Text(l10n.columnTotal), numeric: true),
+                DataColumn(label: Text(l10n.columnStatus)),
               ],
               rows: [
                 for (final order in _result!.items)
@@ -153,7 +155,7 @@ class _OrdersScreenState extends State<OrdersScreen> {
                     },
                     cells: [
                       DataCell(Text(order.orderNumber, style: const TextStyle(fontWeight: FontWeight.w600))),
-                      DataCell(Text('Table ${order.tableNumber}')),
+                      DataCell(Text(l10n.tableNumber(order.tableNumber))),
                       DataCell(Text(order.waiterName)),
                       DataCell(Text(Formatters.dateTime(order.openedAt))),
                       DataCell(Text('${order.itemCount}')),
@@ -194,9 +196,9 @@ class OrderStatusBadge extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => switch (order.status) {
-    OrderStatus.open => const StatusBadge('Open', color: ServioColors.primaryDark, background: ServioColors.infoLight),
-    OrderStatus.completed => const StatusBadge('Paid', color: ServioColors.success, background: ServioColors.successLight),
-    OrderStatus.cancelled => const StatusBadge('Cancelled', color: ServioColors.danger, background: ServioColors.dangerLight),
+    OrderStatus.open => StatusBadge(l10n.open, color: ServioColors.primaryDark, background: ServioColors.infoLight),
+    OrderStatus.completed => StatusBadge(l10n.paid, color: ServioColors.success, background: ServioColors.successLight),
+    OrderStatus.cancelled => StatusBadge(l10n.cancelled, color: ServioColors.danger, background: ServioColors.dangerLight),
   };
 }
 
@@ -245,15 +247,15 @@ class _OrderDetailsDialogState extends State<OrderDetailsDialog> {
     final order = _order!;
     final reason = await askForReason(
       context,
-      title: 'Cancel order ${order.orderNumber}',
-      message: 'Tickets that were not started are cancelled and the kitchen and bar are notified.',
-      confirmLabel: 'Cancel order',
+      title: l10n.cancelOrderNumber(order.orderNumber),
+      message: l10n.cancelOrderTicketsMessage,
+      confirmLabel: l10n.cancelOrder,
     );
     if (reason == null || !mounted) return;
     try {
       await context.read<OrderProvider>().cancel(order.id, reason);
       if (!mounted) return;
-      showSuccess(context, 'Order ${order.orderNumber} for table ${order.tableNumber} was cancelled.');
+      showSuccess(context, l10n.orderCancelledFor(order.orderNumber, order.tableNumber));
       await _load();
     } catch (e) {
       if (mounted) showError(context, e);
@@ -308,56 +310,65 @@ class _OrderDetailsDialogState extends State<OrderDetailsDialog> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text('Order ${order.orderNumber}', style: const TextStyle(fontSize: 22, fontWeight: FontWeight.bold)),
                     Text(
-                      'Table ${order.tableNumber} · ${order.guestCount} guests · ${order.waiterName} · opened ${Formatters.dateTime(order.openedAt)}',
+                      l10n.orderNumberTitle(order.orderNumber),
+                      style: const TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
+                    ),
+                    Text(
+                      l10n.orderDetailsLine(
+                        order.tableNumber,
+                        l10n.guestCount(order.guestCount),
+                        order.waiterName,
+                        Formatters.dateTime(order.openedAt),
+                      ),
                       style: const TextStyle(color: ServioColors.textMuted),
                     ),
                   ],
                 ),
               ),
               OrderStatusBadge(order),
-              IconButton(tooltip: 'Close', onPressed: () => Navigator.pop(context), icon: const Icon(Icons.close)),
+              IconButton(tooltip: l10n.close, onPressed: () => Navigator.pop(context), icon: const Icon(Icons.close)),
             ],
           ),
           if (order.cancellationReason != null) ...[
             const SizedBox(height: 8),
-            Text('Cancelled: ${order.cancellationReason}', style: const TextStyle(color: ServioColors.danger)),
+            Text(l10n.cancelledReason(order.cancellationReason!), style: const TextStyle(color: ServioColors.danger)),
           ],
           const SizedBox(height: 20),
-          const Text('Items', style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600)),
+          Text(l10n.items, style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w600)),
           for (final item in order.items)
             ListTile(
               dense: true,
               contentPadding: EdgeInsets.zero,
               title: Text(
-                '${item.menuItemName} × ${item.quantity}',
+                l10n.itemTimesQuantity(item.menuItemName, item.quantity),
                 style: TextStyle(decoration: item.ticketStatus == TicketStatus.cancelled ? TextDecoration.lineThrough : null),
               ),
               subtitle: Text(
-                ['${money(item.unitPrice)} each', item.ticketStatus.label, if (item.note != null) item.note!].join(' · '),
+                [l10n.priceEach(money(item.unitPrice)), item.ticketStatus.label, if (item.note != null) item.note!].join(' · '),
               ),
               trailing: Text(money(item.lineTotal)),
             ),
           const Divider(),
-          _totalRow('Total', money(order.total), bold: true),
+          _totalRow(l10n.total, money(order.total), bold: true),
           Align(
             alignment: Alignment.centerRight,
             child: VatNote(total: order.total, taxRate: order.taxRate, currency: symbol),
           ),
           const SizedBox(height: 16),
-          const Text('Kitchen and bar tickets', style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600)),
+          Text(l10n.kitchenAndBarTickets, style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w600)),
           const SizedBox(height: 8),
           Wrap(
             spacing: 8,
             runSpacing: 8,
             children: [
-              for (final t in order.tickets) Chip(label: Text('${t.ticketNumber} · ${t.stationName} · ${t.status.label}')),
+              for (final t in order.tickets)
+                Chip(label: Text(l10n.ticketLine(t.ticketNumber, Stations.label(t.stationName), t.status.label))),
             ],
           ),
           const SizedBox(height: 16),
-          const Text('Payments', style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600)),
-          if (_payments.isEmpty) const Padding(padding: EdgeInsets.symmetric(vertical: 8), child: Text('No payments yet.')),
+          Text(l10n.payments, style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w600)),
+          if (_payments.isEmpty) Padding(padding: const EdgeInsets.symmetric(vertical: 8), child: Text(l10n.noPaymentsYet)),
           for (final p in _payments)
             Card(
               margin: const EdgeInsets.only(top: 8),
@@ -370,7 +381,13 @@ class _OrderDetailsDialogState extends State<OrderDetailsDialog> {
                       children: [
                         Expanded(
                           child: Text(
-                            '${p.paymentMethod} · ${money(p.amount)}${p.tipAmount > 0 ? ' (incl. ${money(p.tipAmount)} tip)' : ''}',
+                            p.tipAmount > 0
+                                ? l10n.paymentLineWithTip(
+                                    PaymentMethods.label(p.paymentMethod),
+                                    money(p.amount),
+                                    money(p.tipAmount),
+                                  )
+                                : l10n.paymentLine(PaymentMethods.label(p.paymentMethod), money(p.amount)),
                             style: const TextStyle(fontWeight: FontWeight.w600),
                           ),
                         ),
@@ -382,32 +399,30 @@ class _OrderDetailsDialogState extends State<OrderDetailsDialog> {
                           OutlinedButton.icon(
                             onPressed: () => _printReceipt(p),
                             icon: const Icon(Icons.receipt_long_outlined),
-                            label: const Text('Receipt'),
+                            label: Text(l10n.receipt),
                           ),
                           const SizedBox(width: 8),
                         ],
                         Tooltip(
-                          message: p.canRefund
-                              ? 'Refund up to ${money(p.refundableAmount)}'
-                              : 'Nothing left to refund on this payment.',
+                          message: p.canRefund ? l10n.refundUpTo(money(p.refundableAmount)) : l10n.nothingToRefund,
                           child: OutlinedButton.icon(
                             onPressed: p.canRefund ? () => _refund(p) : null,
                             icon: const Icon(Icons.undo),
-                            label: const Text('Refund'),
+                            label: Text(l10n.refund),
                           ),
                         ),
                       ],
                     ),
                     Text(
-                      '${p.processedByName} · ${Formatters.dateTime(p.completedAt ?? p.createdAt)}'
-                      '${p.cashReceived == null ? '' : ' · received ${money(p.cashReceived!)}, change ${money(p.changeGiven!)}'}',
+                      l10n.paymentProcessedLine(p.processedByName, Formatters.dateTime(p.completedAt ?? p.createdAt)) +
+                          (p.cashReceived == null ? '' : l10n.cashReceivedLine(money(p.cashReceived!), money(p.changeGiven!))),
                       style: const TextStyle(color: ServioColors.textMuted, fontSize: 12),
                     ),
                     for (final r in p.refunds)
                       Padding(
                         padding: const EdgeInsets.only(top: 6),
                         child: Text(
-                          '↩ ${money(r.amount)} refunded by ${r.refundedByName} on ${Formatters.dateTime(r.createdAt)} – ${r.reason}',
+                          l10n.refundedLine(money(r.amount), r.refundedByName, Formatters.dateTime(r.createdAt), r.reason),
                           style: const TextStyle(color: ServioColors.danger, fontSize: 13),
                         ),
                       ),
@@ -420,12 +435,12 @@ class _OrderDetailsDialogState extends State<OrderDetailsDialog> {
             Align(
               alignment: Alignment.centerRight,
               child: Tooltip(
-                message: inProgress ? 'Items are already being prepared or were served, so the order has to be paid.' : '',
+                message: inProgress ? l10n.orderMustBePaid : '',
                 child: OutlinedButton.icon(
                   style: OutlinedButton.styleFrom(foregroundColor: ServioColors.danger),
                   onPressed: inProgress ? null : _cancelOrder,
                   icon: const Icon(Icons.cancel_outlined),
-                  label: const Text('Cancel order'),
+                  label: Text(l10n.cancelOrder),
                 ),
               ),
             ),
@@ -467,7 +482,7 @@ class _RefundDialog extends StatefulWidget {
 class _RefundDialogState extends State<_RefundDialog> {
   final _formKey = GlobalKey<FormState>();
   final _server = ServerErrors();
-  late final _amount = TextEditingController(text: widget.payment.refundableAmount.toStringAsFixed(2));
+  late final _amount = TextEditingController(text: Formatters.decimal(widget.payment.refundableAmount, digits: 2));
   final _reason = TextEditingController();
 
   @override
@@ -482,19 +497,17 @@ class _RefundDialogState extends State<_RefundDialog> {
     final p = widget.payment;
     final refundable = Formatters.money(p.refundableAmount, p.currencySymbol);
     return FormDialog(
-      title: 'Refund payment',
+      title: l10n.refundPayment,
       formKey: _formKey,
       serverErrors: _server,
-      saveLabel: 'Refund',
+      saveLabel: l10n.refund,
       width: 460,
       onSave: () async {
         final ok = await confirmAction(
           context,
-          title: 'Refund ${Formatters.money(Validators.parseDecimal(_amount.text), p.currencySymbol)}?',
-          message: p.paymentMethod == 'PayPal'
-              ? 'The money is returned to the guest\'s PayPal account. This cannot be undone.'
-              : 'Give the cash back to the guest. This cannot be undone.',
-          confirmLabel: 'Refund',
+          title: l10n.refundAmountQuestion(Formatters.money(Validators.parseDecimal(_amount.text), p.currencySymbol)),
+          message: p.paymentMethod == PaymentMethods.payPal ? l10n.refundPayPalMessage : l10n.refundCashMessage,
+          confirmLabel: l10n.refund,
           destructive: true,
         );
         if (!ok || !mounted) return;
@@ -507,27 +520,30 @@ class _RefundDialogState extends State<_RefundDialog> {
         Navigator.pop(context, true);
         showSuccess(
           context,
-          'Refund of ${Formatters.money(result.refundedAmount - p.refundedAmount, p.currencySymbol)} for order ${p.orderNumber} was completed.',
+          l10n.refundCompleted(Formatters.money(result.refundedAmount - p.refundedAmount, p.currencySymbol), p.orderNumber),
         );
       },
       children: [
         Text(
-          '${p.paymentMethod} payment of ${Formatters.money(p.capturedAmount ?? p.amount, p.currencySymbol)}. '
-          'Up to $refundable can still be refunded.',
+          l10n.refundIntro(
+            PaymentMethods.label(p.paymentMethod),
+            Formatters.money(p.capturedAmount ?? p.amount, p.currencySymbol),
+            refundable,
+          ),
         ),
         TextFormField(
           controller: _amount,
           autofocus: true,
-          decoration: InputDecoration(labelText: 'Amount', helperText: 'At most $refundable'),
+          decoration: InputDecoration(labelText: l10n.amount, helperText: l10n.atMost(refundable)),
           validator: (value) =>
-              _server['Amount'] ?? Validators.decimal(value, 'Refund amount', min: 0.01, max: p.refundableAmount),
+              _server['Amount'] ?? Validators.decimal(value, l10n.refundAmount, min: 0.01, max: p.refundableAmount),
         ),
         TextFormField(
           controller: _reason,
           maxLines: 2,
           maxLength: 500,
-          decoration: const InputDecoration(labelText: 'Reason', hintText: 'e.g. Steak was overcooked'),
-          validator: (value) => _server['Reason'] ?? Validators.length(value, 'Reason', min: 3, max: 500),
+          decoration: InputDecoration(labelText: l10n.reason, hintText: l10n.refundReasonHint),
+          validator: (value) => _server['Reason'] ?? Validators.length(value, l10n.reason, min: 3, max: 500),
         ),
       ],
     );

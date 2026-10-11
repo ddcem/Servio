@@ -25,7 +25,7 @@ class _ReceiptScreenState extends State<ReceiptScreen> {
 
   @override
   Widget build(BuildContext context) => Scaffold(
-    appBar: GradientAppBar(title: 'Receipt', subtitle: widget.title),
+    appBar: GradientAppBar(title: l10n.receipt, subtitle: widget.title),
     body: FutureBuilder<Uint8List>(
       future: _pdf,
       builder: (context, snapshot) {

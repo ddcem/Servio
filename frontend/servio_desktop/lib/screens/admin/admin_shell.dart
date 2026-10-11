@@ -31,16 +31,16 @@ class AdminShell extends StatefulWidget {
 }
 
 class _AdminShellState extends State<AdminShell> {
-  static final _sections = [
-    _Section('Menu Management', Icons.inventory_2_outlined, () => const MenuManagementScreen()),
-    _Section('Employees', Icons.people_outline, () => const EmployeesScreen()),
-    _Section('Tables', Icons.table_restaurant_outlined, () => const TablesScreen()),
-    _Section('Reservations', Icons.event_outlined, () => const ReservationsScreen()),
-    _Section('Orders & Payments', Icons.receipt_long_outlined, () => const OrdersScreen()),
-    _Section('Reference Data', Icons.category_outlined, () => const ReferenceDataScreen()),
-    _Section('Reports', Icons.bar_chart, () => const ReportsScreen()),
-    _Section('Notifications', Icons.notifications_outlined, () => const NotificationsScreen()),
-    _Section('Settings', Icons.settings_outlined, () => const SettingsScreen()),
+  static List<_Section> get _sections => [
+    _Section(l10n.menuManagement, Icons.inventory_2_outlined, () => const MenuManagementScreen()),
+    _Section(l10n.employees, Icons.people_outline, () => const EmployeesScreen()),
+    _Section(l10n.tables, Icons.table_restaurant_outlined, () => const TablesScreen()),
+    _Section(l10n.reservations, Icons.event_outlined, () => const ReservationsScreen()),
+    _Section(l10n.ordersAndPayments, Icons.receipt_long_outlined, () => const OrdersScreen()),
+    _Section(l10n.referenceData, Icons.category_outlined, () => const ReferenceDataScreen()),
+    _Section(l10n.reports, Icons.bar_chart, () => const ReportsScreen()),
+    _Section(l10n.notifications, Icons.notifications_outlined, () => const NotificationsScreen()),
+    _Section(l10n.settings, Icons.settings_outlined, () => const SettingsScreen()),
   ];
 
   static const _notificationsIndex = 7;
@@ -53,7 +53,7 @@ class _AdminShellState extends State<AdminShell> {
     super.initState();
     context.read<NotificationCenter>().refreshCount();
     _notifications = context.read<RealtimeService>().notifications.listen((notification) {
-      if (mounted) showSuccess(context, '${notification.title}: ${notification.body}');
+      if (mounted) showSuccess(context, l10n.notificationLine(notification.title, notification.body));
     });
   }
 
@@ -65,7 +65,9 @@ class _AdminShellState extends State<AdminShell> {
 
   @override
   Widget build(BuildContext _) {
-    final user = context.watch<AuthProvider>().user!;
+    final user = context.watch<AuthProvider>().user;
+    // Right after logout this screen is built once more before the app returns to the login screen.
+    if (user == null) return const SizedBox.shrink();
     final unread = context.watch<NotificationCenter>().unreadCount;
 
     return Scaffold(
@@ -78,7 +80,7 @@ class _AdminShellState extends State<AdminShell> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
-                const Padding(
+                Padding(
                   padding: EdgeInsets.fromLTRB(24, 20, 24, 16),
                   child: Row(
                     children: [
@@ -92,10 +94,10 @@ class _AdminShellState extends State<AdminShell> {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Text(
-                            'Admin Panel',
+                            l10n.adminPanel,
                             style: TextStyle(color: Colors.white, fontSize: 20, fontWeight: FontWeight.bold),
                           ),
-                          Text('System Management', style: TextStyle(color: Colors.white54)),
+                          Text(l10n.systemManagement, style: TextStyle(color: Colors.white54)),
                         ],
                       ),
                     ],
@@ -104,7 +106,7 @@ class _AdminShellState extends State<AdminShell> {
                 const Divider(color: Colors.white12, height: 1),
                 _NavTile(
                   icon: Icons.arrow_back,
-                  label: 'Back to Dashboard',
+                  label: l10n.backToDashboard,
                   selected: false,
                   onTap: () => Navigator.of(context).pop(),
                 ),
@@ -130,7 +132,7 @@ class _AdminShellState extends State<AdminShell> {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      const Text('Logged in as Admin', style: TextStyle(color: Colors.white54, fontSize: 13)),
+                      Text(l10n.loggedInAs(Roles.label(user.role)), style: const TextStyle(color: Colors.white54, fontSize: 13)),
                       Text(
                         user.fullName,
                         style: const TextStyle(color: Colors.white, fontSize: 16, fontWeight: FontWeight.w600),
@@ -140,7 +142,7 @@ class _AdminShellState extends State<AdminShell> {
                 ),
                 _NavTile(
                   icon: Icons.logout,
-                  label: 'Logout',
+                  label: l10n.logout,
                   selected: false,
                   onTap: () => context.read<AuthProvider>().logout(),
                 ),

@@ -8,8 +8,8 @@ class TableStatusBadge extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => switch (status) {
-    TableStatus.available => const StatusBadge('Available', color: ServioColors.success, background: ServioColors.successLight),
-    TableStatus.occupied => const StatusBadge('Occupied', color: ServioColors.danger, background: ServioColors.dangerLight),
-    TableStatus.reserved => const StatusBadge('Reserved', color: ServioColors.warning, background: ServioColors.warningLight),
+    TableStatus.available => StatusBadge(l10n.available, color: ServioColors.success, background: ServioColors.successLight),
+    TableStatus.occupied => StatusBadge(l10n.occupied, color: ServioColors.danger, background: ServioColors.dangerLight),
+    TableStatus.reserved => StatusBadge(l10n.reserved, color: ServioColors.warning, background: ServioColors.warningLight),
   };
 }

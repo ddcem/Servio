@@ -1,8 +1,10 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using Servio.Model.Enums;
-using Servio.Services.Database;
+using Servio.Model.Localization;
 using Servio.Services.Database.Entities;
+using Servio.Services.Database;
+using Servio.Services.Localization;
 using Servio.Services.Mapping;
 
 namespace Servio.Services.Notifications;
@@ -18,15 +20,39 @@ public class NotificationDispatcher(
     private readonly List<Notification> _pending = [];
     private readonly HashSet<string> _broadcasts = [];
 
-    public void Notify(int userId, NotificationType type, string title, string body,
-        OrderTicket? ticket = null, Reservation? reservation = null)
+    public async Task NotifyAsync(int userId, NotificationType type, LocalizedText title, LocalizedText body,
+        OrderTicket? ticket = null, Reservation? reservation = null, CancellationToken cancellationToken = default)
+    {
+        var language = await context.Users
+            .Where(x => x.Id == userId)
+            .Select(x => x.PreferredLanguage)
+            .FirstOrDefaultAsync(cancellationToken);
+        Add(userId, language ?? Languages.English, type, title, body, ticket, reservation);
+    }
+
+    public async Task NotifyRoleAsync(string role, NotificationType type, LocalizedText title, LocalizedText body,
+        OrderTicket? ticket = null, Reservation? reservation = null, CancellationToken cancellationToken = default)
+    {
+        var users = await context.Users
+            .Where(x => x.IsActive && x.Role.Name == role)
+            .Select(x => new { x.Id, x.PreferredLanguage })
+            .ToListAsync(cancellationToken);
+
+        foreach (var user in users)
+        {
+            Add(user.Id, user.PreferredLanguage, type, title, body, ticket, reservation);
+        }
+    }
+
+    private void Add(int userId, string language, NotificationType type, LocalizedText title, LocalizedText body,
+        OrderTicket? ticket, Reservation? reservation)
     {
         var notification = new Notification
         {
             UserId = userId,
             Type = type,
-            Title = Truncate(title, TitleMaxLength),
-            Body = Truncate(body, BodyMaxLength),
+            Title = Truncate(Translator.Render(title, language), TitleMaxLength),
+            Body = Truncate(Translator.Render(body, language), BodyMaxLength),
             OrderTicket = ticket,
             Reservation = reservation,
             CreatedAt = DateTime.UtcNow
@@ -34,20 +60,6 @@ public class NotificationDispatcher(
 
         context.Notifications.Add(notification);
         _pending.Add(notification);
-    }
-
-    public async Task NotifyRoleAsync(string role, NotificationType type, string title, string body,
-        OrderTicket? ticket = null, Reservation? reservation = null, CancellationToken cancellationToken = default)
-    {
-        var userIds = await context.Users
-            .Where(x => x.IsActive && x.Role.Name == role)
-            .Select(x => x.Id)
-            .ToListAsync(cancellationToken);
-
-        foreach (var userId in userIds)
-        {
-            Notify(userId, type, title, body, ticket, reservation);
-        }
     }
 
     public void Broadcast(string eventName) => _broadcasts.Add(eventName);

@@ -12,6 +12,7 @@ class User {
     required this.role,
     required this.isActive,
     required this.hasProfileImage,
+    this.preferredLanguage = 'en',
     required this.createdAt,
     this.lastLoginAt,
     this.hasActivity = false,
@@ -28,6 +29,7 @@ class User {
     role: json['role'] as String,
     isActive: json['isActive'] as bool,
     hasProfileImage: json['hasProfileImage'] as bool,
+    preferredLanguage: json['preferredLanguage'] as String? ?? 'en',
     createdAt: toLocalDate(json['createdAt']),
     lastLoginAt: toLocalDateOrNull(json['lastLoginAt']),
     hasActivity: json['hasActivity'] as bool? ?? false,
@@ -43,6 +45,9 @@ class User {
   final String role;
   final bool isActive;
   final bool hasProfileImage;
+
+  /// The app language the user chose: "en" or "bs".
+  final String preferredLanguage;
   final DateTime createdAt;
   final DateTime? lastLoginAt;
   final bool hasActivity;

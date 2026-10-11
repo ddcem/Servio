@@ -1,6 +1,7 @@
 using System.Linq.Expressions;
 using Microsoft.EntityFrameworkCore;
 using Servio.Model.Exceptions;
+using Servio.Model.Localization;
 using Servio.Model.Responses;
 using Servio.Model.SearchObjects;
 using Servio.Services.Database;
@@ -63,7 +64,7 @@ public abstract class BaseReadService<TEntity, TResponse, TSearch>(ServioDbConte
             .FirstOrDefaultAsync(cancellationToken)
         ?? throw NotFound();
 
-    protected NotFoundException NotFound() => new($"{EntityName} was not found. It may have been deleted.");
+    protected NotFoundException NotFound() => new("{0} was not found. It may have been deleted.", new Localized(EntityName));
 
     protected static string? Normalize(string? value) =>
         string.IsNullOrWhiteSpace(value) ? null : value.Trim();

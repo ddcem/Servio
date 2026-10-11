@@ -6,6 +6,7 @@ import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:integration_test/integration_test.dart';
 import 'package:servio_mobile/main.dart' as app;
+import 'package:servio_shared/servio_shared.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 /// Walks through the waiter's day against the running API and saves a screenshot of every screen.
@@ -71,6 +72,9 @@ void main() {
     await tester.tap(find.text('Skip'));
 
     await waitFor(tester, find.text('Waiter Login'));
+    // The account may be set to another language; choosing English here applies it after login.
+    await tapAndSettle(tester, find.byType(LanguageMenuButton));
+    await tapAndSettle(tester, find.text('English').last);
     await tester.enterText(find.byType(TextFormField).at(0), 'mobile');
     await tester.enterText(find.byType(TextFormField).at(1), 'test');
     await shot(tester, '03_login');
@@ -104,6 +108,9 @@ void main() {
     await waitFor(tester, find.text('Send Order'));
     await shot(tester, '09_cart');
     await tapAndSettle(tester, find.text('Send Order'));
+    await waitFor(tester, find.text('Send order?'));
+    await shot(tester, '09a_send_confirm');
+    await tapAndSettle(tester, find.widgetWithText(FilledButton, 'Send Order'));
 
     await waitFor(tester, find.text('OCC'));
     await tester.pump(const Duration(seconds: 2));
@@ -121,7 +128,7 @@ void main() {
     await tapAndSettle(tester, find.text('5'));
     await tapAndSettle(tester, find.text('0'));
     await shot(tester, '12_payment_cash');
-    await tapAndSettle(tester, find.text('Card'));
+    await tapAndSettle(tester, find.text('PayPal'));
     await shot(tester, '13_payment_card');
 
     // Back to the tables; cancel the order this test created, so it leaves no data behind.
@@ -132,7 +139,11 @@ void main() {
     await waitFor(tester, find.text('OCC'));
     final grid = find.byType(CustomScrollView);
     final card = find.descendant(of: grid, matching: find.text(tableNumber)).first;
-    await tester.scrollUntilVisible(card, -300, scrollable: find.descendant(of: grid, matching: find.byType(Scrollable)).first);
+    await tester.scrollUntilVisible(
+      card,
+      -300,
+      scrollable: find.descendant(of: grid, matching: find.byType(Scrollable)).first,
+    );
     await tapAndSettle(tester, card);
     await waitFor(tester, find.text('Add Items'));
     await shot(tester, '14_table_order');
@@ -150,6 +161,9 @@ void main() {
     await tester.pageBack();
     await tester.pumpAndSettle();
     await tapAndSettle(tester, find.byTooltip('More'));
+    await tapAndSettle(tester, find.text('Settings'));
+    await waitFor(tester, find.text('Bosanski'));
+    await shot(tester, '17a_settings');
     await tapAndSettle(tester, find.text('My profile'));
     await waitFor(tester, find.text('Save changes'));
     await shot(tester, '17_profile');

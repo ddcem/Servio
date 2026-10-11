@@ -18,11 +18,13 @@ Future<Recommendation?> showUpsellDialog(
     return AlertDialog(
       titlePadding: const EdgeInsets.fromLTRB(24, 24, 24, 0),
       contentPadding: const EdgeInsets.fromLTRB(24, 12, 24, 0),
-      title: const Row(
+      title: Row(
         children: [
           Icon(Icons.lightbulb, color: Color(0xFFFACC15)),
           SizedBox(width: 8),
-          Text('Upsell Suggestion', style: TextStyle(fontWeight: FontWeight.bold)),
+          Expanded(
+            child: Text(l10n.upsellSuggestion, style: const TextStyle(fontWeight: FontWeight.bold)),
+          ),
         ],
       ),
       content: SingleChildScrollView(
@@ -32,8 +34,8 @@ Future<Recommendation?> showUpsellDialog(
           children: [
             Text(
               hasDrink && source.courseType != CourseType.drink
-                  ? 'Would your guest like a drink with the ${source.name}?'
-                  : 'Guests who order ${source.name} often add:',
+                  ? l10n.upsellDrinkQuestion(source.name)
+                  : l10n.upsellOftenAdd(source.name),
               style: const TextStyle(fontSize: 15),
             ),
             const SizedBox(height: 12),
@@ -73,7 +75,7 @@ Future<Recommendation?> showUpsellDialog(
                       style: FilledButton.styleFrom(padding: const EdgeInsets.symmetric(horizontal: 12)),
                       onPressed: () => Navigator.pop(context, suggestion),
                       icon: const Icon(Icons.add, size: 18),
-                      label: const Text('Add'),
+                      label: Text(l10n.add),
                     ),
                   ],
                 ),
@@ -89,7 +91,7 @@ Future<Recommendation?> showUpsellDialog(
           child: FilledButton.tonal(
             style: FilledButton.styleFrom(backgroundColor: ServioColors.border, foregroundColor: ServioColors.textPrimary),
             onPressed: () => Navigator.pop(context),
-            child: const Text('Not Now', style: TextStyle(fontWeight: FontWeight.w600)),
+            child: Text(l10n.notNow, style: TextStyle(fontWeight: FontWeight.w600)),
           ),
         ),
       ],

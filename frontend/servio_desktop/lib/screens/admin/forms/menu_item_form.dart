@@ -24,14 +24,14 @@ class _MenuItemForm extends StatefulWidget {
 }
 
 class _MenuItemFormState extends State<_MenuItemForm> {
-  static const _imageTypes = XTypeGroup(label: 'Images', extensions: ['jpg', 'jpeg', 'png', 'webp']);
+  static final _imageTypes = XTypeGroup(label: l10n.images, extensions: ['jpg', 'jpeg', 'png', 'webp']);
   static const _maxImageBytes = 2 * 1024 * 1024;
 
   final _formKey = GlobalKey<FormState>();
   final _server = ServerErrors();
   late final _name = TextEditingController(text: widget.item?.name);
   late final _description = TextEditingController(text: widget.item?.description);
-  late final _price = TextEditingController(text: widget.item?.price.toStringAsFixed(2));
+  late final _price = TextEditingController(text: widget.item == null ? null : Formatters.decimal(widget.item!.price, digits: 2));
   late int? _categoryId = widget.item?.categoryId;
   late bool _available = widget.item?.isAvailableToday ?? true;
   late final Set<int> _tagIds = {...?widget.item?.tags.map((t) => t.id)};
@@ -70,12 +70,12 @@ class _MenuItemFormState extends State<_MenuItemForm> {
   }
 
   Future<void> _pickImage() async {
-    final file = await openFile(acceptedTypeGroups: const [_imageTypes]);
+    final file = await openFile(acceptedTypeGroups: [_imageTypes]);
     if (file == null) return;
     final bytes = await file.readAsBytes();
     setState(() {
       if (bytes.length > _maxImageBytes) {
-        _imageError = 'The image is larger than 2 MB. Choose a smaller JPEG, PNG or WebP image.';
+        _imageError = l10n.imageTooLarge;
         return;
       }
       _imageError = null;
@@ -96,8 +96,8 @@ class _MenuItemFormState extends State<_MenuItemForm> {
     final tag = await showNameForm<ItemTag>(
       context,
       provider: context.read<ItemTagProvider>(),
-      entityLabel: 'Tag',
-      hint: 'e.g. Spicy',
+      entityLabel: l10n.entityTag,
+      hint: l10n.tagHint,
     );
     if (tag == null) return;
     await _loadReferenceData();
@@ -127,13 +127,13 @@ class _MenuItemFormState extends State<_MenuItemForm> {
     } on ApiException catch (e) {
       if (!mounted) return;
       Navigator.pop(context, true);
-      showError(context, ApiException('"${saved.name}" was saved, but the image was not: ${e.message}'));
+      showError(context, ApiException(l10n.savedButImageFailed(saved.name, e.message)));
       return;
     }
 
     if (!mounted) return;
     Navigator.pop(context, true);
-    showSuccess(context, '"${saved.name}" was ${_editing ? 'updated' : 'added to the menu'}.');
+    showSuccess(context, _editing ? l10n.itemUpdated(saved.name) : l10n.itemAddedToMenu(saved.name));
   }
 
   @override
@@ -142,7 +142,7 @@ class _MenuItemFormState extends State<_MenuItemForm> {
     final menuItems = context.read<MenuItemProvider>();
 
     return FormDialog(
-      title: _editing ? 'Edit menu item' : 'Add menu item',
+      title: _editing ? l10n.editMenuItem : l10n.addMenuItem,
       formKey: _formKey,
       serverErrors: _server,
       width: 640,
@@ -170,7 +170,7 @@ class _MenuItemFormState extends State<_MenuItemForm> {
                 TextButton.icon(
                   onPressed: _pickImage,
                   icon: const Icon(Icons.upload),
-                  label: Text(_hasImage ? 'Change' : 'Add image'),
+                  label: Text(_hasImage ? l10n.changeImage : l10n.addImage),
                 ),
                 if (_hasImage)
                   TextButton.icon(
@@ -180,7 +180,7 @@ class _MenuItemFormState extends State<_MenuItemForm> {
                       _removeImage = true;
                     }),
                     icon: const Icon(Icons.delete_outline),
-                    label: const Text('Remove'),
+                    label: Text(l10n.remove),
                   ),
               ],
             ),
@@ -192,14 +192,17 @@ class _MenuItemFormState extends State<_MenuItemForm> {
                     controller: _name,
                     autofocus: true,
                     maxLength: 100,
-                    decoration: const InputDecoration(labelText: 'Name', hintText: 'e.g. Ribeye Steak'),
-                    validator: (value) => _server['Name'] ?? Validators.length(value, 'Name', min: 2, max: 100),
+                    decoration: InputDecoration(labelText: l10n.name, hintText: l10n.nameHintDish),
+                    validator: (value) => _server['Name'] ?? Validators.length(value, l10n.name, min: 2, max: 100),
                   ),
                   const SizedBox(height: 12),
                   TextFormField(
                     controller: _price,
-                    decoration: const InputDecoration(labelText: 'Price', hintText: 'e.g. 12.50'),
-                    validator: (value) => _server['Price'] ?? Validators.decimal(value, 'Price', min: 0.01, max: 10000),
+                    decoration: InputDecoration(
+                      labelText: l10n.price,
+                      hintText: Formatters.language == 'bs' ? 'npr. 12,50' : 'e.g. 12.50',
+                    ),
+                    validator: (value) => _server['Price'] ?? Validators.decimal(value, l10n.price, min: 0.01, max: 10000),
                   ),
                 ],
               ),
@@ -211,11 +214,8 @@ class _MenuItemFormState extends State<_MenuItemForm> {
           controller: _description,
           maxLines: 2,
           maxLength: 500,
-          decoration: const InputDecoration(
-            labelText: 'Description (optional)',
-            hintText: 'e.g. 300 g grilled ribeye with herb butter',
-          ),
-          validator: (value) => _server['Description'] ?? Validators.length(value, 'Description', max: 500, isRequired: false),
+          decoration: InputDecoration(labelText: l10n.descriptionOptional, hintText: l10n.descriptionHint),
+          validator: (value) => _server['Description'] ?? Validators.length(value, l10n.description, max: 500, isRequired: false),
         ),
         Row(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -224,20 +224,23 @@ class _MenuItemFormState extends State<_MenuItemForm> {
               child: DropdownButtonFormField<int>(
                 key: ValueKey(_categories.length),
                 initialValue: _categoryId,
-                decoration: const InputDecoration(labelText: 'Category'),
+                decoration: InputDecoration(labelText: l10n.category),
                 items: _categories
                     .map(
-                      (c) => DropdownMenuItem(value: c.id, child: Text('${c.name} (${c.preparationStationName.toLowerCase()})')),
+                      (c) => DropdownMenuItem(
+                        value: c.id,
+                        child: Text(l10n.categoryWithStation(c.name, Stations.label(c.preparationStationName).toLowerCase())),
+                      ),
                     )
                     .toList(),
                 onChanged: (value) => setState(() => _categoryId = value),
-                validator: (value) => _server['CategoryId'] ?? (value == null ? 'Category is required.' : null),
+                validator: (value) => _server['CategoryId'] ?? (value == null ? l10n.categoryRequired : null),
               ),
             ),
             const SizedBox(width: 8),
             Padding(
               padding: const EdgeInsets.only(top: 6),
-              child: IconButton.filledTonal(tooltip: 'Add a new category', onPressed: _addCategory, icon: const Icon(Icons.add)),
+              child: IconButton.filledTonal(tooltip: l10n.addNewCategory, onPressed: _addCategory, icon: const Icon(Icons.add)),
             ),
           ],
         ),
@@ -246,9 +249,9 @@ class _MenuItemFormState extends State<_MenuItemForm> {
           children: [
             Row(
               children: [
-                const Text('Tags', style: TextStyle(fontWeight: FontWeight.w600)),
+                Text(l10n.tags, style: const TextStyle(fontWeight: FontWeight.w600)),
                 const Spacer(),
-                TextButton.icon(onPressed: _addTag, icon: const Icon(Icons.add, size: 18), label: const Text('New tag')),
+                TextButton.icon(onPressed: _addTag, icon: const Icon(Icons.add, size: 18), label: Text(l10n.newTag)),
               ],
             ),
             Wrap(
@@ -272,8 +275,8 @@ class _MenuItemFormState extends State<_MenuItemForm> {
         ),
         SwitchListTile(
           contentPadding: EdgeInsets.zero,
-          title: const Text('Available today'),
-          subtitle: const Text('Unavailable items are hidden from the waiters\' menu'),
+          title: Text(l10n.availableToday),
+          subtitle: Text(l10n.unavailableHidden),
           value: _available,
           onChanged: (value) => setState(() => _available = value),
         ),

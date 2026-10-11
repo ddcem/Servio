@@ -70,9 +70,9 @@ class _SettingsScreenState extends State<SettingsScreen> {
     if (!_formKey.currentState!.validate()) return;
     final confirmed = await confirmAction(
       context,
-      title: 'Save settings?',
-      message: 'New orders use the new VAT rate and currency. Open orders keep the values they were opened with.',
-      confirmLabel: 'Save Settings',
+      title: l10n.saveSettingsQuestion,
+      message: l10n.saveSettingsMessage,
+      confirmLabel: l10n.saveSettings,
     );
     if (!confirmed || !mounted) return;
 
@@ -85,7 +85,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
       });
       if (!mounted) return;
       setState(() => _settings = saved);
-      showSuccess(context, 'Settings saved: ${saved.restaurantName}, ${saved.currencyCode}, VAT ${_taxRate.text}%.');
+      showSuccess(context, l10n.settingsSaved(saved.restaurantName, saved.currencyCode, _taxRate.text));
     } catch (e) {
       _server.set(e);
       _formKey.currentState!.validate();
@@ -97,8 +97,8 @@ class _SettingsScreenState extends State<SettingsScreen> {
 
   @override
   Widget build(BuildContext _) => AdminPage(
-    title: 'System Settings',
-    subtitle: 'Configure restaurant preferences',
+    title: l10n.systemSettings,
+    subtitle: l10n.configurePreferences,
     child: _error != null && _settings == null
         ? ErrorView(error: _error!, onRetry: _load)
         : _settings == null
@@ -113,19 +113,34 @@ class _SettingsScreenState extends State<SettingsScreen> {
                   children: [
                     Panel(
                       padding: const EdgeInsets.all(28),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(l10n.myPreferences, style: const TextStyle(fontSize: 22, fontWeight: FontWeight.bold)),
+                          const SizedBox(height: 4),
+                          Text(l10n.myPreferencesHint, style: const TextStyle(color: ServioColors.textMuted)),
+                          const SizedBox(height: 12),
+                          Text(l10n.language, style: const TextStyle(fontWeight: FontWeight.w600)),
+                          const LanguagePicker(),
+                        ],
+                      ),
+                    ),
+                    const SizedBox(height: 20),
+                    Panel(
+                      padding: const EdgeInsets.all(28),
                       child: Form(
                         key: _formKey,
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.stretch,
                           children: [
-                            const Text('General Settings', style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold)),
+                            Text(l10n.generalSettings, style: const TextStyle(fontSize: 22, fontWeight: FontWeight.bold)),
                             const SizedBox(height: 20),
                             TextFormField(
                               controller: _name,
                               maxLength: 100,
-                              decoration: const InputDecoration(labelText: 'Restaurant name'),
+                              decoration: InputDecoration(labelText: l10n.restaurantName),
                               validator: (value) =>
-                                  _server['RestaurantName'] ?? Validators.length(value, 'Restaurant name', min: 2, max: 100),
+                                  _server['RestaurantName'] ?? Validators.length(value, l10n.restaurantName, min: 2, max: 100),
                             ),
                             const SizedBox(height: 12),
                             Row(
@@ -135,26 +150,24 @@ class _SettingsScreenState extends State<SettingsScreen> {
                                   child: DropdownButtonFormField<int>(
                                     key: ValueKey(_currencies.length),
                                     initialValue: _currencyId,
-                                    decoration: const InputDecoration(
-                                      labelText: 'Currency',
-                                      helperText: 'PayPal payments are charged in this currency',
-                                    ),
+                                    decoration: InputDecoration(labelText: l10n.currency, helperText: l10n.currencyHelper),
                                     items: _currencies
                                         .map(
-                                          (c) =>
-                                              DropdownMenuItem(value: c.id, child: Text('${c.code} (${c.symbol}) – ${c.name}')),
+                                          (c) => DropdownMenuItem(
+                                            value: c.id,
+                                            child: Text(l10n.currencyOption(c.code, c.symbol, c.name)),
+                                          ),
                                         )
                                         .toList(),
                                     onChanged: (value) => setState(() => _currencyId = value),
-                                    validator: (value) =>
-                                        _server['CurrencyId'] ?? (value == null ? 'Currency is required.' : null),
+                                    validator: (value) => _server['CurrencyId'] ?? (value == null ? l10n.currencyRequired : null),
                                   ),
                                 ),
                                 const SizedBox(width: 8),
                                 Padding(
                                   padding: const EdgeInsets.only(top: 6),
                                   child: IconButton.filledTonal(
-                                    tooltip: 'Add a new currency',
+                                    tooltip: l10n.addNewCurrency,
                                     onPressed: _addCurrency,
                                     icon: const Icon(Icons.add),
                                   ),
@@ -164,17 +177,19 @@ class _SettingsScreenState extends State<SettingsScreen> {
                             const SizedBox(height: 16),
                             TextFormField(
                               controller: _taxRate,
-                              decoration: const InputDecoration(
-                                labelText: 'VAT rate (%)',
+                              decoration: InputDecoration(
+                                labelText: l10n.vatRatePercent,
                                 hintText: 'e.g. 17',
-                                helperText: 'Included in menu prices; receipts show how much of the total is VAT',
+                                helperText: l10n.vatRateHelper,
                               ),
-                              validator: (value) => _server['TaxRate'] ?? Validators.decimal(value, 'VAT rate', min: 0, max: 100),
+                              validator: (value) =>
+                                  _server['TaxRate'] ?? Validators.decimal(value, l10n.vatRate, min: 0, max: 100),
                             ),
                             const SizedBox(height: 12),
                             Text(
-                              'Last changed ${Formatters.dateTime(_settings!.updatedAt)}'
-                              '${_settings!.updatedByName == null ? '' : ' by ${_settings!.updatedByName}'}',
+                              _settings!.updatedByName == null
+                                  ? l10n.lastChanged(Formatters.dateTime(_settings!.updatedAt))
+                                  : l10n.lastChangedBy(Formatters.dateTime(_settings!.updatedAt), _settings!.updatedByName!),
                               style: const TextStyle(color: ServioColors.textMuted),
                             ),
                           ],
@@ -186,7 +201,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                       style: FilledButton.styleFrom(minimumSize: const Size(0, 56)),
                       onPressed: _saving ? null : _save,
                       icon: const Icon(Icons.save_outlined),
-                      label: const Text('Save Settings'),
+                      label: Text(l10n.saveSettings),
                     ),
                   ],
                 ),

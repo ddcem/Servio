@@ -18,6 +18,7 @@ dependencies:
   intl: ^0.20.3
   servio_shared:
     path: ../servio_shared
+  shared_preferences: ^2.5.6
 
 dev_dependencies:
   flutter_test:

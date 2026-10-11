@@ -27,7 +27,7 @@ class _OrderDetailsScreenState extends State<OrderDetailsScreen> {
     String money(double value) => Formatters.money(value, order.currencySymbol);
 
     return Scaffold(
-      appBar: GradientAppBar(title: 'Table ${order.tableNumber}', subtitle: order.orderNumber),
+      appBar: GradientAppBar(title: l10n.tableNumber(order.tableNumber), subtitle: order.orderNumber),
       body: ListView(
         padding: const EdgeInsets.all(16),
         children: [
@@ -41,25 +41,25 @@ class _OrderDetailsScreenState extends State<OrderDetailsScreen> {
                     children: [
                       Expanded(
                         child: Text(
-                          '${order.guestCount} guests · ${order.waiterName}',
+                          l10n.guestsAndWaiter(l10n.guestCount(order.guestCount), order.waiterName),
                           style: const TextStyle(color: ServioColors.textMuted),
                         ),
                       ),
                       StatusBadge(
-                        order.status == OrderStatus.completed ? 'Paid' : 'Cancelled',
+                        order.status == OrderStatus.completed ? l10n.paid : l10n.cancelled,
                         color: order.status == OrderStatus.completed ? ServioColors.success : ServioColors.danger,
                         background: order.status == OrderStatus.completed ? ServioColors.successLight : ServioColors.dangerLight,
                       ),
                     ],
                   ),
                   Text(
-                    'Opened ${Formatters.dateTime(order.openedAt)}'
-                    '${order.closedAt == null ? '' : ' · closed ${Formatters.time(order.closedAt!)}'}',
+                    l10n.openedAt(Formatters.dateTime(order.openedAt)) +
+                        (order.closedAt == null ? '' : l10n.closedAt(Formatters.time(order.closedAt!))),
                     style: const TextStyle(color: ServioColors.textMuted),
                   ),
                   if (order.cancellationReason != null) ...[
                     const SizedBox(height: 8),
-                    Text('Reason: ${order.cancellationReason}', style: const TextStyle(color: ServioColors.danger)),
+                    Text(l10n.reasonText(order.cancellationReason!), style: const TextStyle(color: ServioColors.danger)),
                   ],
                   const Divider(height: 24),
                   for (final item in order.items)
@@ -67,7 +67,7 @@ class _OrderDetailsScreenState extends State<OrderDetailsScreen> {
                       padding: const EdgeInsets.symmetric(vertical: 4),
                       child: Row(
                         children: [
-                          Expanded(child: Text('${item.menuItemName} × ${item.quantity}')),
+                          Expanded(child: Text(l10n.itemTimesQuantity(item.menuItemName, item.quantity))),
                           if (item.ticketStatus == TicketStatus.cancelled) ...[
                             const TicketStatusChip(TicketStatus.cancelled),
                             const SizedBox(width: 8),
@@ -79,8 +79,8 @@ class _OrderDetailsScreenState extends State<OrderDetailsScreen> {
                   const Divider(height: 24),
                   Row(
                     children: [
-                      const Expanded(
-                        child: Text('Total', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+                      Expanded(
+                        child: Text(l10n.total, style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
                       ),
                       Text(money(order.total), style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
                     ],
@@ -103,7 +103,7 @@ class _OrderDetailsScreenState extends State<OrderDetailsScreen> {
               return Column(
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
-                  const Text('Payment', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+                  Text(l10n.payment, style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
                   const SizedBox(height: 8),
                   for (final payment in payments) _PaymentCard(payment: payment, money: money),
                 ],
@@ -146,32 +146,39 @@ class _PaymentCard extends StatelessWidget {
           children: [
             Row(
               children: [
-                Icon(payment.paymentMethod == 'Cash' ? Icons.payments_outlined : Icons.credit_card, color: ServioColors.primary),
+                Icon(
+                  payment.paymentMethod == PaymentMethods.cash ? Icons.payments_outlined : Icons.account_balance_wallet_outlined,
+                  color: ServioColors.primary,
+                ),
                 const SizedBox(width: 8),
                 Expanded(
-                  child: Text(payment.paymentMethod, style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w600)),
+                  child: Text(
+                    PaymentMethods.label(payment.paymentMethod),
+                    style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
+                  ),
                 ),
                 Text(payment.status.label, style: const TextStyle(fontWeight: FontWeight.w600)),
               ],
             ),
             const SizedBox(height: 8),
-            line('Amount paid', money(payment.capturedAmount ?? payment.amount)),
-            if (payment.tipAmount > 0) line('Tip (${payment.tipPercent.toStringAsFixed(0)}%)', money(payment.tipAmount)),
-            if (payment.cashReceived != null) line('Cash received', money(payment.cashReceived!)),
-            if (payment.changeGiven != null) line('Change', money(payment.changeGiven!)),
-            for (final refund in payment.refunds) line('Refund ${Formatters.date(refund.createdAt)}', '−${money(refund.amount)}'),
-            line('Taken by', payment.processedByName),
+            line(l10n.amountPaid, money(payment.capturedAmount ?? payment.amount)),
+            if (payment.tipAmount > 0) line(l10n.tipPercent(payment.tipPercent.toStringAsFixed(0)), money(payment.tipAmount)),
+            if (payment.cashReceived != null) line(l10n.cashReceived, money(payment.cashReceived!)),
+            if (payment.changeGiven != null) line(l10n.change, money(payment.changeGiven!)),
+            for (final refund in payment.refunds)
+              line(l10n.refundOn(Formatters.date(refund.createdAt)), '−${money(refund.amount)}'),
+            line(l10n.takenBy, payment.processedByName),
             if (paid) ...[
               const SizedBox(height: 10),
               OutlinedButton.icon(
                 onPressed: () => Navigator.of(context).push(
                   MaterialPageRoute(
                     builder: (_) =>
-                        ReceiptScreen(paymentId: payment.id, title: 'Table ${payment.tableNumber} · ${payment.orderNumber}'),
+                        ReceiptScreen(paymentId: payment.id, title: l10n.tableAndOrder(payment.tableNumber, payment.orderNumber)),
                   ),
                 ),
                 icon: const Icon(Icons.receipt_long_outlined),
-                label: const Text('View receipt'),
+                label: Text(l10n.viewReceipt),
               ),
             ],
           ],

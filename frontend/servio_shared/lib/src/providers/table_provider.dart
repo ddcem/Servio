@@ -8,6 +8,13 @@ class RestaurantTableProvider extends CrudProvider<RestaurantTable> {
 
   @override
   RestaurantTable fromJson(Map<String, dynamic> json) => RestaurantTable.fromJson(json);
+
+  /// Gives tables to waiters for the current shift; a null waiter means any waiter may serve the table.
+  Future<void> assign(Map<int, int?> waiterByTableId) => api.put('$endpoint/assignments', {
+    'items': [
+      for (final MapEntry(key: tableId, value: waiterId) in waiterByTableId.entries) {'tableId': tableId, 'waiterId': waiterId},
+    ],
+  });
 }
 
 /// Reservations are never deleted; they move through confirm / complete / no-show / cancel.

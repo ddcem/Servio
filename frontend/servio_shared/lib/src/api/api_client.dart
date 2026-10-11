@@ -5,6 +5,7 @@ import 'dart:typed_data';
 import 'package:http/http.dart' as http;
 
 import 'api_exception.dart';
+import '../localization/language.dart';
 
 /// Thin wrapper over HTTP that adds the bearer token, encodes JSON and turns
 /// error responses into [ApiException]s with the server's message.
@@ -17,10 +18,13 @@ class ApiClient {
   /// The bearer token of the logged-in user, or null.
   String? token;
 
+  /// Two-letter code of the app language; the server answers in it.
+  String language = 'en';
+
   /// Called when the server rejects the token (expired or logged out elsewhere).
   void Function()? onUnauthorized;
 
-  Map<String, String> get authHeaders => {if (token != null) 'Authorization': 'Bearer $token'};
+  Map<String, String> get authHeaders => {if (token != null) 'Authorization': 'Bearer $token', 'Accept-Language': language};
 
   Uri uri(String path, [Map<String, dynamic>? query]) {
     final parameters = <String, dynamic>{};
@@ -67,9 +71,9 @@ class ApiClient {
     try {
       response = await request();
     } on SocketException {
-      throw ApiException('Cannot reach the server at $baseUrl. Check that the API is running.');
+      throw ApiException(l10n.serverUnreachable(baseUrl));
     } on http.ClientException {
-      throw ApiException('Cannot reach the server at $baseUrl. Check that the API is running.');
+      throw ApiException(l10n.serverUnreachable(baseUrl));
     }
 
     if (response.statusCode >= 200 && response.statusCode < 300) return response;

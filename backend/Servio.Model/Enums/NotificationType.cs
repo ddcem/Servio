@@ -8,5 +8,6 @@ public enum NotificationType
     ReservationConfirmed = 3,
     ReservationCancelled = 4,
     PaymentCompleted = 5,
-    RefundIssued = 6
+    RefundIssued = 6,
+    TablesAssigned = 7
 }

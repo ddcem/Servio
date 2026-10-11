@@ -75,15 +75,15 @@ class _TableOrderScreenState extends State<TableOrderScreen> {
   Future<void> _cancel() async {
     final reason = await askForReason(
       context,
-      title: 'Cancel order',
-      message: 'Only orders that the kitchen and bar have not started can be cancelled. Why is it cancelled?',
-      confirmLabel: 'Cancel order',
+      title: l10n.cancelOrder,
+      message: l10n.cancelOrderMessage,
+      confirmLabel: l10n.cancelOrder,
     );
     if (reason == null || !mounted) return;
     try {
       await _orders.cancel(widget.orderId, reason);
       if (!mounted) return;
-      showSuccess(context, 'The order was cancelled.');
+      showSuccess(context, l10n.orderCancelled);
       _leave();
     } catch (e) {
       if (mounted) showError(context, e);
@@ -95,20 +95,20 @@ class _TableOrderScreenState extends State<TableOrderScreen> {
     final order = _order;
     return Scaffold(
       appBar: GradientAppBar(
-        title: order == null ? 'Order' : 'Table ${order.tableNumber}',
-        subtitle: order == null ? null : '${order.orderNumber} · ${order.waiterName}',
+        title: order == null ? l10n.order : l10n.tableNumber(order.tableNumber),
+        subtitle: order == null ? null : l10n.orderAndWaiter(order.orderNumber, order.waiterName),
         actions: [
           if (order != null)
             PopupMenuButton<String>(
-              tooltip: 'More',
-              icon: const Icon(Icons.more_vert, color: Colors.white),
+              tooltip: l10n.more,
+              icon: Icon(Icons.more_vert, color: Colors.white),
               onSelected: (_) => _cancel(),
-              itemBuilder: (_) => const [
+              itemBuilder: (_) => [
                 PopupMenuItem(
                   value: 'cancel',
                   child: ListTile(
                     leading: Icon(Icons.cancel_outlined, color: ServioColors.danger),
-                    title: Text('Cancel order'),
+                    title: Text(l10n.cancelOrder),
                   ),
                 ),
               ],

@@ -6,7 +6,7 @@ import '../widgets/gradient_app_bar.dart';
 import 'paypal_checkout_screen.dart';
 import 'receipt_screen.dart';
 
-enum _Method { cash, card }
+enum _Method { cash, payPal }
 
 /// Settles an order: choose a tip, then take cash (with change) or a card payment through PayPal.
 class PaymentScreen extends StatefulWidget {
@@ -35,6 +35,10 @@ class _PaymentScreenState extends State<PaymentScreen> {
   double get _tip => (_order.total * _tipPercent).roundToDouble() / 100;
   double get _amount => _order.total + _tip;
   double get _cashReceived => double.tryParse(_cash) ?? 0;
+
+  /// The amount as it is typed, written like money in the app's language ("€30.8" / "30,8 €").
+  String get _cashText =>
+      Formatters.language == 'bs' ? '${_cash.replaceAll('.', ',')} ${_order.currencySymbol}' : '${_order.currencySymbol}$_cash';
   double get _change => _cashReceived - _amount;
 
   bool get _waitingForKitchen =>
@@ -55,12 +59,14 @@ class _PaymentScreenState extends State<PaymentScreen> {
 
   /// Payments cannot be undone from the app (only the admin can refund), so the waiter confirms first.
   Future<bool> _confirm(String message) =>
-      confirmAction(context, title: 'Take payment?', message: message, confirmLabel: 'Confirm');
+      confirmAction(context, title: l10n.takePaymentQuestion, message: message, confirmLabel: l10n.confirm);
 
   Future<void> _payCash() async {
-    final tip = _tipPercent > 0 ? ' including a ${_money(_tip)} tip' : '';
-    final change = _change > 0.004 ? ' Give ${_money(_change)} change.' : '';
-    if (!await _confirm('Record a cash payment of ${_money(_amount)}$tip for table ${_order.tableNumber}?$change')) return;
+    final message = _tipPercent > 0
+        ? l10n.cashPaymentWithTipMessage(_money(_amount), _money(_tip), _order.tableNumber)
+        : l10n.cashPaymentMessage(_money(_amount), _order.tableNumber);
+    final change = _change > 0.004 ? ' ${l10n.giveChange(_money(_change))}' : '';
+    if (!await _confirm(message + change)) return;
     setState(() => _busy = true);
     try {
       final payment = await _payments.payCash(_order.id, _tipPercent, _cashReceived);
@@ -72,9 +78,11 @@ class _PaymentScreenState extends State<PaymentScreen> {
     }
   }
 
-  Future<void> _payCard() async {
-    final tip = _tipPercent > 0 ? ' including a ${_money(_tip)} tip' : '';
-    if (!await _confirm('Charge ${_money(_amount)}$tip for table ${_order.tableNumber} through PayPal?')) return;
+  Future<void> _payPayPal() async {
+    final message = _tipPercent > 0
+        ? l10n.cardPaymentWithTipMessage(_money(_amount), _money(_tip), _order.tableNumber)
+        : l10n.cardPaymentMessage(_money(_amount), _order.tableNumber);
+    if (!await _confirm(message)) return;
     setState(() => _busy = true);
     try {
       final checkout = await _payments.startPayPal(_order.id, _tipPercent);
@@ -84,7 +92,7 @@ class _PaymentScreenState extends State<PaymentScreen> {
       if (!mounted) return;
       if (approved != true) {
         await _payments.cancel(checkout.paymentId);
-        if (mounted) showError(context, 'The PayPal payment was cancelled. No money was taken.');
+        if (mounted) showError(context, l10n.payPalCancelled);
         return;
       }
       final payment = await _capture(checkout.paymentId);
@@ -103,7 +111,12 @@ class _PaymentScreenState extends State<PaymentScreen> {
         return await _payments.capturePayPal(paymentId);
       } on ApiException catch (e) {
         if (!mounted) return null;
-        final retry = await confirmAction(context, title: 'Payment not confirmed', message: e.message, confirmLabel: 'Try again');
+        final retry = await confirmAction(
+          context,
+          title: l10n.paymentNotConfirmed,
+          message: e.message,
+          confirmLabel: l10n.tryAgain,
+        );
         if (!retry) {
           try {
             await _payments.cancel(paymentId);
@@ -122,23 +135,23 @@ class _PaymentScreenState extends State<PaymentScreen> {
       barrierDismissible: false,
       builder: (context) => AlertDialog(
         icon: const Icon(Icons.check_circle, color: ServioColors.success, size: 56),
-        title: Text('Table ${payment.tableNumber} paid'),
+        title: Text(l10n.tablePaid(payment.tableNumber)),
         content: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            _line('Paid by', payment.paymentMethod),
-            _line('Amount', _money(payment.amount)),
-            if (payment.tipAmount > 0) _line('Tip', _money(payment.tipAmount)),
-            if (payment.changeGiven != null) _line('Change', _money(payment.changeGiven!), bold: true),
+            _line(l10n.paidBy, PaymentMethods.label(payment.paymentMethod)),
+            _line(l10n.amount, _money(payment.amount)),
+            if (payment.tipAmount > 0) _line(l10n.tip, _money(payment.tipAmount)),
+            if (payment.changeGiven != null) _line(l10n.change, _money(payment.changeGiven!), bold: true),
           ],
         ),
         actions: [
           OutlinedButton.icon(
             onPressed: () => Navigator.pop(context, true),
             icon: const Icon(Icons.receipt_long_outlined),
-            label: const Text('Receipt'),
+            label: Text(l10n.receipt),
           ),
-          FilledButton(onPressed: () => Navigator.pop(context, false), child: const Text('Done')),
+          FilledButton(onPressed: () => Navigator.pop(context, false), child: Text(l10n.done)),
         ],
       ),
     );
@@ -147,7 +160,8 @@ class _PaymentScreenState extends State<PaymentScreen> {
     if (showReceipt == true) {
       navigator.push(
         MaterialPageRoute(
-          builder: (_) => ReceiptScreen(paymentId: payment.id, title: 'Table ${payment.tableNumber} · ${payment.orderNumber}'),
+          builder: (_) =>
+              ReceiptScreen(paymentId: payment.id, title: l10n.tableAndOrder(payment.tableNumber, payment.orderNumber)),
         ),
       );
     }
@@ -158,7 +172,7 @@ class _PaymentScreenState extends State<PaymentScreen> {
     final cashReady = _cashReceived > 0 && _change >= -0.004;
 
     return Scaffold(
-      appBar: GradientAppBar(title: 'Process Payment', subtitle: 'Table ${_order.tableNumber} · ${_order.orderNumber}'),
+      appBar: GradientAppBar(title: l10n.processPayment, subtitle: l10n.tableAndOrder(_order.tableNumber, _order.orderNumber)),
       body: ListView(
         padding: const EdgeInsets.all(16),
         children: [
@@ -167,11 +181,11 @@ class _PaymentScreenState extends State<PaymentScreen> {
               margin: const EdgeInsets.only(bottom: 16),
               padding: const EdgeInsets.all(14),
               decoration: BoxDecoration(color: ServioColors.warningLight, borderRadius: BorderRadius.circular(12)),
-              child: const Row(
+              child: Row(
                 children: [
                   Icon(Icons.hourglass_top, color: ServioColors.warning),
                   SizedBox(width: 10),
-                  Expanded(child: Text('Some items are still being prepared. The bill can be paid once everything is ready.')),
+                  Expanded(child: Text(l10n.stillBeingPrepared)),
                 ],
               ),
             ),
@@ -184,8 +198,8 @@ class _PaymentScreenState extends State<PaymentScreen> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
-                  const Text(
-                    'Total Amount',
+                  Text(
+                    l10n.totalAmount,
                     textAlign: TextAlign.center,
                     style: TextStyle(color: ServioColors.textMuted),
                   ),
@@ -195,19 +209,20 @@ class _PaymentScreenState extends State<PaymentScreen> {
                     style: const TextStyle(fontSize: 36, fontWeight: FontWeight.bold),
                   ),
                   const SizedBox(height: 16),
-                  const Text('Order Summary', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+                  Text(l10n.orderSummary, style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
                   const SizedBox(height: 6),
-                  for (final item in _order.items) _line('${item.menuItemName} × ${item.quantity}', _money(item.lineTotal)),
+                  for (final item in _order.items)
+                    _line(l10n.itemTimesQuantity(item.menuItemName, item.quantity), _money(item.lineTotal)),
                   const Divider(height: 20),
-                  _line('Bill', _money(_order.total), bold: _tipPercent == 0, size: _tipPercent == 0 ? 18 : 14),
+                  _line(l10n.bill, _money(_order.total), bold: _tipPercent == 0, size: _tipPercent == 0 ? 18 : 14),
                   VatNote(total: _order.total, taxRate: _order.taxRate, currency: _order.currencySymbol),
                   if (_tipPercent > 0) ...[
-                    _line('Tip ($_tipPercent%)', _money(_tip), muted: true),
+                    _line(l10n.tipPercent('$_tipPercent'), _money(_tip), muted: true),
                     const Divider(height: 20),
-                    _line('Total to pay', _money(_amount), bold: true, size: 18),
+                    _line(l10n.totalToPay, _money(_amount), bold: true, size: 18),
                   ],
                   const SizedBox(height: 18),
-                  const Text('Tip Amount', style: TextStyle(fontWeight: FontWeight.w600)),
+                  Text(l10n.tipAmount, style: const TextStyle(fontWeight: FontWeight.w600)),
                   const SizedBox(height: 8),
                   Row(
                     children: [
@@ -228,7 +243,7 @@ class _PaymentScreenState extends State<PaymentScreen> {
                     Padding(
                       padding: const EdgeInsets.only(top: 8),
                       child: Text(
-                        '+ ${_money(_tip)} tip',
+                        l10n.plusTip(_money(_tip)),
                         textAlign: TextAlign.center,
                         style: const TextStyle(color: ServioColors.success, fontWeight: FontWeight.w600),
                       ),
@@ -239,7 +254,7 @@ class _PaymentScreenState extends State<PaymentScreen> {
                       Expanded(
                         child: _MethodButton(
                           icon: Icons.payments_outlined,
-                          label: 'Cash',
+                          label: l10n.methodCash,
                           color: ServioColors.success,
                           selected: _method == _Method.cash,
                           onTap: () => setState(() => _method = _Method.cash),
@@ -248,21 +263,21 @@ class _PaymentScreenState extends State<PaymentScreen> {
                       const SizedBox(width: 12),
                       Expanded(
                         child: _MethodButton(
-                          icon: Icons.credit_card,
-                          label: 'Card',
+                          icon: Icons.account_balance_wallet_outlined,
+                          label: l10n.payPal,
                           color: ServioColors.primary,
-                          selected: _method == _Method.card,
-                          onTap: () => setState(() => _method = _Method.card),
+                          selected: _method == _Method.payPal,
+                          onTap: () => setState(() => _method = _Method.payPal),
                         ),
                       ),
                     ],
                   ),
                   if (_method == _Method.cash) ...[const SizedBox(height: 16), _buildCash()],
-                  if (_method == _Method.card)
-                    const Padding(
+                  if (_method == _Method.payPal)
+                    Padding(
                       padding: EdgeInsets.only(top: 12),
                       child: Text(
-                        'The guest pays on PayPal\'s secure page, by card or with a PayPal account.',
+                        l10n.payPalSecurePage,
                         textAlign: TextAlign.center,
                         style: TextStyle(color: ServioColors.textMuted),
                       ),
@@ -274,7 +289,7 @@ class _PaymentScreenState extends State<PaymentScreen> {
                       style: FilledButton.styleFrom(backgroundColor: const Color(0xFF2E7D32)),
                       onPressed: _busy || _waitingForKitchen || _method == null || (_method == _Method.cash && !cashReady)
                           ? null
-                          : (_method == _Method.cash ? _payCash : _payCard),
+                          : (_method == _Method.cash ? _payCash : _payPayPal),
                       icon: _busy
                           ? const SizedBox(
                               width: 20,
@@ -283,9 +298,9 @@ class _PaymentScreenState extends State<PaymentScreen> {
                             )
                           : const Icon(Icons.check_circle_outline),
                       label: Text(switch (_method) {
-                        null => 'Select Payment Method',
-                        _Method.cash => cashReady ? 'Complete Cash Payment' : 'Enter Cash Received',
-                        _Method.card => 'Process Card Payment',
+                        null => l10n.selectPaymentMethod,
+                        _Method.cash => cashReady ? l10n.completeCashPayment : l10n.enterCashReceived,
+                        _Method.payPal => l10n.payWithPayPal,
                       }, style: const TextStyle(fontSize: 17, fontWeight: FontWeight.bold)),
                     ),
                   ),
@@ -318,14 +333,14 @@ class _PaymentScreenState extends State<PaymentScreen> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              const Text('Cash Received', style: TextStyle(fontWeight: FontWeight.w600)),
+              Text(l10n.cashReceivedTitle, style: const TextStyle(fontWeight: FontWeight.w600)),
               Text(
-                _cash.isEmpty ? '–' : '${_order.currencySymbol}$_cash',
+                _cash.isEmpty ? '–' : _cashText,
                 style: const TextStyle(fontSize: 34, fontWeight: FontWeight.bold, color: Color(0xFF2E7D32)),
               ),
               if (_cashReceived > 0) ...[
                 const Divider(height: 20, color: Color(0xFFBBF7D0)),
-                Text(enough ? 'Change' : 'Still missing', textAlign: TextAlign.center),
+                Text(enough ? l10n.change : l10n.stillMissing, textAlign: TextAlign.center),
                 Text(
                   _money(_change.abs()),
                   textAlign: TextAlign.center,
@@ -345,7 +360,7 @@ class _PaymentScreenState extends State<PaymentScreen> {
           children: [
             for (final value in suggestions)
               ActionChip(
-                label: Text(value == _amount ? 'Exact' : _money(value)),
+                label: Text(value == _amount ? l10n.exact : _money(value)),
                 onPressed: () => setState(() => _cash = value.toStringAsFixed(2)),
               ),
           ],
@@ -371,7 +386,11 @@ class _PaymentScreenState extends State<PaymentScreen> {
                     onTap: () => _press(key),
                     child: Center(
                       child: Text(
-                        key == 'C' ? 'Clear' : key,
+                        switch (key) {
+                          'C' => l10n.clear,
+                          '.' => Formatters.language == 'bs' ? ',' : '.',
+                          _ => key,
+                        },
                         style: TextStyle(
                           fontSize: 20,
                           fontWeight: FontWeight.w600,

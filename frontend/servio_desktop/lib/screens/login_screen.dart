@@ -51,6 +51,12 @@ class _LoginScreenState extends State<LoginScreen> {
 
   @override
   Widget build(BuildContext _) => Scaffold(
+    extendBodyBehindAppBar: true,
+    appBar: AppBar(
+      backgroundColor: Colors.transparent,
+      automaticallyImplyLeading: false,
+      actions: const [LanguageMenuButton(), SizedBox(width: 16)],
+    ),
     body: Container(
       decoration: const BoxDecoration(
         gradient: LinearGradient(
@@ -78,14 +84,14 @@ class _LoginScreenState extends State<LoginScreen> {
                         child: Icon(Icons.verified_user_outlined, color: Colors.white, size: 36),
                       ),
                       const SizedBox(height: 16),
-                      const Text(
-                        'Staff Login',
+                      Text(
+                        l10n.staffLogin,
                         textAlign: TextAlign.center,
                         style: TextStyle(fontSize: 28, fontWeight: FontWeight.bold),
                       ),
                       const SizedBox(height: 4),
-                      const Text(
-                        'Enter your credentials to continue',
+                      Text(
+                        l10n.enterCredentials,
                         textAlign: TextAlign.center,
                         style: TextStyle(color: ServioColors.textMuted),
                       ),
@@ -94,8 +100,8 @@ class _LoginScreenState extends State<LoginScreen> {
                         controller: _username,
                         autofocus: true,
                         textInputAction: TextInputAction.next,
-                        decoration: const InputDecoration(labelText: 'Username', prefixIcon: Icon(Icons.person_outline)),
-                        validator: (value) => Validators.required(value, 'Username'),
+                        decoration: InputDecoration(labelText: l10n.username, prefixIcon: Icon(Icons.person_outline)),
+                        validator: (value) => Validators.required(value, l10n.username),
                       ),
                       const SizedBox(height: 16),
                       TextFormField(
@@ -103,15 +109,15 @@ class _LoginScreenState extends State<LoginScreen> {
                         obscureText: _obscure,
                         onFieldSubmitted: (_) => _login(),
                         decoration: InputDecoration(
-                          labelText: 'Password',
+                          labelText: l10n.password,
                           prefixIcon: const Icon(Icons.lock_outline),
                           suffixIcon: IconButton(
-                            tooltip: _obscure ? 'Show password' : 'Hide password',
+                            tooltip: _obscure ? l10n.showPassword : l10n.hidePassword,
                             icon: Icon(_obscure ? Icons.visibility_outlined : Icons.visibility_off_outlined),
                             onPressed: () => setState(() => _obscure = !_obscure),
                           ),
                         ),
-                        validator: (value) => Validators.required(value, 'Password'),
+                        validator: (value) => Validators.required(value, l10n.password),
                       ),
                       if (_error != null) ...[
                         const SizedBox(height: 16),
@@ -128,7 +134,7 @@ class _LoginScreenState extends State<LoginScreen> {
                         onPressed: _busy ? null : _login,
                         child: _busy
                             ? const SizedBox(width: 22, height: 22, child: CircularProgressIndicator(strokeWidth: 2))
-                            : const Text('Login'),
+                            : Text(l10n.login),
                       ),
                     ],
                   ),
@@ -149,15 +155,15 @@ class _DemoAccounts extends StatelessWidget {
   Widget build(BuildContext context) => Container(
     padding: const EdgeInsets.all(14),
     decoration: BoxDecoration(color: ServioColors.surfaceMuted, borderRadius: BorderRadius.circular(10)),
-    child: const DefaultTextStyle(
+    child: DefaultTextStyle(
       style: TextStyle(color: ServioColors.textMuted, fontSize: 13, height: 1.6),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text('Demo accounts (password: test)', style: TextStyle(fontWeight: FontWeight.w600)),
-          Text('• desktop – admin panel'),
-          Text('• kitchen – kitchen display'),
-          Text('• bar – bar display'),
+          Text(l10n.demoAccounts, style: const TextStyle(fontWeight: FontWeight.w600)),
+          Text(l10n.demoDesktop),
+          Text(l10n.demoKitchen),
+          Text(l10n.demoBar),
         ],
       ),
     ),

@@ -4,6 +4,7 @@ using Microsoft.Extensions.Logging;
 using Servio.Model.Constants;
 using Servio.Model.Enums;
 using Servio.Model.Exceptions;
+using Servio.Model.Localization;
 using Servio.Model.Messages;
 using Servio.Model.Requests;
 using Servio.Model.Responses;
@@ -11,8 +12,9 @@ using Servio.Model.SearchObjects;
 using Servio.Services.Auth;
 using Servio.Services.Base;
 using Servio.Services.Common;
-using Servio.Services.Database;
 using Servio.Services.Database.Entities;
+using Servio.Services.Database;
+using Servio.Services.Localization;
 using Servio.Services.Messaging;
 using Servio.Services.Notifications;
 using Servio.Services.Settings;
@@ -128,8 +130,8 @@ public class ReservationService(
         Context.Reservations.Add(reservation);
 
         await dispatcher.NotifyRoleAsync(Roles.Waiter, NotificationType.ReservationCreated,
-            $"New reservation – table {table.Number}",
-            $"{reservation.GuestName}, {reservation.PartySize} guests, {Describe(reservation)}. Waiting for confirmation.",
+            new LocalizedText("New reservation – table {0}", table.Number),
+            new LocalizedText("{0}, {1} guests, {2}. Waiting for confirmation.", reservation.GuestName, reservation.PartySize, Describe(reservation)),
             reservation: reservation, cancellationToken: cancellationToken);
 
         await Context.SaveChangesAsync(cancellationToken);
@@ -143,7 +145,7 @@ public class ReservationService(
         var reservation = await LoadAsync(id, cancellationToken);
         if (!ActiveStatuses.Contains(reservation.Status))
         {
-            throw new BusinessException($"A {reservation.Status} reservation can no longer be edited.");
+            throw new BusinessException("A {0} reservation can no longer be edited.", reservation.Status);
         }
 
         Map(request, reservation);
@@ -167,8 +169,8 @@ public class ReservationService(
         ChangeStatus(reservation, ReservationStatus.Confirmed, null);
 
         await dispatcher.NotifyRoleAsync(Roles.Waiter, NotificationType.ReservationConfirmed,
-            $"Table {reservation.Table.Number} reserved",
-            $"{reservation.GuestName}, {reservation.PartySize} guests, {Describe(reservation)}.",
+            new LocalizedText("Table {0} reserved", reservation.Table.Number),
+            new LocalizedText("{0}, {1} guests, {2}.", reservation.GuestName, reservation.PartySize, Describe(reservation)),
             reservation: reservation, cancellationToken: cancellationToken);
 
         await Context.SaveChangesAsync(cancellationToken);
@@ -179,7 +181,7 @@ public class ReservationService(
             var settings = await settingsService.GetAsync(cancellationToken);
             await TrySendEmailAsync(EmailTemplates.ReservationConfirmed(email, reservation.GuestName, settings.RestaurantName,
                 reservation.Table.Number, reservation.PartySize,
-                clock.FormatLocal(reservation.StartTime), clock.FormatLocal(reservation.EndTime, "HH:mm")), cancellationToken);
+                clock.FormatLocal(reservation.StartTime), clock.FormatLocal(reservation.EndTime, "HH:mm"), LanguageContext.Current), cancellationToken);
         }
 
         return await GetByIdAsync(id, cancellationToken);
@@ -191,7 +193,7 @@ public class ReservationService(
         if (DateTime.UtcNow < reservation.StartTime - ReservationRules.CompleteEarliestBeforeStart)
         {
             throw new BusinessException(
-                $"Guests can be marked as arrived at most {ReservationRules.CompleteEarliestBeforeStart.TotalMinutes:0} minutes before the reservation starts.");
+                "Guests can be marked as arrived at most {0:0} minutes before the reservation starts.", ReservationRules.CompleteEarliestBeforeStart.TotalMinutes);
         }
 
         ChangeStatus(reservation, ReservationStatus.Completed, null);
@@ -208,7 +210,7 @@ public class ReservationService(
         if (DateTime.UtcNow < reservation.StartTime + ReservationRules.NoShowGracePeriod)
         {
             throw new BusinessException(
-                $"A guest can be marked as a no-show only {ReservationRules.NoShowGracePeriod.TotalMinutes:0} minutes after the reservation starts.");
+                "A guest can be marked as a no-show only {0:0} minutes after the reservation starts.", ReservationRules.NoShowGracePeriod.TotalMinutes);
         }
 
         ChangeStatus(reservation, ReservationStatus.NoShow, null);
@@ -227,8 +229,8 @@ public class ReservationService(
         ChangeStatus(reservation, ReservationStatus.Cancelled, reason);
 
         await dispatcher.NotifyRoleAsync(Roles.Waiter, NotificationType.ReservationCancelled,
-            $"Reservation cancelled – table {reservation.Table.Number}",
-            $"{reservation.GuestName}, {Describe(reservation)}. Reason: {reason}",
+            new LocalizedText("Reservation cancelled – table {0}", reservation.Table.Number),
+            new LocalizedText("{0}, {1}. Reason: {2}", reservation.GuestName, Describe(reservation), reason),
             reservation: reservation, cancellationToken: cancellationToken);
 
         await Context.SaveChangesAsync(cancellationToken);
@@ -238,7 +240,7 @@ public class ReservationService(
         {
             var settings = await settingsService.GetAsync(cancellationToken);
             await TrySendEmailAsync(EmailTemplates.ReservationCancelled(email, reservation.GuestName, settings.RestaurantName,
-                clock.FormatLocal(reservation.StartTime), reason), cancellationToken);
+                clock.FormatLocal(reservation.StartTime), reason, LanguageContext.Current), cancellationToken);
         }
 
         return await GetByIdAsync(id, cancellationToken);
@@ -291,7 +293,7 @@ public class ReservationService(
         if (duration < ReservationRules.MinDuration || duration > ReservationRules.MaxDuration)
         {
             throw new BusinessException(
-                $"A reservation must last between {ReservationRules.MinDuration.TotalMinutes:0} minutes and {ReservationRules.MaxDuration.TotalHours:0} hours.");
+                "A reservation must last between {0:0} minutes and {1:0} hours.", ReservationRules.MinDuration.TotalMinutes, ReservationRules.MaxDuration.TotalHours);
         }
 
         if (startChanged && reservation.StartTime < now - ReservationRules.PastStartTolerance)
@@ -301,7 +303,7 @@ public class ReservationService(
 
         if (reservation.StartTime > now + ReservationRules.MaxBookingAhead)
         {
-            throw new BusinessException($"Reservations can be made at most {ReservationRules.MaxBookingAhead.TotalDays:0} days in advance.");
+            throw new BusinessException("Reservations can be made at most {0:0} days in advance.", ReservationRules.MaxBookingAhead.TotalDays);
         }
 
         var table = await Context.RestaurantTables.FirstOrDefaultAsync(x => x.Id == reservation.TableId, cancellationToken)
@@ -309,12 +311,12 @@ public class ReservationService(
 
         if (!table.IsActive)
         {
-            throw new BusinessException($"Table {table.Number} is not in use and cannot be reserved.");
+            throw new BusinessException("Table {0} is not in use and cannot be reserved.", table.Number);
         }
 
         if (reservation.PartySize > table.Capacity)
         {
-            throw new BusinessException($"Table {table.Number} seats at most {table.Capacity} guests. Choose a larger table.");
+            throw new BusinessException("Table {0} seats at most {1} guests. Choose a larger table.", table.Number, table.Capacity);
         }
 
         var overlapping = await Context.Reservations
@@ -328,7 +330,7 @@ public class ReservationService(
         if (overlapping is not null)
         {
             throw new BusinessException(
-                $"Table {table.Number} is already reserved from {clock.FormatLocal(overlapping.StartTime)} to {clock.FormatLocal(overlapping.EndTime, "HH:mm")}.");
+                "Table {0} is already reserved from {1} to {2}.", table.Number, clock.FormatLocal(overlapping.StartTime), clock.FormatLocal(overlapping.EndTime, "HH:mm"));
         }
 
         var duplicateTable = await Context.Reservations
@@ -342,7 +344,7 @@ public class ReservationService(
         if (duplicateTable is not null)
         {
             throw new BusinessException(
-                $"The guest with phone {reservation.GuestPhone} already has a reservation at that time (table {duplicateTable}).");
+                "The guest with phone {0} already has a reservation at that time (table {1}).", reservation.GuestPhone, duplicateTable);
         }
 
         return table;

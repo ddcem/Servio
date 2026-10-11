@@ -70,7 +70,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
       if (!mounted) return;
       context.read<AuthProvider>().updateUser(user);
       setState(() => _user = user);
-      showSuccess(context, 'Your profile was saved.');
+      showSuccess(context, l10n.profileSaved);
     } catch (e) {
       if (mounted) showError(context, e);
     } finally {
@@ -88,18 +88,18 @@ class _ProfileScreenState extends State<ProfileScreen> {
           children: [
             ListTile(
               leading: const Icon(Icons.photo_camera_outlined),
-              title: const Text('Take a photo'),
+              title: Text(l10n.takePhoto),
               onTap: () => Navigator.pop(context, ImageSource.camera),
             ),
             ListTile(
               leading: const Icon(Icons.photo_library_outlined),
-              title: const Text('Choose from gallery'),
+              title: Text(l10n.chooseFromGallery),
               onTap: () => Navigator.pop(context, ImageSource.gallery),
             ),
             if (_user?.hasProfileImage ?? false)
               ListTile(
                 leading: const Icon(Icons.delete_outline, color: ServioColors.danger),
-                title: const Text('Remove photo'),
+                title: Text(l10n.removePhoto),
                 onTap: () => Navigator.pop(context, 'remove'),
               ),
           ],
@@ -134,14 +134,14 @@ class _ProfileScreenState extends State<ProfileScreen> {
       context: context,
       builder: (_) => _PasswordDialog(profile: _profile),
     );
-    if (changed == true && mounted) showSuccess(context, 'Your password was changed.');
+    if (changed == true && mounted) showSuccess(context, l10n.passwordChanged);
   }
 
   @override
   Widget build(BuildContext context) {
     final user = _user;
     return Scaffold(
-      appBar: const GradientAppBar(title: 'My Profile'),
+      appBar: GradientAppBar(title: l10n.myProfile),
       body: _error != null && user == null
           ? ErrorView(error: _error!, onRetry: _load)
           : user == null
@@ -169,7 +169,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                             right: 0,
                             bottom: 0,
                             child: IconButton.filled(
-                              tooltip: 'Change photo',
+                              tooltip: l10n.changePhoto,
                               onPressed: _changePhoto,
                               icon: const Icon(Icons.photo_camera_outlined),
                             ),
@@ -179,7 +179,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                     ),
                     const SizedBox(height: 12),
                     Text(
-                      '@${user.username} · ${user.role}',
+                      '@${user.username} · ${Roles.label(user.role)}',
                       textAlign: TextAlign.center,
                       style: const TextStyle(color: ServioColors.textMuted),
                     ),
@@ -187,41 +187,41 @@ class _ProfileScreenState extends State<ProfileScreen> {
                     TextFormField(
                       controller: _firstName,
                       textCapitalization: TextCapitalization.words,
-                      decoration: const InputDecoration(labelText: 'First name'),
-                      validator: (value) => Validators.length(value, 'First name', min: 2, max: 50),
+                      decoration: InputDecoration(labelText: l10n.firstName),
+                      validator: (value) => Validators.length(value, l10n.firstName, min: 2, max: 50),
                     ),
                     const SizedBox(height: 16),
                     TextFormField(
                       controller: _lastName,
                       textCapitalization: TextCapitalization.words,
-                      decoration: const InputDecoration(labelText: 'Last name'),
-                      validator: (value) => Validators.length(value, 'Last name', min: 2, max: 50),
+                      decoration: InputDecoration(labelText: l10n.lastName),
+                      validator: (value) => Validators.length(value, l10n.lastName, min: 2, max: 50),
                     ),
                     const SizedBox(height: 16),
                     TextFormField(
                       controller: _email,
                       keyboardType: TextInputType.emailAddress,
                       autocorrect: false,
-                      decoration: const InputDecoration(labelText: 'Email'),
+                      decoration: InputDecoration(labelText: l10n.email),
                       validator: Validators.email,
                     ),
                     const SizedBox(height: 16),
                     TextFormField(
                       controller: _phone,
                       keyboardType: TextInputType.phone,
-                      decoration: const InputDecoration(labelText: 'Phone (optional)', hintText: '+387 61 123 456'),
+                      decoration: InputDecoration(labelText: l10n.phoneOptional, hintText: '+387 61 123 456'),
                       validator: Validators.phone,
                     ),
                     const SizedBox(height: 24),
                     SizedBox(
                       height: 52,
-                      child: FilledButton(onPressed: _saving ? null : _save, child: const Text('Save changes')),
+                      child: FilledButton(onPressed: _saving ? null : _save, child: Text(l10n.saveChanges)),
                     ),
                     const SizedBox(height: 12),
                     OutlinedButton.icon(
                       onPressed: _changePassword,
                       icon: const Icon(Icons.lock_reset),
-                      label: const Text('Change password'),
+                      label: Text(l10n.changePassword),
                     ),
                   ],
                 ),
@@ -274,7 +274,7 @@ class _PasswordDialogState extends State<_PasswordDialog> {
 
   @override
   Widget build(BuildContext context) => AlertDialog(
-    title: const Text('Change password'),
+    title: Text(l10n.changePassword),
     content: Form(
       key: _formKey,
       child: SingleChildScrollView(
@@ -284,24 +284,21 @@ class _PasswordDialogState extends State<_PasswordDialog> {
             TextFormField(
               controller: _current,
               obscureText: true,
-              decoration: const InputDecoration(labelText: 'Current password'),
-              validator: (value) => Validators.required(value, 'Current password'),
+              decoration: InputDecoration(labelText: l10n.currentPassword),
+              validator: (value) => Validators.required(value, l10n.currentPassword),
             ),
             const SizedBox(height: 12),
             TextFormField(
               controller: _password,
               obscureText: true,
-              decoration: const InputDecoration(
-                labelText: 'New password',
-                helperText: 'At least 8 characters, with a letter and a number',
-              ),
+              decoration: InputDecoration(labelText: l10n.newPassword, helperText: l10n.passwordHint),
               validator: Validators.newPassword,
             ),
             const SizedBox(height: 12),
             TextFormField(
               controller: _confirmation,
               obscureText: true,
-              decoration: const InputDecoration(labelText: 'Repeat new password'),
+              decoration: InputDecoration(labelText: l10n.repeatNewPassword),
               validator: (value) => Validators.confirmation(value, _password.text),
             ),
             if (_error != null) ...[
@@ -313,8 +310,8 @@ class _PasswordDialogState extends State<_PasswordDialog> {
       ),
     ),
     actions: [
-      TextButton(onPressed: () => Navigator.pop(context), child: const Text('Back')),
-      FilledButton(onPressed: _saving ? null : _save, child: const Text('Change password')),
+      TextButton(onPressed: () => Navigator.pop(context), child: Text(l10n.back)),
+      FilledButton(onPressed: _saving ? null : _save, child: Text(l10n.changePassword)),
     ],
   );
 }

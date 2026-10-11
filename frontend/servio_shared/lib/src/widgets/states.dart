@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../api/api_exception.dart';
 import '../theme/servio_colors.dart';
+import '../localization/language.dart';
 
 class LoadingView extends StatelessWidget {
   const LoadingView({super.key});
@@ -28,13 +29,13 @@ class ErrorView extends StatelessWidget {
           const Icon(Icons.cloud_off, size: 48, color: ServioColors.textMuted),
           const SizedBox(height: 12),
           Text(
-            error is ApiException ? (error as ApiException).message : 'Something went wrong. Please try again.',
+            error is ApiException ? (error as ApiException).message : l10n.errorGeneric,
             textAlign: TextAlign.center,
             style: const TextStyle(color: ServioColors.textMuted),
           ),
           if (onRetry != null) ...[
             const SizedBox(height: 16),
-            OutlinedButton.icon(onPressed: onRetry, icon: const Icon(Icons.refresh), label: const Text('Try again')),
+            OutlinedButton.icon(onPressed: onRetry, icon: const Icon(Icons.refresh), label: Text(l10n.tryAgain)),
           ],
         ],
       ),

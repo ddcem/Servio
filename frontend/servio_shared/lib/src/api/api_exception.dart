@@ -2,6 +2,8 @@ import 'dart:convert';
 
 import 'package:http/http.dart' as http;
 
+import '../localization/language.dart';
+
 /// An error returned by the Servio API, carrying the message meant for the user
 /// and, for validation errors, the message of every invalid field.
 class ApiException implements Exception {
@@ -36,10 +38,10 @@ class ApiException implements Exception {
   }
 
   static String _fallbackMessage(int statusCode) => switch (statusCode) {
-    401 => 'Your session has expired. Please log in again.',
-    403 => 'You do not have permission for this action.',
-    404 => 'The requested record was not found.',
-    _ => 'Something went wrong on the server. Please try again.',
+    401 => l10n.sessionExpired,
+    403 => l10n.errorForbidden,
+    404 => l10n.errorNotFound,
+    _ => l10n.errorServer,
   };
 
   @override

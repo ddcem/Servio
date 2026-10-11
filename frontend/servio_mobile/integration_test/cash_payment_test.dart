@@ -70,7 +70,11 @@ void main() {
 
     final grid = find.byType(CustomScrollView);
     final card = find.descendant(of: grid, matching: find.text('10'));
-    await tester.scrollUntilVisible(card, 300, scrollable: find.descendant(of: grid, matching: find.byType(Scrollable)).first);
+    await tester.scrollUntilVisible(
+      card,
+      300,
+      scrollable: find.descendant(of: grid, matching: find.byType(Scrollable)).first,
+    );
     await tapAndSettle(tester, card.first);
     await waitFor(tester, find.text('Mark served'));
     await shot(tester, 'p01_ready_to_serve');

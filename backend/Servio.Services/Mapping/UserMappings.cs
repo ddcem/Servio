@@ -18,6 +18,7 @@ public static class UserMappings
         Role = user.Role.Name,
         IsActive = user.IsActive,
         HasProfileImage = user.ProfileImage != null,
+        PreferredLanguage = user.PreferredLanguage,
         CreatedAt = user.CreatedAt,
         LastLoginAt = user.LastLoginAt
     };

@@ -17,21 +17,21 @@ class ReferenceDataScreen extends StatelessWidget {
   Widget build(BuildContext context) => DefaultTabController(
     length: 5,
     child: AdminPage(
-      title: 'Reference Data',
-      subtitle: 'Lists used by the menu, tables and payments',
+      title: l10n.referenceData,
+      subtitle: l10n.referenceDataSubtitle,
       child: Column(
         children: [
-          const ColoredBox(
+          ColoredBox(
             color: Colors.white,
             child: TabBar(
               isScrollable: true,
               tabAlignment: TabAlignment.start,
               tabs: [
-                Tab(text: 'Menu categories'),
-                Tab(text: 'Item tags'),
-                Tab(text: 'Table areas'),
-                Tab(text: 'Currencies'),
-                Tab(text: 'System lists'),
+                Tab(text: l10n.menuCategories),
+                Tab(text: l10n.itemTags),
+                Tab(text: l10n.tableAreas),
+                Tab(text: l10n.currencies),
+                Tab(text: l10n.systemLists),
               ],
             ),
           ),
@@ -41,31 +41,34 @@ class ReferenceDataScreen extends StatelessWidget {
                 _CrudTab<MenuCategory>(
                   id: (c) => c.id,
                   provider: context.read<MenuCategoryProvider>(),
-                  entityLabel: 'category',
-                  searchHint: 'Search categories',
-                  columns: const ['NAME', 'COURSE', 'PREPARED AT', 'ORDER', 'ITEMS'],
-                  cells: (c) => [c.name, c.courseType.label, c.preparationStationName, '${c.sortOrder}', '${c.menuItemCount}'],
+                  addLabel: l10n.addCategoryButton,
+                  searchHint: l10n.searchCategories,
+                  columns: [l10n.columnName, l10n.columnCourse, l10n.columnPreparedAt, l10n.columnOrder, l10n.columnItems],
+                  cells: (c) => [
+                    c.name,
+                    c.courseType.label,
+                    Stations.label(c.preparationStationName),
+                    '${c.sortOrder}',
+                    '${c.menuItemCount}',
+                  ],
                   name: (c) => c.name,
-                  deleteBlockedReason: (c) => c.menuItemCount > 0
-                      ? 'Used by ${c.menuItemCount} menu item(s), including removed items kept for order history.'
-                      : null,
+                  deleteBlockedReason: (c) => c.menuItemCount > 0 ? l10n.categoryInUse(c.menuItemCount) : null,
                   openForm: (context, c) => showCategoryForm(context, category: c),
                 ),
                 _CrudTab<ItemTag>(
                   id: (t) => t.id,
                   provider: context.read<ItemTagProvider>(),
-                  entityLabel: 'tag',
-                  searchHint: 'Search tags',
-                  columns: const ['NAME', 'MENU ITEMS'],
+                  addLabel: l10n.addTagButton,
+                  searchHint: l10n.searchTags,
+                  columns: [l10n.columnName, l10n.columnMenuItems],
                   cells: (t) => [t.name, '${t.menuItemCount}'],
                   name: (t) => t.name,
-                  deleteBlockedReason: (t) =>
-                      t.menuItemCount > 0 ? 'Used by ${t.menuItemCount} menu item(s). Remove it from those items first.' : null,
+                  deleteBlockedReason: (t) => t.menuItemCount > 0 ? l10n.tagInUse(t.menuItemCount) : null,
                   openForm: (context, t) => showNameForm<ItemTag>(
                     context,
                     provider: context.read<ItemTagProvider>(),
-                    entityLabel: 'Tag',
-                    hint: 'e.g. Spicy',
+                    entityLabel: l10n.entityTag,
+                    hint: l10n.tagHint,
                     id: t?.id,
                     currentName: t?.name,
                   ),
@@ -73,18 +76,17 @@ class ReferenceDataScreen extends StatelessWidget {
                 _CrudTab<TableArea>(
                   id: (a) => a.id,
                   provider: context.read<TableAreaProvider>(),
-                  entityLabel: 'area',
-                  searchHint: 'Search areas',
-                  columns: const ['NAME', 'TABLES'],
+                  addLabel: l10n.addAreaButton,
+                  searchHint: l10n.searchAreas,
+                  columns: [l10n.columnName, l10n.columnTables],
                   cells: (a) => [a.name, '${a.tableCount}'],
                   name: (a) => a.name,
-                  deleteBlockedReason: (a) =>
-                      a.tableCount > 0 ? 'Has ${a.tableCount} table(s). Move or delete them first.' : null,
+                  deleteBlockedReason: (a) => a.tableCount > 0 ? l10n.areaInUse(a.tableCount) : null,
                   openForm: (context, a) => showNameForm<TableArea>(
                     context,
                     provider: context.read<TableAreaProvider>(),
-                    entityLabel: 'Area',
-                    hint: 'e.g. Garden',
+                    entityLabel: l10n.entityArea,
+                    hint: l10n.areaHint,
                     id: a?.id,
                     currentName: a?.name,
                   ),
@@ -92,12 +94,12 @@ class ReferenceDataScreen extends StatelessWidget {
                 _CrudTab<Currency>(
                   id: (c) => c.id,
                   provider: context.read<CurrencyProvider>(),
-                  entityLabel: 'currency',
-                  searchHint: 'Search currencies',
-                  columns: const ['CODE', 'NAME', 'SYMBOL', 'IN USE'],
-                  cells: (c) => [c.code, c.name, c.symbol, c.isInUse ? 'Yes' : 'No'],
+                  addLabel: l10n.addCurrencyButton,
+                  searchHint: l10n.searchCurrencies,
+                  columns: [l10n.columnCode, l10n.columnName, l10n.columnSymbol, l10n.columnInUse],
+                  cells: (c) => [c.code, c.name, c.symbol, c.isInUse ? l10n.yes : l10n.no],
                   name: (c) => c.code,
-                  deleteBlockedReason: (c) => c.isInUse ? 'Used by the restaurant settings or by existing orders.' : null,
+                  deleteBlockedReason: (c) => c.isInUse ? l10n.currencyInUse : null,
                   openForm: (context, c) => showCurrencyForm(context, currency: c),
                 ),
                 const _SystemLists(),
@@ -114,7 +116,7 @@ class _CrudTab<T> extends StatefulWidget {
   const _CrudTab({
     super.key,
     required this.provider,
-    required this.entityLabel,
+    required this.addLabel,
     required this.searchHint,
     required this.columns,
     required this.cells,
@@ -125,7 +127,9 @@ class _CrudTab<T> extends StatefulWidget {
   });
 
   final CrudProvider<T> provider;
-  final String entityLabel;
+
+  /// The add button's text, e.g. 'Add tag'.
+  final String addLabel;
   final String searchHint;
   final List<String> columns;
   final List<String> Function(T) cells;
@@ -175,16 +179,16 @@ class _CrudTabState<T> extends State<_CrudTab<T>> with AutomaticKeepAliveClientM
     final name = widget.name(item);
     final confirmed = await confirmAction(
       context,
-      title: 'Delete $name?',
-      message: 'The ${widget.entityLabel} is removed permanently.',
-      confirmLabel: 'Delete',
+      title: l10n.deleteQuestion(name),
+      message: l10n.removedPermanently,
+      confirmLabel: l10n.delete,
       destructive: true,
     );
     if (!confirmed || !mounted) return;
     try {
       await widget.provider.delete(widget.id(item));
       if (!mounted) return;
-      showSuccess(context, '${widget.entityLabel[0].toUpperCase()}${widget.entityLabel.substring(1)} "$name" was deleted.');
+      showSuccess(context, l10n.entityDeleted(name));
       await _load();
     } catch (e) {
       if (mounted) showError(context, e);
@@ -210,7 +214,7 @@ class _CrudTabState<T> extends State<_CrudTab<T>> with AutomaticKeepAliveClientM
               },
             ),
             const Spacer(),
-            FilledButton.icon(onPressed: () => _open(), icon: const Icon(Icons.add), label: Text('Add ${widget.entityLabel}')),
+            FilledButton.icon(onPressed: () => _open(), icon: const Icon(Icons.add), label: Text(widget.addLabel)),
           ],
         ),
         const SizedBox(height: 20),
@@ -219,7 +223,7 @@ class _CrudTabState<T> extends State<_CrudTab<T>> with AutomaticKeepAliveClientM
         else if (_result == null)
           const LoadingView()
         else if (_result!.items.isEmpty)
-          EmptyView(icon: Icons.category_outlined, message: 'Nothing found.')
+          EmptyView(icon: Icons.category_outlined, message: l10n.nothingFound)
         else
           Panel(
             padding: const EdgeInsets.all(8),
@@ -230,7 +234,7 @@ class _CrudTabState<T> extends State<_CrudTab<T>> with AutomaticKeepAliveClientM
                     headingTextStyle: const TextStyle(fontWeight: FontWeight.w600, color: ServioColors.textMuted),
                     columns: [
                       for (final c in widget.columns) DataColumn(label: Text(c)),
-                      const DataColumn(label: Text('ACTIONS')),
+                      DataColumn(label: Text(l10n.columnActions)),
                     ],
                     rows: [
                       for (final item in _result!.items)
@@ -242,13 +246,13 @@ class _CrudTabState<T> extends State<_CrudTab<T>> with AutomaticKeepAliveClientM
                                 children: [
                                   ActionIcon(
                                     icon: Icons.edit_outlined,
-                                    tooltip: 'Edit',
+                                    tooltip: l10n.edit,
                                     color: ServioColors.primary,
                                     onPressed: () => _open(item),
                                   ),
                                   ActionIcon(
                                     icon: Icons.delete_outline,
-                                    tooltip: 'Delete',
+                                    tooltip: l10n.delete,
                                     color: ServioColors.danger,
                                     disabledReason: widget.deleteBlockedReason(item),
                                     onPressed: () => _delete(item),
@@ -291,16 +295,11 @@ class _SystemLists extends StatelessWidget {
       Container(
         padding: const EdgeInsets.all(16),
         decoration: BoxDecoration(color: ServioColors.infoLight, borderRadius: BorderRadius.circular(12)),
-        child: const Row(
+        child: Row(
           children: [
             Icon(Icons.info_outline, color: ServioColors.primaryDark),
             SizedBox(width: 12),
-            Expanded(
-              child: Text(
-                'These lists are fixed. Roles decide what each employee may do, stations decide where orders are sent, '
-                'and payment methods are tied to the cash and PayPal flows, so renaming or deleting them would break those features.',
-              ),
-            ),
+            Expanded(child: Text(l10n.systemListsInfo)),
           ],
         ),
       ),
@@ -309,14 +308,14 @@ class _SystemLists extends StatelessWidget {
         spacing: 20,
         runSpacing: 20,
         children: [
-          _LookupList(title: 'Roles', icon: Icons.badge_outlined, load: context.read<RoleProvider>().getAll),
+          _LookupList(title: l10n.roles, icon: Icons.badge_outlined, load: context.read<RoleProvider>().getAll),
           _LookupList(
-            title: 'Preparation stations',
+            title: l10n.preparationStations,
             icon: Icons.soup_kitchen_outlined,
             load: context.read<PreparationStationProvider>().getAll,
           ),
           _LookupList(
-            title: 'Payment methods',
+            title: l10n.paymentMethods,
             icon: Icons.payments_outlined,
             load: context.read<PaymentMethodProvider>().getAll,
           ),
@@ -353,10 +352,13 @@ class _LookupList extends StatelessWidget {
             if (snapshot.hasError) Text('${snapshot.error}', style: const TextStyle(color: ServioColors.danger)),
             if (!snapshot.hasData && !snapshot.hasError) const LinearProgressIndicator(),
             for (final item in snapshot.data ?? const <Lookup>[])
-              Padding(padding: const EdgeInsets.symmetric(vertical: 4), child: Text('• ${item.name}')),
+              Padding(padding: const EdgeInsets.symmetric(vertical: 4), child: Text('• ${_lookupLabel(item.name)}')),
           ],
         ),
       ),
     ),
   );
 }
+
+/// Roles, stations and payment methods share their API names ("Kitchen", "Cash"); shown translated.
+String _lookupLabel(String name) => name == PaymentMethods.cash ? PaymentMethods.label(name) : Roles.label(name);

@@ -14,6 +14,8 @@ Future<void> main() async {
   final preferences = await SharedPreferences.getInstance();
   final api = ApiClient(apiBaseUrl);
   final realtime = RealtimeService(api.baseUrl);
+  final auth = AuthProvider(api, realtime);
+  final language = LanguageController(preferences, api, auth);
 
   runApp(
     MultiProvider(
@@ -21,7 +23,8 @@ Future<void> main() async {
         Provider.value(value: api),
         Provider.value(value: realtime),
         Provider.value(value: preferences),
-        ChangeNotifierProvider(create: (_) => AuthProvider(api, realtime)),
+        ChangeNotifierProvider.value(value: auth),
+        ChangeNotifierProvider.value(value: language),
         ChangeNotifierProvider(create: (_) => NotificationCenter(NotificationProvider(api), realtime)),
         Provider(create: (_) => MenuItemProvider(api)),
         Provider(create: (_) => MenuCategoryProvider(api)),

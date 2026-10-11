@@ -64,21 +64,18 @@ class _ActiveOrdersScreenState extends State<ActiveOrdersScreen> {
   Widget build(BuildContext context) {
     final orders = _orders;
     return Scaffold(
-      appBar: GradientAppBar(
-        title: 'Active Tables',
-        subtitle: orders == null ? null : '${orders.length} ${orders.length == 1 ? 'table' : 'tables'} with orders',
-      ),
+      appBar: GradientAppBar(title: l10n.activeTables, subtitle: orders == null ? null : l10n.tablesWithOrders(orders.length)),
       body: _error != null && orders == null
           ? ErrorView(error: _error!, onRetry: _load)
           : orders == null
-          ? const LoadingView()
+          ? LoadingView()
           : RefreshIndicator(
               onRefresh: _load,
               child: orders.isEmpty
                   ? ListView(
-                      children: const [
+                      children: [
                         SizedBox(height: 120),
-                        EmptyView(icon: Icons.receipt_long_outlined, message: 'You have no open orders.'),
+                        EmptyView(icon: Icons.receipt_long_outlined, message: l10n.noOpenOrders),
                       ],
                     )
                   : ListView.separated(

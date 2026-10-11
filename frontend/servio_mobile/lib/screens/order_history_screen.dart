@@ -53,15 +53,15 @@ class _OrderHistoryScreenState extends State<OrderHistoryScreen> {
 
   @override
   Widget build(BuildContext context) => Scaffold(
-    appBar: const GradientAppBar(title: 'Order History', subtitle: 'Your closed orders'),
+    appBar: GradientAppBar(title: l10n.orderHistory, subtitle: l10n.yourClosedOrders),
     body: Column(
       children: [
         Padding(
-          padding: const EdgeInsets.fromLTRB(16, 12, 16, 0),
+          padding: EdgeInsets.fromLTRB(16, 12, 16, 0),
           child: SegmentedButton<OrderStatus>(
-            segments: const [
-              ButtonSegment(value: OrderStatus.completed, label: Text('Paid'), icon: Icon(Icons.check_circle_outline)),
-              ButtonSegment(value: OrderStatus.cancelled, label: Text('Cancelled'), icon: Icon(Icons.cancel_outlined)),
+            segments: [
+              ButtonSegment(value: OrderStatus.completed, label: Text(l10n.paid), icon: Icon(Icons.check_circle_outline)),
+              ButtonSegment(value: OrderStatus.cancelled, label: Text(l10n.cancelled), icon: Icon(Icons.cancel_outlined)),
             ],
             selected: {_status},
             onSelectionChanged: (value) {
@@ -74,14 +74,14 @@ class _OrderHistoryScreenState extends State<OrderHistoryScreen> {
           child: _error != null && _items.isEmpty
               ? ErrorView(error: _error!, onRetry: _reload)
               : _items.isEmpty && _loading
-              ? const LoadingView()
+              ? LoadingView()
               : RefreshIndicator(
                   onRefresh: _reload,
                   child: _items.isEmpty
                       ? ListView(
-                          children: const [
+                          children: [
                             SizedBox(height: 100),
-                            EmptyView(icon: Icons.history, message: 'No orders here yet.'),
+                            EmptyView(icon: Icons.history, message: l10n.noOrdersYet),
                           ],
                         )
                       : ListView.builder(
@@ -97,7 +97,7 @@ class _OrderHistoryScreenState extends State<OrderHistoryScreen> {
                                           _page++;
                                           _loadPage();
                                         },
-                                  child: const Text('Load more'),
+                                  child: Text(l10n.loadMore),
                                 ),
                               );
                             }
@@ -115,11 +115,15 @@ class _OrderHistoryScreenState extends State<OrderHistoryScreen> {
                                   ),
                                 ),
                                 title: Text(
-                                  'Table ${order.tableNumber} · ${order.orderNumber}',
+                                  l10n.tableAndOrder(order.tableNumber, order.orderNumber),
                                   style: const TextStyle(fontWeight: FontWeight.w600),
                                 ),
                                 subtitle: Text(
-                                  '${Formatters.dateTime(order.closedAt ?? order.openedAt)} · $items items · ${order.guestCount} guests',
+                                  l10n.historyLine(
+                                    Formatters.dateTime(order.closedAt ?? order.openedAt),
+                                    l10n.itemCount(items),
+                                    l10n.guestCount(order.guestCount),
+                                  ),
                                 ),
                                 trailing: Text(
                                   Formatters.money(order.total, order.currencySymbol),

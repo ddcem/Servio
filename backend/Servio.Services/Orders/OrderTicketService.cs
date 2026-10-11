@@ -3,16 +3,18 @@ using Microsoft.EntityFrameworkCore;
 using Servio.Model.Constants;
 using Servio.Model.Enums;
 using Servio.Model.Exceptions;
+using Servio.Model.Localization;
 using Servio.Model.Requests;
 using Servio.Model.Responses;
 using Servio.Model.SearchObjects;
 using Servio.Services.Auth;
 using Servio.Services.Base;
 using Servio.Services.Common;
-using Servio.Services.Database;
 using Servio.Services.Database.Entities;
+using Servio.Services.Database;
 using Servio.Services.Notifications;
 using Servio.Services.StateMachines;
+using Servio.Services.Tables;
 
 namespace Servio.Services.Orders;
 
@@ -123,12 +125,12 @@ public class OrderTicketService(
         ticket.ReadyAt = DateTime.UtcNow;
         ticket.ReadyByUserId = currentUser.UserId;
 
-        var what = ticket.Station.Name == PreparationStations.Bar ? "drinks" : "food";
-        var where = ticket.Station.Name == PreparationStations.Bar ? "at the bar" : "in the kitchen";
-        dispatcher.Notify(ticket.Order.WaiterId, NotificationType.TicketReady,
-            $"Table {ticket.Order.Table.Number} – {what} ready",
-            $"{DescribeItems(ticket)} {(ticket.Items.Count == 1 && ticket.Items.First().Quantity == 1 ? "is" : "are")} ready {where} (ticket {ticket.TicketNumber}).",
-            ticket: ticket);
+        var atBar = ticket.Station.Name == PreparationStations.Bar;
+        await dispatcher.NotifyAsync(ticket.Order.WaiterId, NotificationType.TicketReady,
+            new LocalizedText(atBar ? "Table {0} – drinks ready" : "Table {0} – food ready", ticket.Order.Table.Number),
+            new LocalizedText(atBar ? "Ready at the bar: {0} (ticket {1})." : "Ready in the kitchen: {0} (ticket {1}).",
+                DescribeItems(ticket), ticket.TicketNumber),
+            ticket: ticket, cancellationToken: cancellationToken);
 
         await Context.SaveChangesAsync(cancellationToken);
         await PublishChangesAsync(cancellationToken);
@@ -139,6 +141,7 @@ public class OrderTicketService(
     public async Task<OrderTicketResponse> ServeAsync(int id, CancellationToken cancellationToken = default)
     {
         var ticket = await LoadAsync(id, cancellationToken);
+        await TableAccess.EnsureCanServeAsync(Context, currentUser, ticket.Order.Table, cancellationToken);
         ChangeStatus(ticket, TicketStatus.Served, null);
         ticket.ServedAt = DateTime.UtcNow;
 
@@ -151,15 +154,16 @@ public class OrderTicketService(
     public async Task<OrderTicketResponse> CancelAsync(int id, ReasonRequest request, CancellationToken cancellationToken = default)
     {
         var ticket = await LoadAsync(id, cancellationToken);
+        await TableAccess.EnsureCanServeAsync(Context, currentUser, ticket.Order.Table, cancellationToken);
         if (ticket.Order.Status != OrderStatus.Open)
         {
-            throw new BusinessException($"Order {ticket.Order.OrderNumber} is already closed.");
+            throw new BusinessException("Order {0} is already closed.", ticket.Order.OrderNumber);
         }
 
         if (ticket.Status != TicketStatus.New)
         {
             throw new BusinessException(
-                $"Ticket {ticket.TicketNumber} is already {ticket.Status.ToString().ToLower()} and can no longer be cancelled.");
+                "Ticket {0} is already {1} and can no longer be cancelled.", ticket.TicketNumber, ticket.Status);
         }
 
         var reason = request.Reason.Trim();
@@ -169,8 +173,8 @@ public class OrderTicketService(
         OrderCalculator.Recalculate(ticket.Order);
 
         await dispatcher.NotifyRoleAsync(ticket.Station.Name, NotificationType.TicketCancelled,
-            $"Ticket {ticket.TicketNumber} cancelled – table {ticket.Order.Table.Number}",
-            $"{DescribeItems(ticket)}. Reason: {reason}",
+            new LocalizedText("Ticket {0} cancelled – table {1}", ticket.TicketNumber, ticket.Order.Table.Number),
+            new LocalizedText("{0}. Reason: {1}", DescribeItems(ticket), reason),
             ticket: ticket, cancellationToken: cancellationToken);
 
         await Context.SaveChangesAsync(cancellationToken);

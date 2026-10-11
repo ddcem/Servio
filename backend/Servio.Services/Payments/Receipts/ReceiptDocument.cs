@@ -1,7 +1,9 @@
 using QuestPDF.Fluent;
 using QuestPDF.Helpers;
 using QuestPDF.Infrastructure;
+using Servio.Model.Localization;
 using Servio.Services.Common;
+using Servio.Services.Localization;
 
 namespace Servio.Services.Payments.Receipts;
 
@@ -29,7 +31,7 @@ public record ReceiptData(
     IReadOnlyList<ReceiptRefund> Refunds);
 
 /// <summary>
-/// The guest's bill on an 80 mm receipt roll. Prices include VAT, so the VAT is shown as the part of
+/// The guest's bill on an 80 mm receipt roll, in the request's language. Prices include VAT, so the VAT is shown as the part of
 /// the total that is tax (base + VAT = total), not added on top.
 /// </summary>
 public class ReceiptDocument(ReceiptData data) : IDocument
@@ -50,13 +52,13 @@ public class ReceiptDocument(ReceiptData data) : IDocument
             {
                 col.Spacing(2);
                 col.Item().AlignCenter().Text(data.RestaurantName).FontSize(13).Bold();
-                col.Item().AlignCenter().Text("RECEIPT").FontSize(9).LetterSpacing(0.2f).FontColor(Muted);
+                col.Item().AlignCenter().Text(Translator.T("RECEIPT")).FontSize(9).LetterSpacing(0.2f).FontColor(Muted);
                 Divider(col);
 
-                Pair(col, "Order", data.OrderNumber);
-                Pair(col, "Table", data.TableNumber.ToString());
-                Pair(col, "Waiter", data.WaiterName);
-                Pair(col, "Date", data.PaidAt);
+                Pair(col, Translator.T("Order"), data.OrderNumber);
+                Pair(col, Translator.T("Table"), data.TableNumber.ToString());
+                Pair(col, Translator.T("Waiter"), data.WaiterName);
+                Pair(col, Translator.T("Date"), data.PaidAt);
                 Divider(col);
 
                 col.Item().Table(table =>
@@ -69,9 +71,9 @@ public class ReceiptDocument(ReceiptData data) : IDocument
                     });
                     table.Header(header =>
                     {
-                        header.Cell().Text("Item").SemiBold();
-                        header.Cell().AlignRight().Text("Qty × price").SemiBold();
-                        header.Cell().AlignRight().Text("Amount").SemiBold();
+                        header.Cell().Text(Translator.T("Item")).SemiBold();
+                        header.Cell().AlignRight().Text(Translator.T("Qty × price")).SemiBold();
+                        header.Cell().AlignRight().Text(Translator.T("Amount")).SemiBold();
                     });
                     foreach (var line in data.Lines)
                     {
@@ -84,34 +86,34 @@ public class ReceiptDocument(ReceiptData data) : IDocument
 
                 col.Item().Row(row =>
                 {
-                    row.RelativeItem().Text("TOTAL").FontSize(12).Bold();
+                    row.RelativeItem().Text(Translator.T("TOTAL")).FontSize(12).Bold();
                     row.AutoItem().Text(Amount(data.Total)).FontSize(12).Bold();
                 });
-                col.Item().PaddingTop(4).Text($"VAT {data.TaxRate:0.##}% included in prices").FontSize(7.5f).FontColor(Muted);
-                Pair(col, "Base (excl. VAT)", Amount(data.Total - data.TaxAmount));
-                Pair(col, $"VAT {data.TaxRate:0.##}%", Amount(data.TaxAmount));
+                col.Item().PaddingTop(4).Text(Translator.Render(new LocalizedText("VAT {0:0.##}% included in prices", data.TaxRate))).FontSize(7.5f).FontColor(Muted);
+                Pair(col, Translator.T("Base (excl. VAT)"), Amount(data.Total - data.TaxAmount));
+                Pair(col, Translator.Render(new LocalizedText("VAT {0:0.##}%", data.TaxRate)), Amount(data.TaxAmount));
                 Divider(col);
 
                 if (data.TipAmount > 0)
                 {
-                    Pair(col, $"Tip ({data.TipPercent:0.##}%)", Amount(data.TipAmount));
+                    Pair(col, Translator.Render(new LocalizedText("Tip ({0:0.##}%)", data.TipPercent)), Amount(data.TipAmount));
                 }
                 col.Item().Row(row =>
                 {
-                    row.RelativeItem().Text("Paid").SemiBold();
+                    row.RelativeItem().Text(Translator.T("Paid")).SemiBold();
                     row.AutoItem().Text(Amount(data.AmountPaid)).SemiBold();
                 });
-                Pair(col, "Payment", data.PaymentMethod);
+                Pair(col, Translator.T("Payment"), Translator.T(data.PaymentMethod));
                 if (data.CashReceived is { } cash)
                 {
-                    Pair(col, "Cash received", Amount(cash));
-                    Pair(col, "Change", Amount(data.ChangeGiven ?? 0));
+                    Pair(col, Translator.T("Cash received"), Amount(cash));
+                    Pair(col, Translator.T("Change"), Amount(data.ChangeGiven ?? 0));
                 }
 
                 if (data.Refunds.Count > 0)
                 {
                     Divider(col);
-                    col.Item().Text("Refunds").SemiBold();
+                    col.Item().Text(Translator.T("Refunds")).SemiBold();
                     foreach (var refund in data.Refunds)
                     {
                         Pair(col, refund.Date, "−" + Amount(refund.Amount));
@@ -120,7 +122,7 @@ public class ReceiptDocument(ReceiptData data) : IDocument
                 }
 
                 Divider(col);
-                col.Item().AlignCenter().Text("Thank you for your visit!").Italic();
+                col.Item().AlignCenter().Text(Translator.T("Thank you for your visit!")).Italic();
                 col.Item().AlignCenter().Text("Servio").FontSize(7).FontColor(Muted);
             });
         });

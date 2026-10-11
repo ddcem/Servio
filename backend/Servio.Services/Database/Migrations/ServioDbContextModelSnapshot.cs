@@ -815,6 +815,9 @@ namespace Servio.Services.Database.Migrations
                     b.Property<int>("AreaId")
                         .HasColumnType("integer");
 
+                    b.Property<int?>("AssignedWaiterId")
+                        .HasColumnType("integer");
+
                     b.Property<int>("Capacity")
                         .HasColumnType("integer");
 
@@ -827,6 +830,8 @@ namespace Servio.Services.Database.Migrations
                     b.HasKey("Id");
 
                     b.HasIndex("AreaId");
+
+                    b.HasIndex("AssignedWaiterId");
 
                     b.HasIndex("Number")
                         .IsUnique();
@@ -915,6 +920,13 @@ namespace Servio.Services.Database.Migrations
                     b.Property<string>("PhoneNumber")
                         .HasMaxLength(20)
                         .HasColumnType("character varying(20)");
+
+                    b.Property<string>("PreferredLanguage")
+                        .IsRequired()
+                        .ValueGeneratedOnAdd()
+                        .HasMaxLength(5)
+                        .HasColumnType("character varying(5)")
+                        .HasDefaultValue("en");
 
                     b.Property<byte[]>("ProfileImage")
                         .HasColumnType("bytea");
@@ -1325,7 +1337,14 @@ namespace Servio.Services.Database.Migrations
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
+                    b.HasOne("Servio.Services.Database.Entities.User", "AssignedWaiter")
+                        .WithMany()
+                        .HasForeignKey("AssignedWaiterId")
+                        .OnDelete(DeleteBehavior.SetNull);
+
                     b.Navigation("Area");
+
+                    b.Navigation("AssignedWaiter");
                 });
 
             modelBuilder.Entity("Servio.Services.Database.Entities.User", b =>

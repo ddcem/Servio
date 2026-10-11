@@ -66,23 +66,26 @@ class _ReservationFormState extends State<_ReservationForm> {
       initialDate: _date.isBefore(now) ? now : _date,
       firstDate: DateTime(now.year, now.month, now.day),
       lastDate: now.add(const Duration(days: 180)),
-      helpText: 'Reservation date',
+      helpText: l10n.reservationDate,
     );
     if (picked != null) setState(() => _date = picked);
   }
 
   Future<void> _pickTime() async {
-    final picked = await showTimePicker(context: context, initialTime: _time, helpText: 'Arrival time');
+    final picked = await showTimePicker(context: context, initialTime: _time, helpText: l10n.arrivalTime);
     if (picked != null) setState(() => _time = picked);
   }
 
-  static String _durationLabel(int minutes) =>
-      minutes < 60 ? '$minutes min' : '${minutes ~/ 60} h${minutes % 60 == 0 ? '' : ' ${minutes % 60} min'}';
+  static String _durationLabel(int minutes) => minutes < 60
+      ? l10n.durationMinutes(minutes)
+      : minutes % 60 == 0
+      ? l10n.durationHours(minutes ~/ 60)
+      : l10n.durationHoursMinutes(minutes ~/ 60, minutes % 60);
 
   String? _validateTimes() {
     if (_server['StartTime'] != null) return _server['StartTime'];
     final startChanged = !_editing || !_start.isAtSameMomentAs(widget.reservation!.startTime);
-    if (startChanged && _start.isBefore(DateTime.now())) return 'Start time must be in the future.';
+    if (startChanged && _start.isBefore(DateTime.now())) return l10n.startMustBeFuture;
     return null;
   }
 
@@ -92,7 +95,7 @@ class _ReservationFormState extends State<_ReservationForm> {
     final durations = {..._durations, _duration}.toList()..sort();
 
     return FormDialog(
-      title: _editing ? 'Edit reservation' : 'New reservation',
+      title: _editing ? l10n.editReservation : l10n.newReservation,
       formKey: _formKey,
       serverErrors: _server,
       width: 620,
@@ -114,8 +117,8 @@ class _ReservationFormState extends State<_ReservationForm> {
         showSuccess(
           context,
           _editing
-              ? 'The reservation for ${saved.guestName} was updated.'
-              : 'Reservation for ${saved.guestName} at table ${saved.tableNumber} on ${Formatters.dateTime(saved.startTime)} was created. Confirm it to notify the guest.',
+              ? l10n.reservationUpdated(saved.guestName)
+              : l10n.reservationCreated(saved.guestName, saved.tableNumber, Formatters.dateTime(saved.startTime)),
         );
       },
       children: [
@@ -127,16 +130,16 @@ class _ReservationFormState extends State<_ReservationForm> {
               child: TextFormField(
                 controller: _guestName,
                 autofocus: true,
-                decoration: const InputDecoration(labelText: 'Guest name'),
-                validator: (value) => _server['GuestName'] ?? Validators.length(value, 'Guest name', min: 2, max: 100),
+                decoration: InputDecoration(labelText: l10n.guestName),
+                validator: (value) => _server['GuestName'] ?? Validators.length(value, l10n.guestName, min: 2, max: 100),
               ),
             ),
             const SizedBox(width: 16),
             Expanded(
               child: TextFormField(
                 controller: _partySize,
-                decoration: const InputDecoration(labelText: 'Guests'),
-                validator: (value) => _server['PartySize'] ?? Validators.integer(value, 'Party size', min: 1, max: 20),
+                decoration: InputDecoration(labelText: l10n.guests),
+                validator: (value) => _server['PartySize'] ?? Validators.integer(value, l10n.partySize, min: 1, max: 20),
               ),
             ),
           ],
@@ -147,7 +150,7 @@ class _ReservationFormState extends State<_ReservationForm> {
             Expanded(
               child: TextFormField(
                 controller: _phone,
-                decoration: const InputDecoration(labelText: 'Phone', hintText: '+387 61 123 456'),
+                decoration: InputDecoration(labelText: l10n.phone, hintText: '+387 61 123 456'),
                 validator: (value) => _server['GuestPhone'] ?? Validators.phone(value, isRequired: true),
               ),
             ),
@@ -155,10 +158,7 @@ class _ReservationFormState extends State<_ReservationForm> {
             Expanded(
               child: TextFormField(
                 controller: _email,
-                decoration: const InputDecoration(
-                  labelText: 'Email (optional)',
-                  helperText: 'The guest gets a confirmation email',
-                ),
+                decoration: InputDecoration(labelText: l10n.emailOptional, helperText: l10n.guestGetsEmail),
                 validator: (value) => _server['GuestEmail'] ?? Validators.email(value, isRequired: false),
               ),
             ),
@@ -174,7 +174,7 @@ class _ReservationFormState extends State<_ReservationForm> {
                   onTap: _pickDate,
                   child: InputDecorator(
                     decoration: InputDecoration(
-                      labelText: 'Date',
+                      labelText: l10n.date,
                       prefixIcon: const Icon(Icons.calendar_today_outlined),
                       errorText: field.errorText,
                     ),
@@ -188,7 +188,7 @@ class _ReservationFormState extends State<_ReservationForm> {
               child: InkWell(
                 onTap: _pickTime,
                 child: InputDecorator(
-                  decoration: const InputDecoration(labelText: 'Arrival time', prefixIcon: Icon(Icons.schedule)),
+                  decoration: InputDecoration(labelText: l10n.arrivalTime, prefixIcon: const Icon(Icons.schedule)),
                   child: Text(_time.format(context)),
                 ),
               ),
@@ -197,7 +197,7 @@ class _ReservationFormState extends State<_ReservationForm> {
             Expanded(
               child: DropdownButtonFormField<int>(
                 initialValue: _duration,
-                decoration: const InputDecoration(labelText: 'Duration'),
+                decoration: InputDecoration(labelText: l10n.duration),
                 items: durations.map((d) => DropdownMenuItem(value: d, child: Text(_durationLabel(d)))).toList(),
                 onChanged: (value) => setState(() => _duration = value!),
                 validator: (_) => _server['EndTime'],
@@ -208,22 +208,24 @@ class _ReservationFormState extends State<_ReservationForm> {
         DropdownButtonFormField<int>(
           key: ValueKey(_tables.length),
           initialValue: _tableId,
-          decoration: const InputDecoration(
-            labelText: 'Table',
-            helperText: 'Overlapping reservations and capacity are checked when saving',
-          ),
+          decoration: InputDecoration(labelText: l10n.table, helperText: l10n.tableChecksHelper),
           items: _tables
-              .map((t) => DropdownMenuItem(value: t.id, child: Text('Table ${t.number} · ${t.capacity} seats · ${t.areaName}')))
+              .map(
+                (t) => DropdownMenuItem(
+                  value: t.id,
+                  child: Text(l10n.tableOption(t.number, l10n.seatCount(t.capacity), t.areaName)),
+                ),
+              )
               .toList(),
           onChanged: (value) => setState(() => _tableId = value),
-          validator: (value) => _server['TableId'] ?? (value == null ? 'Table is required.' : null),
+          validator: (value) => _server['TableId'] ?? (value == null ? l10n.tableRequired : null),
         ),
         TextFormField(
           controller: _note,
           maxLines: 2,
           maxLength: 500,
-          decoration: const InputDecoration(labelText: 'Note (optional)', hintText: 'e.g. Birthday, needs a high chair'),
-          validator: (value) => _server['Note'] ?? Validators.length(value, 'Note', max: 500, isRequired: false),
+          decoration: InputDecoration(labelText: l10n.noteOptional, hintText: l10n.reservationNoteHint),
+          validator: (value) => _server['Note'] ?? Validators.length(value, l10n.note, max: 500, isRequired: false),
         ),
       ],
     );

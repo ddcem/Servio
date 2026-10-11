@@ -2,6 +2,7 @@ using Microsoft.EntityFrameworkCore;
 using Npgsql;
 using Servio.Model.Exceptions;
 using Servio.Model.Responses;
+using Servio.Services.Localization;
 
 namespace Servio.API.Middleware;
 
@@ -23,18 +24,18 @@ public class ExceptionHandlingMiddleware(RequestDelegate next, ILogger<Exception
         {
             var (statusCode, message) = ex switch
             {
-                BusinessException => (StatusCodes.Status400BadRequest, ex.Message),
-                NotFoundException => (StatusCodes.Status404NotFound, ex.Message),
-                AuthenticationException => (StatusCodes.Status401Unauthorized, ex.Message),
-                ForbiddenException => (StatusCodes.Status403Forbidden, ex.Message),
-                PaymentProviderException => (StatusCodes.Status502BadGateway, ex.Message),
+                BusinessException e => (StatusCodes.Status400BadRequest, Translator.Render(e.Text)),
+                NotFoundException e => (StatusCodes.Status404NotFound, Translator.Render(e.Text)),
+                AuthenticationException e => (StatusCodes.Status401Unauthorized, Translator.Render(e.Text)),
+                ForbiddenException e => (StatusCodes.Status403Forbidden, Translator.Render(e.Text)),
+                PaymentProviderException e => (StatusCodes.Status502BadGateway, Translator.Render(e.Text)),
                 // Safety net for races that slip past the service checks (two users saving at the same moment).
                 DbUpdateException { InnerException: PostgresException { SqlState: PostgresErrorCodes.UniqueViolation } } =>
-                    (StatusCodes.Status409Conflict, "This record was just changed by someone else. Reload and try again."),
+                    (StatusCodes.Status409Conflict, Translator.T("This record was just changed by someone else. Reload and try again.")),
                 DbUpdateException { InnerException: PostgresException { SqlState: PostgresErrorCodes.ForeignKeyViolation } } =>
-                    (StatusCodes.Status409Conflict, "This record is used by other data and cannot be changed or deleted."),
-                OperationCanceledException when context.RequestAborted.IsCancellationRequested => (499, "Request was cancelled."),
-                _ => (StatusCodes.Status500InternalServerError, UnexpectedErrorMessage)
+                    (StatusCodes.Status409Conflict, Translator.T("This record is used by other data and cannot be changed or deleted.")),
+                OperationCanceledException when context.RequestAborted.IsCancellationRequested => (499, Translator.T("Request was cancelled.")),
+                _ => (StatusCodes.Status500InternalServerError, Translator.T(UnexpectedErrorMessage))
             };
 
             if (statusCode is StatusCodes.Status500InternalServerError or StatusCodes.Status409Conflict)

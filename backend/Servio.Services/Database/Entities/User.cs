@@ -13,6 +13,8 @@ public class User : IEntity
     public string? ProfileImageContentType { get; set; }
     public int RoleId { get; set; }
     public bool IsActive { get; set; } = true;
+    /// <summary>Two-letter code of the app language the user chose, e.g. "bs".</summary>
+    public string PreferredLanguage { get; set; } = "en";
     public DateTime CreatedAt { get; set; }
     public DateTime? LastLoginAt { get; set; }
 

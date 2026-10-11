@@ -4,17 +4,20 @@ using Microsoft.Extensions.Logging;
 using Servio.Model.Constants;
 using Servio.Model.Enums;
 using Servio.Model.Exceptions;
+using Servio.Model.Localization;
 using Servio.Model.Requests;
 using Servio.Model.Responses;
 using Servio.Model.SearchObjects;
 using Servio.Services.Auth;
 using Servio.Services.Base;
 using Servio.Services.Common;
-using Servio.Services.Database;
 using Servio.Services.Database.Entities;
+using Servio.Services.Database;
+using Servio.Services.Localization;
 using Servio.Services.Notifications;
 using Servio.Services.Payments.PayPal;
 using Servio.Services.StateMachines;
+using Servio.Services.Tables;
 
 namespace Servio.Services.Payments;
 
@@ -142,13 +145,14 @@ public class PaymentService(
     public async Task<PaymentResponse> PayCashAsync(CashPaymentRequest request, CancellationToken cancellationToken = default)
     {
         var order = await LoadPayableOrderAsync(request.OrderId!.Value, cancellationToken);
+        await TableAccess.EnsureCanServeAsync(Context, currentUser, order.Table, cancellationToken);
         var (tipAmount, amount) = CalculateAmount(order, request.TipPercent!.Value);
         var cashReceived = request.CashReceived!.Value;
 
         if (cashReceived < amount)
         {
             throw new BusinessException(
-                $"Cash received ({Money.Format(cashReceived, order.Currency.Symbol)}) is less than the amount due ({Money.Format(amount, order.Currency.Symbol)}).");
+                "Cash received ({0}) is less than the amount due ({1}).", new LocalizedMoney(cashReceived, order.Currency.Symbol), new LocalizedMoney(amount, order.Currency.Symbol));
         }
 
         CancelAbandonedCheckouts(order);
@@ -182,6 +186,7 @@ public class PaymentService(
     public async Task<PayPalCheckoutResponse> StartPayPalAsync(PayPalPaymentRequest request, CancellationToken cancellationToken = default)
     {
         var order = await LoadPayableOrderAsync(request.OrderId!.Value, cancellationToken);
+        await TableAccess.EnsureCanServeAsync(Context, currentUser, order.Table, cancellationToken);
         var (tipAmount, amount) = CalculateAmount(order, request.TipPercent!.Value);
 
         CancelAbandonedCheckouts(order);
@@ -222,6 +227,7 @@ public class PaymentService(
     public async Task<PaymentResponse> CapturePayPalAsync(int id, CancellationToken cancellationToken = default)
     {
         var payment = await LoadPaymentAsync(id, cancellationToken);
+        await TableAccess.EnsureCanServeAsync(Context, currentUser, payment.Order.Table, cancellationToken);
 
         // Idempotent: a repeated confirmation does not capture or close the order again.
         if (payment.Status != PaymentStatus.Pending)
@@ -231,7 +237,7 @@ public class PaymentService(
                 return await GetByIdAsync(id, cancellationToken);
             }
 
-            throw new BusinessException($"This payment was {payment.Status.ToString().ToLower()}. Start a new payment.");
+            throw new BusinessException("This payment was {0}. Start a new payment.", payment.Status);
         }
 
         if (payment.PayPalOrderId is null)
@@ -281,6 +287,7 @@ public class PaymentService(
     public async Task<PaymentResponse> CancelAsync(int id, CancellationToken cancellationToken = default)
     {
         var payment = await LoadPaymentAsync(id, cancellationToken);
+        await TableAccess.EnsureCanServeAsync(Context, currentUser, payment.Order.Table, cancellationToken);
         if (payment.Status == PaymentStatus.Cancelled)
         {
             return await GetByIdAsync(id, cancellationToken);
@@ -300,7 +307,7 @@ public class PaymentService(
 
         if (!RefundablePaymentStatuses.Contains(payment.Status) || payment.CapturedAmount is null)
         {
-            throw new BusinessException($"A {payment.Status.ToString().ToLower()} payment cannot be refunded.");
+            throw new BusinessException("A {0} payment cannot be refunded.", payment.Status);
         }
 
         // Refunds are limited by what was actually charged, not by the order total.
@@ -312,7 +319,7 @@ public class PaymentService(
         if (amount > refundable)
         {
             throw new BusinessException(
-                $"At most {Money.Format(refundable, symbol)} can still be refunded (charged {Money.Format(payment.CapturedAmount.Value, symbol)}, already refunded {Money.Format(alreadyRefunded, symbol)}).");
+                "At most {0} can still be refunded (charged {1}, already refunded {2}).", new LocalizedMoney(refundable, symbol), new LocalizedMoney(payment.CapturedAmount.Value, symbol), new LocalizedMoney(alreadyRefunded, symbol));
         }
 
         var reason = request.Reason.Trim();
@@ -351,9 +358,11 @@ public class PaymentService(
         StatusWorkflows.Payment.EnsureCanTransition(payment.Status, newStatus);
         payment.Status = newStatus;
 
-        dispatcher.Notify(payment.ProcessedByUserId, NotificationType.RefundIssued,
-            $"Refund issued – order {payment.Order.OrderNumber}",
-            $"{Money.Format(amount, symbol)} returned to the guest ({payment.PaymentMethod.Name}). Reason: {reason}");
+        await dispatcher.NotifyAsync(payment.ProcessedByUserId, NotificationType.RefundIssued,
+            new LocalizedText("Refund issued – order {0}", payment.Order.OrderNumber),
+            new LocalizedText("{0} returned to the guest ({1}). Reason: {2}",
+                new LocalizedMoney(amount, symbol), new Localized(payment.PaymentMethod.Name), reason),
+            cancellationToken: cancellationToken);
 
         await Context.SaveChangesAsync(cancellationToken);
         await dispatcher.FlushAsync(cancellationToken);
@@ -376,7 +385,7 @@ public class PaymentService(
 
         if (order.Payments.Any(x => x.Status == PaymentStatus.Completed))
         {
-            throw new BusinessException($"Order {order.OrderNumber} is already paid.");
+            throw new BusinessException("Order {0} is already paid.", order.OrderNumber);
         }
 
         return order;
@@ -397,14 +406,14 @@ public class PaymentService(
     {
         if (order.Status != OrderStatus.Open)
         {
-            throw new BusinessException($"Order {order.OrderNumber} is already {order.Status.ToString().ToLower()}.");
+            throw new BusinessException("Order {0} is already {1}.", order.OrderNumber, order.Status);
         }
 
         var inProgress = order.Tickets.FirstOrDefault(x => x.Status is TicketStatus.New or TicketStatus.Preparing);
         if (inProgress is not null)
         {
             throw new BusinessException(
-                $"Ticket {inProgress.TicketNumber} ({inProgress.Station.Name.ToLower()}) is still being prepared. The bill can be paid once everything is ready or served.");
+                "Ticket {0} ({1}) is still being prepared. The bill can be paid once everything is ready or served.", inProgress.TicketNumber, new Localized(inProgress.Station.Name.ToLower()));
         }
 
         if (order.Total <= 0)
@@ -448,7 +457,7 @@ public class PaymentService(
                 FromStatus = ticket.Status,
                 ToStatus = TicketStatus.Served,
                 ChangedByUserId = currentUser.UserId,
-                Reason = "Served when the bill was paid",
+                Reason = Translator.T("Served when the bill was paid"),
                 ChangedAt = now
             });
             ticket.Status = TicketStatus.Served;
@@ -460,9 +469,13 @@ public class PaymentService(
         order.ClosedAt = now;
 
         await dispatcher.NotifyRoleAsync(Roles.Admin, NotificationType.PaymentCompleted,
-            $"Table {order.Table.Number} paid",
-            $"Order {order.OrderNumber}: {Money.Format(payment.Amount, order.Currency.Symbol)} by {methodName}" +
-            (payment.TipAmount > 0 ? $", including a {Money.Format(payment.TipAmount, order.Currency.Symbol)} tip." : "."),
+            new LocalizedText("Table {0} paid", order.Table.Number),
+            payment.TipAmount > 0
+                ? new LocalizedText("Order {0}: {1} by {2}, including a {3} tip.", order.OrderNumber,
+                    new LocalizedMoney(payment.Amount, order.Currency.Symbol), new Localized(methodName),
+                    new LocalizedMoney(payment.TipAmount, order.Currency.Symbol))
+                : new LocalizedText("Order {0}: {1} by {2}.", order.OrderNumber,
+                    new LocalizedMoney(payment.Amount, order.Currency.Symbol), new Localized(methodName)),
             cancellationToken: cancellationToken);
     }
 

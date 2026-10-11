@@ -106,7 +106,7 @@ class _MenuScreenState extends State<MenuScreen> {
         SnackBar(
           duration: const Duration(milliseconds: 1200),
           behavior: SnackBarBehavior.floating,
-          content: Text('${item.name} added (${cart.quantityOf(item.id)} in this round)'),
+          content: Text(l10n.itemAddedInRound(item.name, cart.quantityOf(item.id))),
         ),
       );
 
@@ -124,7 +124,7 @@ class _MenuScreenState extends State<MenuScreen> {
       if (menuItem != null) {
         _suggestedFor.add(menuItem.id);
         cart.add(menuItem);
-        showSuccess(context, '${menuItem.name} added.');
+        showSuccess(context, l10n.itemAdded(menuItem.name));
       }
     } on ApiException {
       // Suggestions are optional; ordering carries on without them.
@@ -146,11 +146,9 @@ class _MenuScreenState extends State<MenuScreen> {
     if (send != true || !mounted) return;
     final confirmed = await confirmAction(
       context,
-      title: 'Send order?',
-      message:
-          'Send ${cart.itemCount} items (${Formatters.money(cart.total, _currency)}) for table ${widget.tableNumber} '
-          'to the kitchen and bar? Items cannot be removed once preparation starts.',
-      confirmLabel: 'Send Order',
+      title: l10n.sendOrderQuestion,
+      message: l10n.sendOrderMessage(l10n.itemCount(cart.itemCount), Formatters.money(cart.total, _currency), widget.tableNumber),
+      confirmLabel: l10n.sendOrder,
     );
     if (confirmed) await _send();
   }
@@ -165,8 +163,8 @@ class _MenuScreenState extends State<MenuScreen> {
           ? await orders.create(widget.tableId, widget.guestCount!, cart.itemsRequest, cart.shownRecommendationsRequest)
           : await orders.addItems(widget.order!.id, cart.itemsRequest, cart.shownRecommendationsRequest);
       if (!mounted) return;
-      final stations = {for (final ticket in order.tickets) ticket.stationName.toLowerCase()};
-      showSuccess(context, 'Order sent to the ${stations.join(' and ')}.');
+      final stations = {for (final ticket in order.tickets) Stations.label(ticket.stationName).toLowerCase()};
+      showSuccess(context, l10n.orderSentTo(stations.join(' ${l10n.and} ')));
       cart.clear();
       Navigator.of(context).pop(true);
     } catch (e) {
@@ -180,9 +178,9 @@ class _MenuScreenState extends State<MenuScreen> {
     if (_cart == null || _cart!.isEmpty) return true;
     return confirmAction(
       context,
-      title: 'Discard this round?',
-      message: 'The ${_cart!.itemCount} items in the cart have not been sent yet.',
-      confirmLabel: 'Discard',
+      title: l10n.discardRoundQuestion,
+      message: l10n.discardRoundMessage(l10n.itemCount(_cart!.itemCount)),
+      confirmLabel: l10n.discard,
       destructive: true,
     );
   }
@@ -204,14 +202,14 @@ class _MenuScreenState extends State<MenuScreen> {
       },
       child: Scaffold(
         appBar: GradientAppBar(
-          title: 'Table ${widget.tableNumber}',
+          title: l10n.tableNumber(widget.tableNumber),
           subtitle: widget.order == null
-              ? '${widget.guestCount} guests · $count items'
-              : 'Adding to ${widget.order!.orderNumber} · $count items',
+              ? l10n.guestsAndItems(l10n.guestCount(widget.guestCount!), l10n.itemCount(count))
+              : l10n.addingToOrder(widget.order!.orderNumber, l10n.itemCount(count)),
           actions: [
             HeaderButton(
               icon: _searching ? Icons.search_off : Icons.search,
-              tooltip: _searching ? 'Close search' : 'Search the menu',
+              tooltip: _searching ? l10n.closeSearch : l10n.searchMenu,
               onPressed: () => setState(() {
                 _searching = !_searching;
                 _search = '';
@@ -219,7 +217,7 @@ class _MenuScreenState extends State<MenuScreen> {
             ),
             HeaderButton(
               icon: Icons.shopping_cart_outlined,
-              tooltip: 'Current order',
+              tooltip: l10n.currentOrder,
               badge: count,
               onPressed: cart == null ? () {} : _openCart,
             ),
@@ -234,8 +232,8 @@ class _MenuScreenState extends State<MenuScreen> {
                   ? TextField(
                       autofocus: true,
                       onChanged: (value) => setState(() => _search = value),
-                      decoration: const InputDecoration(
-                        hintText: 'Search by name or description',
+                      decoration: InputDecoration(
+                        hintText: l10n.searchByNameOrDescription,
                         prefixIcon: Icon(Icons.search),
                         isDense: true,
                       ),
@@ -244,7 +242,7 @@ class _MenuScreenState extends State<MenuScreen> {
                       scrollDirection: Axis.horizontal,
                       children: [
                         _CategoryTab(
-                          label: 'Favorites',
+                          label: l10n.favorites,
                           icon: Icons.star,
                           selected: _categoryId == null,
                           onTap: () => setState(() => _categoryId = null),
@@ -278,10 +276,10 @@ class _MenuScreenState extends State<MenuScreen> {
                         children: [
                           const Icon(Icons.shopping_cart_outlined),
                           const SizedBox(width: 10),
-                          Text('$count items', style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w600)),
+                          Text(l10n.itemCount(count), style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w600)),
                           const Spacer(),
                           Text(
-                            _sending ? 'Sending…' : 'Review · ${Formatters.money(cart!.total, _currency)}',
+                            _sending ? l10n.sending : l10n.reviewTotal(Formatters.money(cart!.total, _currency)),
                             style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
                           ),
                         ],
@@ -301,7 +299,7 @@ class _MenuScreenState extends State<MenuScreen> {
     return CustomScrollView(
       slivers: [
         if (showingFavorites)
-          const SliverPadding(
+          SliverPadding(
             padding: EdgeInsets.fromLTRB(16, 16, 16, 0),
             sliver: SliverToBoxAdapter(
               child: Column(
@@ -311,14 +309,11 @@ class _MenuScreenState extends State<MenuScreen> {
                     children: [
                       Icon(Icons.star, color: Color(0xFFFACC15)),
                       SizedBox(width: 8),
-                      Text('Favorites', style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
+                      Text(l10n.favorites, style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
                     ],
                   ),
                   SizedBox(height: 4),
-                  Text(
-                    'Your starred and most sold items · Updates based on your sales',
-                    style: TextStyle(color: ServioColors.textMuted),
-                  ),
+                  Text(l10n.favoritesSubtitle, style: TextStyle(color: ServioColors.textMuted)),
                 ],
               ),
             ),
@@ -328,9 +323,7 @@ class _MenuScreenState extends State<MenuScreen> {
             hasScrollBody: false,
             child: EmptyView(
               icon: showingFavorites ? Icons.star_border : Icons.search_off,
-              message: showingFavorites
-                  ? 'No favorites yet. Tap the star on any item to pin it here; your best sellers appear automatically.'
-                  : 'No items found.',
+              message: showingFavorites ? l10n.noFavorites : l10n.noItemsFound,
             ),
           )
         else
@@ -441,7 +434,7 @@ class _MenuItemCard extends StatelessWidget {
                     const Spacer(),
                     IconButton(
                       visualDensity: VisualDensity.compact,
-                      tooltip: item.isFavorite ? 'Remove from favorites' : 'Add to favorites',
+                      tooltip: item.isFavorite ? l10n.removeFromFavorites : l10n.addToFavorites,
                       onPressed: onFavorite,
                       icon: Icon(
                         item.isFavorite ? Icons.star : Icons.star_border,
@@ -470,11 +463,11 @@ class _MenuItemCard extends StatelessWidget {
                       ),
                     ),
                     if (!available)
-                      const _Pill('Sold out', ServioColors.dangerLight, ServioColors.danger)
+                      _Pill(l10n.soldOut, ServioColors.dangerLight, ServioColors.danger)
                     else if (inCart > 0)
                       _Pill('×$inCart', ServioColors.primary, Colors.white)
                     else if (item.soldByMeCount > 0)
-                      _Pill('${item.soldByMeCount} sold', const Color(0xFFFACC15), ServioColors.textPrimary),
+                      _Pill(l10n.soldCount(item.soldByMeCount), const Color(0xFFFACC15), ServioColors.textPrimary),
                     const SizedBox(width: 8),
                   ],
                 ),

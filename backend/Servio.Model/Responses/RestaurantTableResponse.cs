@@ -12,6 +12,10 @@ public class RestaurantTableResponse
     public bool IsActive { get; set; }
     public TableStatus Status { get; set; }
 
+    /// <summary>The waiter serving the table this shift; null when any waiter may serve it.</summary>
+    public int? AssignedWaiterId { get; set; }
+    public string? AssignedWaiterName { get; set; }
+
     public int? CurrentOrderId { get; set; }
     public decimal? CurrentOrderTotal { get; set; }
     public int? CurrentGuestCount { get; set; }

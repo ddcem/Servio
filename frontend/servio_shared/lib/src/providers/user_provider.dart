@@ -26,6 +26,9 @@ class ProfileProvider {
   Future<User> update(Map<String, dynamic> request) async =>
       User.fromJson(await api.put('profile', request) as Map<String, dynamic>);
 
+  Future<User> setLanguage(String language) async =>
+      User.fromJson(await api.put('profile/language', {'language': language}) as Map<String, dynamic>);
+
   Future<void> changePassword(String currentPassword, String newPassword, String confirmation) => api.put('profile/password', {
     'currentPassword': currentPassword,
     'newPassword': newPassword,

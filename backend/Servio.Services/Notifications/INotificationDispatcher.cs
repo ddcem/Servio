@@ -1,4 +1,5 @@
 using Servio.Model.Enums;
+using Servio.Model.Localization;
 using Servio.Services.Database.Entities;
 
 namespace Servio.Services.Notifications;
@@ -10,10 +11,12 @@ namespace Servio.Services.Notifications;
 /// </summary>
 public interface INotificationDispatcher
 {
-    void Notify(int userId, NotificationType type, string title, string body,
-        OrderTicket? ticket = null, Reservation? reservation = null);
+    /// <summary>Notifies one user; the texts are written in that user's language.</summary>
+    Task NotifyAsync(int userId, NotificationType type, LocalizedText title, LocalizedText body,
+        OrderTicket? ticket = null, Reservation? reservation = null, CancellationToken cancellationToken = default);
 
-    Task NotifyRoleAsync(string role, NotificationType type, string title, string body,
+    /// <summary>Notifies every active user of a role, each in their own language.</summary>
+    Task NotifyRoleAsync(string role, NotificationType type, LocalizedText title, LocalizedText body,
         OrderTicket? ticket = null, Reservation? reservation = null, CancellationToken cancellationToken = default);
 
     void Broadcast(string eventName);

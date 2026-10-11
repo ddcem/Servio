@@ -12,6 +12,8 @@ public class UserResponse
     public string Role { get; set; } = string.Empty;
     public bool IsActive { get; set; }
     public bool HasProfileImage { get; set; }
+    /// <summary>The app language the user chose: "en" or "bs".</summary>
+    public string PreferredLanguage { get; set; } = "en";
     public DateTime CreatedAt { get; set; }
     public DateTime? LastLoginAt { get; set; }
 

@@ -94,7 +94,7 @@ class _ReportsScreenState extends State<ReportsScreen> {
       firstDate: today.subtract(const Duration(days: 365)),
       lastDate: today,
       initialDateRange: _range,
-      helpText: 'Report period',
+      helpText: l10n.reportPeriod,
     );
     if (range != null) {
       setState(() => _range = range);
@@ -122,23 +122,23 @@ class _ReportsScreenState extends State<ReportsScreen> {
       );
       if (location == null) return;
       await XFile.fromData(bytes, mimeType: 'application/pdf', name: fileName).saveTo(location.path);
-      if (mounted) showSuccess(context, 'The ${sales ? 'sales' : 'staff performance'} report was saved to ${location.path}.');
+      if (mounted) showSuccess(context, l10n.reportSaved(location.path));
     } catch (e) {
-      if (mounted) showError(context, e is ApiException ? e : ApiException('The report could not be saved: $e'));
+      if (mounted) showError(context, e is ApiException ? e : ApiException(l10n.reportSaveFailed('$e')));
     }
   }
 
   @override
   Widget build(BuildContext _) => AdminPage(
-    title: 'Sales & Analytics',
-    subtitle: 'Track performance and revenue metrics',
+    title: l10n.salesAndAnalytics,
+    subtitle: l10n.salesSubtitle,
     actions: [
       _PdfMenu(
-        label: 'Sales report',
+        label: l10n.salesReport,
         onSelected: (print) => _exportPdf(sales: true, print: print),
       ),
       _PdfMenu(
-        label: 'Staff report',
+        label: l10n.staffReport,
         onSelected: (print) => _exportPdf(sales: false, print: print),
       ),
     ],
@@ -159,12 +159,12 @@ class _ReportsScreenState extends State<ReportsScreen> {
                 crossAxisAlignment: WrapCrossAlignment.center,
                 runSpacing: 8,
                 children: [
-                  const Text('Period analysis', style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold)),
+                  Text(l10n.periodAnalysis, style: const TextStyle(fontSize: 22, fontWeight: FontWeight.bold)),
                   const SizedBox(width: 16),
                   OutlinedButton.icon(
                     onPressed: _pickRange,
                     icon: const Icon(Icons.date_range),
-                    label: Text('${Formatters.date(_range.start)} – ${Formatters.date(_range.end)}'),
+                    label: Text(l10n.dateRange(Formatters.date(_range.start), Formatters.date(_range.end))),
                   ),
                   const SizedBox(width: 8),
                   for (final days in [7, 30, 90])
@@ -175,7 +175,7 @@ class _ReportsScreenState extends State<ReportsScreen> {
                           setState(() => _range = _lastDays(days));
                           _loadPeriod();
                         },
-                        child: Text('Last $days days'),
+                        child: Text(l10n.lastDays(days)),
                       ),
                     ),
                 ],
@@ -192,10 +192,10 @@ class _ReportsScreenState extends State<ReportsScreen> {
     if (today == null || yesterday == null) return const LoadingView();
     final s = today.currencySymbol;
 
-    String change(double now, double before, String suffix) {
-      if (before == 0) return now == 0 ? 'Same as $suffix' : 'First sales compared to $suffix';
+    String change(double now, double before, String when) {
+      if (before == 0) return now == 0 ? l10n.sameAs(when) : l10n.firstSalesComparedTo(when);
       final percent = ((now - before) / before * 100).round();
-      return '${percent >= 0 ? '+' : ''}$percent% from $suffix';
+      return l10n.percentFrom('${percent >= 0 ? '+' : ''}$percent', when);
     }
 
     return Column(
@@ -208,30 +208,30 @@ class _ReportsScreenState extends State<ReportsScreen> {
             _KpiCard(
               colors: const [Color(0xFF3B82F6), ServioColors.primary],
               icon: Icons.attach_money,
-              label: "Today's revenue",
+              label: l10n.todaysRevenue,
               value: Formatters.money(today.revenue, s),
-              footer: change(today.revenue, yesterday.revenue, 'yesterday'),
+              footer: change(today.revenue, yesterday.revenue, l10n.yesterday),
             ),
             _KpiCard(
               colors: const [Color(0xFF22C55E), ServioColors.success],
               icon: Icons.inventory_2_outlined,
-              label: 'Paid orders',
+              label: l10n.paidOrders,
               value: '${today.orderCount}',
-              footer: '$_openOrders active now',
+              footer: l10n.activeNow(_openOrders),
             ),
             _KpiCard(
               colors: const [Color(0xFFA855F7), ServioColors.bar],
               icon: Icons.trending_up,
-              label: 'Average bill',
+              label: l10n.averageBill,
               value: Formatters.money(today.averageBill, s),
-              footer: change(today.averageBill, yesterday.averageBill, 'yesterday'),
+              footer: change(today.averageBill, yesterday.averageBill, l10n.yesterday),
             ),
             _KpiCard(
               colors: const [Color(0xFFF97316), ServioColors.kitchen],
               icon: Icons.people_outline,
-              label: 'Guests',
+              label: l10n.kpiGuests,
               value: '${today.guestCount}',
-              footer: '${today.orderCount} tables served',
+              footer: l10n.tablesServed(today.orderCount),
             ),
           ],
         ),
@@ -240,9 +240,9 @@ class _ReportsScreenState extends State<ReportsScreen> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              const Text('Popular items today', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+              Text(l10n.popularItemsToday, style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
               const SizedBox(height: 12),
-              if (today.topItems.isEmpty) const Text('No sales yet today.', style: TextStyle(color: ServioColors.textMuted)),
+              if (today.topItems.isEmpty) Text(l10n.noSalesToday, style: const TextStyle(color: ServioColors.textMuted)),
               for (final item in today.topItems.take(5)) _ItemRow(item: item, symbol: s),
             ],
           ),
@@ -262,22 +262,22 @@ class _ReportsScreenState extends State<ReportsScreen> {
           spacing: 16,
           runSpacing: 16,
           children: [
-            _Metric('Revenue', money(sales.revenue)),
-            _Metric('Net revenue (after refunds)', money(sales.netRevenue)),
-            _Metric('Paid orders', '${sales.orderCount}'),
-            _Metric('Average bill', money(sales.averageBill)),
-            _Metric('Guests', '${sales.guestCount}'),
-            _Metric('Tips', money(sales.tips)),
-            _Metric('Refunds', money(sales.refunds)),
-            _Metric('Cancelled orders', '${sales.cancelledOrderCount}'),
+            _Metric(l10n.revenue, money(sales.revenue)),
+            _Metric(l10n.netRevenueAfterRefunds, money(sales.netRevenue)),
+            _Metric(l10n.paidOrders, '${sales.orderCount}'),
+            _Metric(l10n.averageBill, money(sales.averageBill)),
+            _Metric(l10n.kpiGuests, '${sales.guestCount}'),
+            _Metric(l10n.tips, money(sales.tips)),
+            _Metric(l10n.refunds, money(sales.refunds)),
+            _Metric(l10n.cancelledOrders, '${sales.cancelledOrderCount}'),
           ],
         ),
-        const SizedBox(height: 20),
+        SizedBox(height: 20),
         Panel(
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              const Text('Daily revenue', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+              Text(l10n.dailyRevenue, style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
               const SizedBox(height: 16),
               SizedBox(
                 height: 260,
@@ -286,7 +286,7 @@ class _ReportsScreenState extends State<ReportsScreen> {
             ],
           ),
         ),
-        const SizedBox(height: 20),
+        SizedBox(height: 20),
         Row(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -295,7 +295,7 @@ class _ReportsScreenState extends State<ReportsScreen> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    const Text('Best-selling items', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+                    Text(l10n.bestSellingItems, style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
                     const SizedBox(height: 8),
                     for (final item in sales.topItems) _ItemRow(item: item, symbol: s),
                   ],
@@ -310,8 +310,8 @@ class _ReportsScreenState extends State<ReportsScreen> {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        const Text('Least-selling items', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
-                        const Text('Candidates for a promotion or removal', style: TextStyle(color: ServioColors.textMuted)),
+                        Text(l10n.leastSellingItems, style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+                        Text(l10n.promotionCandidates, style: const TextStyle(color: ServioColors.textMuted)),
                         const SizedBox(height: 8),
                         for (final item in sales.leastSoldItems) _ItemRow(item: item, symbol: s, highlight: ServioColors.danger),
                       ],
@@ -322,13 +322,17 @@ class _ReportsScreenState extends State<ReportsScreen> {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        const Text('Sales by category', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+                        Text(l10n.salesByCategory, style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
                         const SizedBox(height: 8),
-                        for (final c in sales.categories) _LabelValue(c.categoryName, '${c.quantity} sold · ${money(c.revenue)}'),
+                        for (final c in sales.categories)
+                          _LabelValue(c.categoryName, l10n.soldAndRevenue(c.quantity, money(c.revenue))),
                         const Divider(height: 24),
-                        const Text('Payments by method', style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600)),
+                        Text(l10n.paymentsByMethod, style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w600)),
                         for (final p in sales.paymentMethods)
-                          _LabelValue(p.paymentMethod, '${p.paymentCount} payments · ${money(p.amount)}'),
+                          _LabelValue(
+                            PaymentMethods.label(p.paymentMethod),
+                            l10n.paymentsAndAmount(p.paymentCount, money(p.amount)),
+                          ),
                       ],
                     ),
                   ),
@@ -337,29 +341,29 @@ class _ReportsScreenState extends State<ReportsScreen> {
             ),
           ],
         ),
-        const SizedBox(height: 20),
+        SizedBox(height: 20),
         Panel(
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              const Text('Staff performance', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
-              const SizedBox(height: 8),
+              Text(l10n.staffPerformance, style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+              SizedBox(height: 8),
               WideTable(
                 child: DataTable(
-                  headingTextStyle: const TextStyle(fontWeight: FontWeight.w600, color: ServioColors.textMuted),
-                  columns: const [
-                    DataColumn(label: Text('WAITER')),
-                    DataColumn(label: Text('ORDERS'), numeric: true),
-                    DataColumn(label: Text('REVENUE'), numeric: true),
-                    DataColumn(label: Text('AVG. BILL'), numeric: true),
-                    DataColumn(label: Text('TIPS'), numeric: true),
-                    DataColumn(label: Text('SUGGESTIONS ACCEPTED'), numeric: true),
+                  headingTextStyle: TextStyle(fontWeight: FontWeight.w600, color: ServioColors.textMuted),
+                  columns: [
+                    DataColumn(label: Text(l10n.columnWaiter)),
+                    DataColumn(label: Text(l10n.columnOrders), numeric: true),
+                    DataColumn(label: Text(l10n.columnRevenue), numeric: true),
+                    DataColumn(label: Text(l10n.columnAvgBill), numeric: true),
+                    DataColumn(label: Text(l10n.columnTips), numeric: true),
+                    DataColumn(label: Text(l10n.columnSuggestionsAccepted), numeric: true),
                   ],
                   rows: [
                     for (final w in staff.waiters)
                       DataRow(
                         cells: [
-                          DataCell(Text(w.isActive ? w.name : '${w.name} (inactive)')),
+                          DataCell(Text(w.isActive ? w.name : l10n.nameInactive(w.name))),
                           DataCell(Text('${w.orderCount}')),
                           DataCell(Text(money(w.revenue))),
                           DataCell(Text(money(w.averageBill))),
@@ -368,7 +372,7 @@ class _ReportsScreenState extends State<ReportsScreen> {
                             Text(
                               w.suggestionAcceptanceRate == null
                                   ? '–'
-                                  : '${Formatters.percent(w.suggestionAcceptanceRate!)} of ${w.suggestionsShown}',
+                                  : l10n.percentOf(Formatters.percent(w.suggestionAcceptanceRate!), w.suggestionsShown),
                             ),
                           ),
                         ],
@@ -383,8 +387,8 @@ class _ReportsScreenState extends State<ReportsScreen> {
                 children: [
                   for (final st in staff.stations)
                     _Metric(
-                      '${st.stationName}: ${st.ticketCount} tickets',
-                      st.averageMinutesToReady == null ? '–' : '${st.averageMinutesToReady!.toStringAsFixed(1)} min to ready',
+                      l10n.stationTickets(Stations.label(st.stationName), st.ticketCount),
+                      st.averageMinutesToReady == null ? '–' : l10n.minutesToReady(Formatters.decimal(st.averageMinutesToReady!)),
                     ),
                 ],
               ),
@@ -404,16 +408,16 @@ class _PdfMenu extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => PopupMenuButton<bool>(
-    tooltip: '$label (PDF) for the selected period',
+    tooltip: l10n.reportPdfTooltip(label),
     onSelected: onSelected,
-    itemBuilder: (_) => const [
+    itemBuilder: (_) => [
       PopupMenuItem(
         value: false,
-        child: ListTile(leading: Icon(Icons.download), title: Text('Save as PDF')),
+        child: ListTile(leading: Icon(Icons.download), title: Text(l10n.saveAsPdf)),
       ),
       PopupMenuItem(
         value: true,
-        child: ListTile(leading: Icon(Icons.print_outlined), title: Text('Print')),
+        child: ListTile(leading: Icon(Icons.print_outlined), title: Text(l10n.print)),
       ),
     ],
     child: IgnorePointer(
@@ -491,7 +495,7 @@ class _ItemRow extends StatelessWidget {
               children: [
                 Text(item.name, style: const TextStyle(fontWeight: FontWeight.w600)),
                 Text(
-                  '${item.quantity} sold · ${item.categoryName}',
+                  l10n.soldAndCategory(item.quantity, item.categoryName),
                   style: const TextStyle(color: ServioColors.textMuted, fontSize: 13),
                 ),
               ],
@@ -567,7 +571,11 @@ class _RevenueChart extends StatelessWidget {
         barTouchData: BarTouchData(
           touchTooltipData: BarTouchTooltipData(
             getTooltipItem: (group, _, rod, _) => BarTooltipItem(
-              '${Formatters.date(daily[group.x].date)}\n${Formatters.money(rod.toY, symbol)} · ${daily[group.x].orderCount} orders',
+              l10n.chartTooltip(
+                Formatters.date(daily[group.x].date),
+                Formatters.money(rod.toY, symbol),
+                l10n.orderCount(daily[group.x].orderCount),
+              ),
               const TextStyle(color: Colors.white),
             ),
           ),
@@ -579,7 +587,10 @@ class _RevenueChart extends StatelessWidget {
             sideTitles: SideTitles(
               showTitles: true,
               reservedSize: 56,
-              getTitlesWidget: (value, meta) => Text('$symbol${value.round()}', style: const TextStyle(fontSize: 11)),
+              getTitlesWidget: (value, meta) => Text(
+                Formatters.language == 'bs' ? '${value.round()} $symbol' : '$symbol${value.round()}',
+                style: const TextStyle(fontSize: 11),
+              ),
             ),
           ),
           bottomTitles: AxisTitles(

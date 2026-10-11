@@ -1,0 +1,2140 @@
+{
+  "@@locale": "en",
+  "assignWaiters": "Assign waiters",
+  "tableAssignments": "Table Assignments",
+  "tableAssignmentsSubtitle": "Drag each table to the waiter who serves it this shift",
+  "unassigned": "Unassigned",
+  "unassignedHint": "Any waiter can serve these tables",
+  "tableCount": "{count, plural, =1{1 table} other{{count} tables}}",
+  "@tableCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "tablesAndSeats": "{tables} · {seats}",
+  "@tablesAndSeats": {
+    "placeholders": {
+      "tables": {
+        "type": "String"
+      },
+      "seats": {
+        "type": "String"
+      }
+    }
+  },
+  "dropTablesHere": "Drop tables here",
+  "moveTo": "Move to…",
+  "addAllOfArea": "Add all of {area}",
+  "@addAllOfArea": {
+    "placeholders": {
+      "area": {
+        "type": "String"
+      }
+    }
+  },
+  "unassignAll": "Unassign all",
+  "columnMenu": "Column actions",
+  "clearAllAssignments": "Clear all",
+  "clearAllQuestion": "Clear the whole plan?",
+  "clearAllMessage": "All tables become free for every waiter. Open orders stay with their waiters.",
+  "assignmentMoved": "Table {number} → {waiter}",
+  "@assignmentMoved": {
+    "placeholders": {
+      "number": {
+        "type": "int"
+      },
+      "waiter": {
+        "type": "String"
+      }
+    }
+  },
+  "tablesMoved": "{tables} → {waiter}",
+  "@tablesMoved": {
+    "placeholders": {
+      "tables": {
+        "type": "String"
+      },
+      "waiter": {
+        "type": "String"
+      }
+    }
+  },
+  "assignmentFreed": "Table {number} is free for every waiter.",
+  "@assignmentFreed": {
+    "placeholders": {
+      "number": {
+        "type": "int"
+      }
+    }
+  },
+  "planCleared": "The plan was cleared. Every waiter can serve every table.",
+  "noActiveWaiters": "There are no active waiters. Add one under Employees.",
+  "openOrderMovesHint": "A table with an open order moves together with the order.",
+  "myTables": "My tables",
+  "allTables": "All tables",
+  "yourTable": "Your table",
+  "tableServedBy": "Table {number} is served by {name}. Ask the admin to reassign it if you need to take it over.",
+  "@tableServedBy": {
+    "placeholders": {
+      "number": {
+        "type": "int"
+      },
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "noTablesAssignedToYou": "No tables are assigned to you right now. Ask the admin, or show all tables.",
+  "menuManagement": "Menu Management",
+  "employees": "Employees",
+  "tables": "Tables",
+  "reservations": "Reservations",
+  "ordersAndPayments": "Orders & Payments",
+  "referenceData": "Reference Data",
+  "reports": "Reports",
+  "notificationLine": "{title}: {body}",
+  "@notificationLine": {
+    "placeholders": {
+      "title": {
+        "type": "String"
+      },
+      "body": {
+        "type": "String"
+      }
+    }
+  },
+  "adminPanel": "Admin Panel",
+  "systemManagement": "System Management",
+  "backToDashboard": "Back to Dashboard",
+  "loggedInAs": "Logged in as {role}",
+  "@loggedInAs": {
+    "placeholders": {
+      "role": {
+        "type": "String"
+      }
+    }
+  },
+  "edit": "Edit",
+  "delete": "Delete",
+  "cancel": "Cancel",
+  "active": "Active",
+  "inactive": "Inactive",
+  "role": "Role",
+  "name": "Name",
+  "price": "Price",
+  "category": "Category",
+  "area": "Area",
+  "open": "Open",
+  "from": "From",
+  "to": "To",
+  "anyDate": "Any date",
+  "dateRange": "{from} – {to}",
+  "@dateRange": {
+    "placeholders": {
+      "from": {
+        "type": "String"
+      },
+      "to": {
+        "type": "String"
+      }
+    }
+  },
+  "clearDates": "Clear dates",
+  "yes": "Yes",
+  "no": "No",
+  "show": "Show",
+  "read": "Read",
+  "markAsRead": "Mark as read",
+  "tag": "Tag",
+  "tags": "Tags",
+  "tagHint": "e.g. Spicy",
+  "areaHint": "e.g. Garden",
+  "items": "Items",
+  "payments": "Payments",
+  "history": "History",
+  "phone": "Phone",
+  "date": "Date",
+  "note": "Note",
+  "refund": "Refund",
+  "print": "Print",
+  "deleteNameQuestion": "Delete {name}?",
+  "@deleteNameQuestion": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "accountRemovedPermanently": "The account is removed permanently. This cannot be undone.",
+  "accountDeleted": "{name}'s account was deleted.",
+  "@accountDeleted": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "employeeManagement": "Employee Management",
+  "manageStaff": "Manage staff members",
+  "addEmployee": "Add Employee",
+  "searchEmployees": "Search by name, username or email",
+  "noEmployeesMatch": "No employees match the filters.",
+  "usernameAndEmail": "@{username} · {email}",
+  "@usernameAndEmail": {
+    "placeholders": {
+      "username": {
+        "type": "String"
+      },
+      "email": {
+        "type": "String"
+      }
+    }
+  },
+  "neverLoggedIn": "Never logged in",
+  "lastLogin": "Last login {time}",
+  "@lastLogin": {
+    "placeholders": {
+      "time": {
+        "type": "String"
+      }
+    }
+  },
+  "deleteEmployee": "Delete employee",
+  "cannotDeleteOwnAccount": "You cannot delete your own account.",
+  "employeeHasActivity": "Has orders, reservations or payments in the system. Deactivate the account instead.",
+  "editEmployee": "Edit employee",
+  "addEmployeeTitle": "Add employee",
+  "accountUpdated": "{name}'s account was updated.",
+  "@accountUpdated": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "employeeAdded": "{name} was added as {role}.",
+  "@employeeAdded": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      },
+      "role": {
+        "type": "String"
+      }
+    }
+  },
+  "usernameHelper": "Used to log in, e.g. john.smith",
+  "emailHint": "name@example.com",
+  "cannotChangeOwnRole": "You cannot change your own role",
+  "roleHelper": "The role decides which app and screens the employee can use",
+  "roleRequired": "Role is required.",
+  "cannotDeactivateOwnAccount": "You cannot deactivate your own account",
+  "inactiveCannotLogIn": "Inactive employees cannot log in",
+  "loggedOutEverywhere": "The employee is logged out on all devices after the change",
+  "repeatPassword": "Repeat password",
+  "images": "Images",
+  "imageTooLarge": "The image is larger than 2 MB. Choose a smaller JPEG, PNG or WebP image.",
+  "savedButImageFailed": "\"{name}\" was saved, but the image was not: {error}",
+  "@savedButImageFailed": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      },
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "itemUpdated": "\"{name}\" was updated.",
+  "@itemUpdated": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "itemAddedToMenu": "\"{name}\" was added to the menu.",
+  "@itemAddedToMenu": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "editMenuItem": "Edit menu item",
+  "addMenuItem": "Add menu item",
+  "changeImage": "Change",
+  "addImage": "Add image",
+  "nameHintDish": "e.g. Ribeye Steak",
+  "descriptionOptional": "Description (optional)",
+  "descriptionHint": "e.g. 300 g grilled ribeye with herb butter",
+  "description": "Description",
+  "categoryWithStation": "{name} ({station})",
+  "@categoryWithStation": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      },
+      "station": {
+        "type": "String"
+      }
+    }
+  },
+  "categoryRequired": "Category is required.",
+  "addNewCategory": "Add a new category",
+  "newTag": "New tag",
+  "availableToday": "Available today",
+  "unavailableHidden": "Unavailable items are hidden from the waiters' menu",
+  "addEntity": "Add {entity}",
+  "@addEntity": {
+    "placeholders": {
+      "entity": {
+        "type": "String"
+      }
+    }
+  },
+  "editEntity": "Edit {entity}",
+  "@editEntity": {
+    "placeholders": {
+      "entity": {
+        "type": "String"
+      }
+    }
+  },
+  "entityAdded": "{entity} \"{name}\" was added.",
+  "@entityAdded": {
+    "placeholders": {
+      "entity": {
+        "type": "String"
+      },
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "entityUpdated": "{entity} \"{name}\" was updated.",
+  "@entityUpdated": {
+    "placeholders": {
+      "entity": {
+        "type": "String"
+      },
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "editCategory": "Edit category",
+  "addCategory": "Add category",
+  "categoryAdded": "Category \"{name}\" was added.",
+  "@categoryAdded": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "categoryUpdated": "Category \"{name}\" was updated.",
+  "@categoryUpdated": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "categoryNameHint": "e.g. Main Course",
+  "courseType": "Course type",
+  "courseTypeHelper": "Used by the recommender to complete a meal",
+  "courseTypeRequired": "Course type is required.",
+  "preparedAt": "Prepared at",
+  "preparedAtHelper": "Items of this category are sent to this station",
+  "stationRequired": "Preparation station is required.",
+  "sortOrder": "Sort order",
+  "sortOrderHelper": "Lower numbers are shown first in the menu",
+  "editCurrency": "Edit currency",
+  "addCurrency": "Add currency",
+  "currencyAdded": "Currency {code} was added.",
+  "@currencyAdded": {
+    "placeholders": {
+      "code": {
+        "type": "String"
+      }
+    }
+  },
+  "currencyUpdated": "Currency {code} was updated.",
+  "@currencyUpdated": {
+    "placeholders": {
+      "code": {
+        "type": "String"
+      }
+    }
+  },
+  "code": "Code",
+  "codeHint": "e.g. EUR",
+  "codeLocked": "The code cannot change while orders or the settings use this currency",
+  "currencyCodeInvalid": "Currency code must be exactly 3 uppercase letters (ISO 4217), e.g. EUR.",
+  "currencyNameHint": "e.g. Euro",
+  "symbol": "Symbol",
+  "reservationDate": "Reservation date",
+  "arrivalTime": "Arrival time",
+  "durationMinutes": "{minutes} min",
+  "@durationMinutes": {
+    "placeholders": {
+      "minutes": {
+        "type": "int"
+      }
+    }
+  },
+  "durationHours": "{hours} h",
+  "@durationHours": {
+    "placeholders": {
+      "hours": {
+        "type": "int"
+      }
+    }
+  },
+  "durationHoursMinutes": "{hours} h {minutes} min",
+  "@durationHoursMinutes": {
+    "placeholders": {
+      "hours": {
+        "type": "int"
+      },
+      "minutes": {
+        "type": "int"
+      }
+    }
+  },
+  "startMustBeFuture": "Start time must be in the future.",
+  "editReservation": "Edit reservation",
+  "newReservation": "New reservation",
+  "reservationUpdated": "The reservation for {name} was updated.",
+  "@reservationUpdated": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "reservationCreated": "Reservation for {name} at table {table} on {time} was created. Confirm it to notify the guest.",
+  "@reservationCreated": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      },
+      "table": {
+        "type": "int"
+      },
+      "time": {
+        "type": "String"
+      }
+    }
+  },
+  "guestName": "Guest name",
+  "guests": "Guests",
+  "partySize": "Party size",
+  "emailOptional": "Email (optional)",
+  "guestGetsEmail": "The guest gets a confirmation email",
+  "duration": "Duration",
+  "tableChecksHelper": "Overlapping reservations and capacity are checked when saving",
+  "tableOption": "Table {number} · {seats} · {area}",
+  "@tableOption": {
+    "placeholders": {
+      "number": {
+        "type": "int"
+      },
+      "seats": {
+        "type": "String"
+      },
+      "area": {
+        "type": "String"
+      }
+    }
+  },
+  "tableRequired": "Table is required.",
+  "noteOptional": "Note (optional)",
+  "reservationNoteHint": "e.g. Birthday, needs a high chair",
+  "editTable": "Edit table {number}",
+  "@editTable": {
+    "placeholders": {
+      "number": {
+        "type": "int"
+      }
+    }
+  },
+  "addTable": "Add table",
+  "tableAdded": "Table {number} ({seats}, {area}) was added.",
+  "@tableAdded": {
+    "placeholders": {
+      "number": {
+        "type": "int"
+      },
+      "seats": {
+        "type": "String"
+      },
+      "area": {
+        "type": "String"
+      }
+    }
+  },
+  "tableUpdated": "Table {number} ({seats}, {area}) was updated.",
+  "@tableUpdated": {
+    "placeholders": {
+      "number": {
+        "type": "int"
+      },
+      "seats": {
+        "type": "String"
+      },
+      "area": {
+        "type": "String"
+      }
+    }
+  },
+  "tableNumberLabel": "Table number",
+  "number": "Number",
+  "seats": "Seats",
+  "capacity": "Capacity",
+  "areaRequired": "Area is required.",
+  "addNewArea": "Add a new area",
+  "inUse": "In use",
+  "notInUseHelper": "Tables not in use cannot be ordered at or reserved",
+  "availableAgain": "{name} is available again today.",
+  "@availableAgain": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "nowHidden": "{name} is now hidden from the waiters' menu.",
+  "@nowHidden": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "removeItemQuestion": "Remove \"{name}\"?",
+  "@removeItemQuestion": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "removeItemMessage": "The item disappears from the menu. Past orders keep it, so sales reports stay correct.",
+  "itemRemoved": "\"{name}\" was removed from the menu.",
+  "@itemRemoved": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "manageMenuSubtitle": "Manage menu items and availability",
+  "addCategoryFirst": "Add a menu category first (Reference Data → Categories).",
+  "addItem": "Add Item",
+  "unavailable": "Unavailable",
+  "availableLabel": "Available",
+  "noMenuItemsMatch": "No menu items match the filters.",
+  "columnItem": "ITEM",
+  "columnCategory": "CATEGORY",
+  "columnPrice": "PRICE",
+  "columnType": "TYPE",
+  "columnOrderNumber": "ORDER",
+  "columnOpened": "OPENED",
+  "columnTotal": "TOTAL",
+  "food": "food",
+  "drinkWord": "drink",
+  "columnAvailableToday": "AVAILABLE TODAY",
+  "columnActions": "ACTIONS",
+  "removeFromMenu": "Remove from menu",
+  "allMarkedRead": "All notifications are marked as read.",
+  "youAreAllCaughtUp": "You are all caught up",
+  "ordersOpenedBetween": "Orders opened between",
+  "ordersSubtitle": "Every bill with its items, kitchen/bar tickets, payments and refunds",
+  "orderNumberOrTable": "Order number or table",
+  "noOrdersMatch": "No orders match the filters.",
+  "cancelOrderNumber": "Cancel order {order}",
+  "@cancelOrderNumber": {
+    "placeholders": {
+      "order": {
+        "type": "String"
+      }
+    }
+  },
+  "cancelOrderTicketsMessage": "Tickets that were not started are cancelled and the kitchen and bar are notified.",
+  "orderCancelledFor": "Order {order} for table {table} was cancelled.",
+  "@orderCancelledFor": {
+    "placeholders": {
+      "order": {
+        "type": "String"
+      },
+      "table": {
+        "type": "int"
+      }
+    }
+  },
+  "orderNumberTitle": "Order {order}",
+  "@orderNumberTitle": {
+    "placeholders": {
+      "order": {
+        "type": "String"
+      }
+    }
+  },
+  "orderDetailsLine": "Table {table} · {guests} · {waiter} · opened {time}",
+  "@orderDetailsLine": {
+    "placeholders": {
+      "table": {
+        "type": "int"
+      },
+      "guests": {
+        "type": "String"
+      },
+      "waiter": {
+        "type": "String"
+      },
+      "time": {
+        "type": "String"
+      }
+    }
+  },
+  "cancelledReason": "Cancelled: {reason}",
+  "@cancelledReason": {
+    "placeholders": {
+      "reason": {
+        "type": "String"
+      }
+    }
+  },
+  "kitchenAndBarTickets": "Kitchen and bar tickets",
+  "ticketLine": "{ticket} · {station} · {status}",
+  "@ticketLine": {
+    "placeholders": {
+      "ticket": {
+        "type": "String"
+      },
+      "station": {
+        "type": "String"
+      },
+      "status": {
+        "type": "String"
+      }
+    }
+  },
+  "noPaymentsYet": "No payments yet.",
+  "paymentLine": "{method} · {amount}",
+  "@paymentLine": {
+    "placeholders": {
+      "method": {
+        "type": "String"
+      },
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "paymentLineWithTip": "{method} · {amount} (incl. {tip} tip)",
+  "@paymentLineWithTip": {
+    "placeholders": {
+      "method": {
+        "type": "String"
+      },
+      "amount": {
+        "type": "String"
+      },
+      "tip": {
+        "type": "String"
+      }
+    }
+  },
+  "refundUpTo": "Refund up to {amount}",
+  "@refundUpTo": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "nothingToRefund": "Nothing left to refund on this payment.",
+  "paymentProcessedLine": "{name} · {time}",
+  "@paymentProcessedLine": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      },
+      "time": {
+        "type": "String"
+      }
+    }
+  },
+  "cashReceivedLine": " · received {received}, change {change}",
+  "@cashReceivedLine": {
+    "placeholders": {
+      "received": {
+        "type": "String"
+      },
+      "change": {
+        "type": "String"
+      }
+    }
+  },
+  "refundedLine": "↩ {amount} refunded by {name} on {time} – {reason}",
+  "@refundedLine": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      },
+      "name": {
+        "type": "String"
+      },
+      "time": {
+        "type": "String"
+      },
+      "reason": {
+        "type": "String"
+      }
+    }
+  },
+  "orderMustBePaid": "Items are already being prepared or were served, so the order has to be paid.",
+  "refundPayment": "Refund payment",
+  "refundAmountQuestion": "Refund {amount}?",
+  "@refundAmountQuestion": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "refundPayPalMessage": "The money is returned to the guest's PayPal account. This cannot be undone.",
+  "refundCashMessage": "Give the cash back to the guest. This cannot be undone.",
+  "refundCompleted": "Refund of {amount} for order {order} was completed.",
+  "@refundCompleted": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      },
+      "order": {
+        "type": "String"
+      }
+    }
+  },
+  "refundIntro": "{method} payment of {amount}. Up to {refundable} can still be refunded.",
+  "@refundIntro": {
+    "placeholders": {
+      "method": {
+        "type": "String"
+      },
+      "amount": {
+        "type": "String"
+      },
+      "refundable": {
+        "type": "String"
+      }
+    }
+  },
+  "atMost": "At most {amount}",
+  "@atMost": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "refundAmount": "Refund amount",
+  "refundReasonHint": "e.g. Steak was overcooked",
+  "referenceDataSubtitle": "Lists used by the menu, tables and payments",
+  "menuCategories": "Menu categories",
+  "itemTags": "Item tags",
+  "tableAreas": "Table areas",
+  "currencies": "Currencies",
+  "systemLists": "System lists",
+  "searchCategories": "Search categories",
+  "columnName": "NAME",
+  "columnCourse": "COURSE",
+  "columnPreparedAt": "PREPARED AT",
+  "columnOrder": "ORDER",
+  "columnItems": "ITEMS",
+  "categoryInUse": "Used by {count, plural, =1{1 menu item} other{{count} menu items}}, including removed items kept for order history.",
+  "@categoryInUse": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "searchTags": "Search tags",
+  "columnMenuItems": "MENU ITEMS",
+  "tagInUse": "Used by {count, plural, =1{1 menu item} other{{count} menu items}}. Remove it from those items first.",
+  "@tagInUse": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "searchAreas": "Search areas",
+  "columnTables": "TABLES",
+  "areaInUse": "Has {count, plural, =1{1 table} other{{count} tables}}. Move or delete them first.",
+  "@areaInUse": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "searchCurrencies": "Search currencies",
+  "columnCode": "CODE",
+  "columnSymbol": "SYMBOL",
+  "columnInUse": "IN USE",
+  "currencyInUse": "Used by the restaurant settings or by existing orders.",
+  "deleteQuestion": "Delete {name}?",
+  "@deleteQuestion": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "removedPermanently": "It is removed permanently.",
+  "entityDeleted": "\"{name}\" was deleted.",
+  "@entityDeleted": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "nothingFound": "Nothing found.",
+  "systemListsInfo": "These lists are fixed. Roles decide what each employee may do, stations decide where orders are sent, and payment methods are tied to the cash and PayPal flows, so renaming or deleting them would break those features.",
+  "roles": "Roles",
+  "preparationStations": "Preparation stations",
+  "paymentMethods": "Payment methods",
+  "entityCategory": "Category",
+  "entityTag": "Tag",
+  "entityArea": "Area",
+  "entityCurrency": "Currency",
+  "addCategoryButton": "Add category",
+  "addTagButton": "Add tag",
+  "addAreaButton": "Add area",
+  "addCurrencyButton": "Add currency",
+  "reportPeriod": "Report period",
+  "reportSaved": "The report was saved to {path}.",
+  "@reportSaved": {
+    "placeholders": {
+      "path": {
+        "type": "String"
+      }
+    }
+  },
+  "reportSaveFailed": "The report could not be saved: {error}",
+  "@reportSaveFailed": {
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "salesAndAnalytics": "Sales & Analytics",
+  "salesSubtitle": "Track performance and revenue metrics",
+  "salesReport": "Sales report",
+  "staffReport": "Staff report",
+  "periodAnalysis": "Period analysis",
+  "lastDays": "Last {count} days",
+  "@lastDays": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "sameAs": "Same as {when}",
+  "@sameAs": {
+    "placeholders": {
+      "when": {
+        "type": "String"
+      }
+    }
+  },
+  "firstSalesComparedTo": "First sales compared to {when}",
+  "@firstSalesComparedTo": {
+    "placeholders": {
+      "when": {
+        "type": "String"
+      }
+    }
+  },
+  "percentFrom": "{change}% from {when}",
+  "@percentFrom": {
+    "placeholders": {
+      "change": {
+        "type": "String"
+      },
+      "when": {
+        "type": "String"
+      }
+    }
+  },
+  "yesterday": "yesterday",
+  "todaysRevenue": "Today's revenue",
+  "kpiGuests": "Guests",
+  "paidOrders": "Paid orders",
+  "activeNow": "{count} active now",
+  "@activeNow": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "averageBill": "Average bill",
+  "tablesServed": "{count, plural, =1{1 table served} other{{count} tables served}}",
+  "@tablesServed": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "popularItemsToday": "Popular items today",
+  "noSalesToday": "No sales yet today.",
+  "revenue": "Revenue",
+  "netRevenueAfterRefunds": "Net revenue (after refunds)",
+  "tips": "Tips",
+  "refunds": "Refunds",
+  "cancelledOrders": "Cancelled orders",
+  "dailyRevenue": "Daily revenue",
+  "bestSellingItems": "Best-selling items",
+  "leastSellingItems": "Least-selling items",
+  "promotionCandidates": "Candidates for a promotion or removal",
+  "salesByCategory": "Sales by category",
+  "soldAndRevenue": "{count} sold · {revenue}",
+  "@soldAndRevenue": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      },
+      "revenue": {
+        "type": "String"
+      }
+    }
+  },
+  "paymentsByMethod": "Payments by method",
+  "paymentsAndAmount": "{count, plural, =1{1 payment} other{{count} payments}} · {amount}",
+  "@paymentsAndAmount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      },
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "staffPerformance": "Staff performance",
+  "columnWaiter": "WAITER",
+  "columnOrders": "ORDERS",
+  "columnRevenue": "REVENUE",
+  "columnAvgBill": "AVG. BILL",
+  "columnTips": "TIPS",
+  "columnSuggestionsAccepted": "SUGGESTIONS ACCEPTED",
+  "nameInactive": "{name} (inactive)",
+  "@nameInactive": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "percentOf": "{percent} of {total}",
+  "@percentOf": {
+    "placeholders": {
+      "percent": {
+        "type": "String"
+      },
+      "total": {
+        "type": "int"
+      }
+    }
+  },
+  "stationTickets": "{station}: {count, plural, =1{1 ticket} other{{count} tickets}}",
+  "@stationTickets": {
+    "placeholders": {
+      "station": {
+        "type": "String"
+      },
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "minutesToReady": "{minutes} min to ready",
+  "@minutesToReady": {
+    "placeholders": {
+      "minutes": {
+        "type": "String"
+      }
+    }
+  },
+  "reportPdfTooltip": "{label} (PDF) for the selected period",
+  "@reportPdfTooltip": {
+    "placeholders": {
+      "label": {
+        "type": "String"
+      }
+    }
+  },
+  "saveAsPdf": "Save as PDF",
+  "soldAndCategory": "{count} sold · {category}",
+  "@soldAndCategory": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      },
+      "category": {
+        "type": "String"
+      }
+    }
+  },
+  "chartTooltip": "{date}\n{amount} · {orders}",
+  "@chartTooltip": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      },
+      "amount": {
+        "type": "String"
+      },
+      "orders": {
+        "type": "String"
+      }
+    }
+  },
+  "orderCount": "{count, plural, =1{1 order} other{{count} orders}}",
+  "@orderCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "reservationsBetween": "Reservations between",
+  "cancelReservation": "Cancel reservation",
+  "cancelReservationMessage": "Cancel {name}'s reservation for {time}? Waiters are notified.",
+  "@cancelReservationMessage": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      },
+      "time": {
+        "type": "String"
+      }
+    }
+  },
+  "cancelReservationEmailMessage": "Cancel {name}'s reservation for {time}? The guest gets an email and waiters are notified.",
+  "@cancelReservationEmailMessage": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      },
+      "time": {
+        "type": "String"
+      }
+    }
+  },
+  "reservationCancelledFor": "{name}'s reservation was cancelled.",
+  "@reservationCancelledFor": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "reservationsSubtitle": "Book tables and follow each reservation through its statuses",
+  "newReservationButton": "New Reservation",
+  "guestNameOrPhone": "Guest name or phone",
+  "noReservationsMatch": "No reservations match the filters.",
+  "columnGuest": "GUEST",
+  "columnWhen": "WHEN",
+  "columnTable": "TABLE",
+  "columnGuests": "GUESTS",
+  "columnStatus": "STATUS",
+  "timeRange": "{start} – {end}",
+  "@timeRange": {
+    "placeholders": {
+      "start": {
+        "type": "String"
+      },
+      "end": {
+        "type": "String"
+      }
+    }
+  },
+  "confirmEmailsGuest": "Confirm (emails the guest)",
+  "reservationConfirmedFor": "{name}'s reservation is confirmed.",
+  "@reservationConfirmedFor": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "guestsArrived": "Guests arrived",
+  "arrivedTooEarly": "Guests can be marked as arrived from 30 minutes before the reservation.",
+  "guestArrived": "{name} has arrived; reservation completed.",
+  "@guestArrived": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "noShow": "No-show",
+  "noShowTooEarly": "A no-show can be recorded 15 minutes after the reservation starts.",
+  "markedNoShow": "{name} was marked as a no-show.",
+  "@markedNoShow": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "tableAndGuests": "Table {table} · {guests}",
+  "@tableAndGuests": {
+    "placeholders": {
+      "table": {
+        "type": "int"
+      },
+      "guests": {
+        "type": "String"
+      }
+    }
+  },
+  "createdByOn": "Created by {name} on {time}",
+  "@createdByOn": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      },
+      "time": {
+        "type": "String"
+      }
+    }
+  },
+  "createdAs": "Created as {status}",
+  "@createdAs": {
+    "placeholders": {
+      "status": {
+        "type": "String"
+      }
+    }
+  },
+  "statusChange": "{from} → {to}",
+  "@statusChange": {
+    "placeholders": {
+      "from": {
+        "type": "String"
+      },
+      "to": {
+        "type": "String"
+      }
+    }
+  },
+  "saveSettingsQuestion": "Save settings?",
+  "saveSettingsMessage": "New orders use the new VAT rate and currency. Open orders keep the values they were opened with.",
+  "saveSettings": "Save Settings",
+  "settingsSaved": "Settings saved: {name}, {currency}, VAT {rate}%.",
+  "@settingsSaved": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      },
+      "currency": {
+        "type": "String"
+      },
+      "rate": {
+        "type": "String"
+      }
+    }
+  },
+  "systemSettings": "System Settings",
+  "configurePreferences": "Configure restaurant preferences",
+  "generalSettings": "General Settings",
+  "restaurantName": "Restaurant name",
+  "currency": "Currency",
+  "currencyHelper": "PayPal payments are charged in this currency",
+  "currencyOption": "{code} ({symbol}) – {name}",
+  "@currencyOption": {
+    "placeholders": {
+      "code": {
+        "type": "String"
+      },
+      "symbol": {
+        "type": "String"
+      },
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "currencyRequired": "Currency is required.",
+  "addNewCurrency": "Add a new currency",
+  "vatRatePercent": "VAT rate (%)",
+  "vatRateHelper": "Included in menu prices; receipts show how much of the total is VAT",
+  "vatRate": "VAT rate",
+  "lastChanged": "Last changed {time}",
+  "@lastChanged": {
+    "placeholders": {
+      "time": {
+        "type": "String"
+      }
+    }
+  },
+  "lastChangedBy": "Last changed {time} by {name}",
+  "@lastChangedBy": {
+    "placeholders": {
+      "time": {
+        "type": "String"
+      },
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "myPreferences": "My preferences",
+  "myPreferencesHint": "Only for your account. Notifications and PDF reports use this language too.",
+  "deleteTableQuestion": "Delete table {number}?",
+  "@deleteTableQuestion": {
+    "placeholders": {
+      "number": {
+        "type": "int"
+      }
+    }
+  },
+  "tableRemovedPermanently": "The table is removed permanently.",
+  "tableDeleted": "Table {number} was deleted.",
+  "@tableDeleted": {
+    "placeholders": {
+      "number": {
+        "type": "int"
+      }
+    }
+  },
+  "tablesSubtitle": "Seating plan with live status",
+  "addAreaFirst": "Add a table area first (Reference Data → Table areas).",
+  "addTableButton": "Add Table",
+  "noTablesMatch": "No tables match the filters.",
+  "columnArea": "AREA",
+  "columnSeats": "SEATS",
+  "columnCurrentBill": "CURRENT BILL",
+  "columnNextReservation": "NEXT RESERVATION",
+  "tableNotInUse": "Table {number} (not in use)",
+  "@tableNotInUse": {
+    "placeholders": {
+      "number": {
+        "type": "int"
+      }
+    }
+  },
+  "billAndGuests": "{amount} · {guests}",
+  "@billAndGuests": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      },
+      "guests": {
+        "type": "String"
+      }
+    }
+  },
+  "reservationTimeAndGuest": "{time} · {name}",
+  "@reservationTimeAndGuest": {
+    "placeholders": {
+      "time": {
+        "type": "String"
+      },
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "deleteTable": "Delete table",
+  "tableHasHistory": "The table has orders or reservations in its history. Mark it as not in use instead.",
+  "adminDashboard": "Admin Dashboard",
+  "chooseView": "Choose what you'd like to view",
+  "kitchenView": "Kitchen View",
+  "monitorFood": "Monitor food orders",
+  "barView": "Bar View",
+  "monitorDrinks": "Monitor drink orders",
+  "manageSystem": "Manage system",
+  "staffLogin": "Staff Login",
+  "demoAccounts": "Demo accounts (password: test)",
+  "demoDesktop": "• desktop – admin panel",
+  "demoKitchen": "• kitchen – kitchen display",
+  "demoBar": "• bar – bar display",
+  "ticketBeingPrepared": "Ticket {ticket} for table {table} is being prepared.",
+  "@ticketBeingPrepared": {
+    "placeholders": {
+      "ticket": {
+        "type": "String"
+      },
+      "table": {
+        "type": "int"
+      }
+    }
+  },
+  "ticketReadyNotified": "Ticket {ticket} is ready. {waiter} has been notified.",
+  "@ticketReadyNotified": {
+    "placeholders": {
+      "ticket": {
+        "type": "String"
+      },
+      "waiter": {
+        "type": "String"
+      }
+    }
+  },
+  "kitchenDisplay": "Kitchen Display",
+  "barDisplay": "Bar Display",
+  "activeOrdersCount": "{count, plural, =1{1 active order} other{{count} active orders}}",
+  "@activeOrdersCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "viewOnly": "View only",
+  "noPendingFood": "No pending food orders",
+  "noPendingDrinks": "No pending drink orders",
+  "ticketTitle": "Order {ticket}",
+  "@ticketTitle": {
+    "placeholders": {
+      "ticket": {
+        "type": "String"
+      }
+    }
+  },
+  "quantityPrefix": "x{quantity}",
+  "@quantityPrefix": {
+    "placeholders": {
+      "quantity": {
+        "type": "int"
+      }
+    }
+  },
+  "startPreparing": "Start Preparing",
+  "markAsReady": "Mark as Ready",
+  "completeOrder": "Complete Order",
+  "summaryNew": "New",
+  "summaryPreparing": "Preparing",
+  "longestWait": "Longest wait",
+  "avgTimeToReadyToday": "Avg. time to ready today",
+  "minutesValue": "{minutes} min",
+  "@minutesValue": {
+    "placeholders": {
+      "minutes": {
+        "type": "String"
+      }
+    }
+  },
+  "completedToday": "Completed today",
+  "roleStaff": "{role} staff",
+  "@roleStaff": {
+    "placeholders": {
+      "role": {
+        "type": "String"
+      }
+    }
+  },
+  "backToDashboardShort": "Back to dashboard",
+  "resultsCount": "{count, plural, =1{1 result} other{{count} results}}",
+  "@resultsCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "previousPage": "Previous page",
+  "pageOf": "Page {page} of {pages}",
+  "@pageOf": {
+    "placeholders": {
+      "page": {
+        "type": "int"
+      },
+      "pages": {
+        "type": "int"
+      }
+    }
+  },
+  "nextPage": "Next page",
+  "table": "Table",
+  "tableNumber": "Table {number}",
+  "@tableNumber": {
+    "placeholders": {
+      "number": {
+        "type": "int"
+      }
+    }
+  },
+  "tableAndOrder": "Table {number} · {order}",
+  "@tableAndOrder": {
+    "placeholders": {
+      "number": {
+        "type": "int"
+      },
+      "order": {
+        "type": "String"
+      }
+    }
+  },
+  "guestCount": "{count, plural, =1{1 guest} other{{count} guests}}",
+  "@guestCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "itemCount": "{count, plural, =1{1 item} other{{count} items}}",
+  "@itemCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "total": "Total",
+  "payment": "Payment",
+  "paid": "Paid",
+  "cancelled": "Cancelled",
+  "status": "Status",
+  "save": "Save",
+  "close": "Close",
+  "more": "More",
+  "loadMore": "Load more",
+  "logout": "Logout",
+  "logoutQuestion": "Do you want to log out?",
+  "email": "Email",
+  "username": "Username",
+  "password": "Password",
+  "showPassword": "Show password",
+  "hidePassword": "Hide password",
+  "login": "Login",
+  "enterCredentials": "Enter your credentials to continue",
+  "notifications": "Notifications",
+  "settings": "Settings",
+  "account": "Account",
+  "help": "Help",
+  "languageHint": "Notifications, emails and receipts use this language too.",
+  "payPal": "PayPal",
+  "receipt": "Receipt",
+  "done": "Done",
+  "change": "Change",
+  "amount": "Amount",
+  "tip": "Tip",
+  "tipPercent": "Tip ({percent}%)",
+  "@tipPercent": {
+    "placeholders": {
+      "percent": {
+        "type": "String"
+      }
+    }
+  },
+  "cashReceived": "Cash received",
+  "reasonText": "Reason: {reason}",
+  "@reasonText": {
+    "placeholders": {
+      "reason": {
+        "type": "String"
+      }
+    }
+  },
+  "quantityTimesPrice": "{price} × {quantity}",
+  "@quantityTimesPrice": {
+    "placeholders": {
+      "price": {
+        "type": "String"
+      },
+      "quantity": {
+        "type": "int"
+      }
+    }
+  },
+  "itemTimesQuantity": "{name} × {quantity}",
+  "@itemTimesQuantity": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      },
+      "quantity": {
+        "type": "int"
+      }
+    }
+  },
+  "passwordChangedLogIn": "Your password was changed. You can log in now.",
+  "resetPassword": "Reset password",
+  "resetEnterCode": "Enter the code from the email and choose a new password.",
+  "resetEnterEmail": "Enter the email address of your account. We will send you a 6-digit code.",
+  "resetCode": "Reset code",
+  "resetCodeInvalid": "The reset code has 6 digits.",
+  "newPassword": "New password",
+  "passwordHint": "At least 8 characters, with a letter and a number",
+  "repeatNewPassword": "Repeat new password",
+  "changePassword": "Change password",
+  "sendCode": "Send code",
+  "sendNewCode": "Send a new code",
+  "forgotPassword": "Forgot password?",
+  "currentPassword": "Current password",
+  "waiterLogin": "Waiter Login",
+  "demoAccount": "Demo account: ",
+  "activeTables": "Active Tables",
+  "tablesWithOrders": "{count, plural, =1{1 table with orders} other{{count} tables with orders}}",
+  "@tablesWithOrders": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "noOpenOrders": "You have no open orders.",
+  "itemAddedInRound": "{name} added ({count} in this round)",
+  "@itemAddedInRound": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      },
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "itemAdded": "{name} added.",
+  "@itemAdded": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "sendOrderQuestion": "Send order?",
+  "sendOrderMessage": "Send {items} ({total}) for table {table} to the kitchen and bar? Items cannot be removed once preparation starts.",
+  "@sendOrderMessage": {
+    "placeholders": {
+      "items": {
+        "type": "String"
+      },
+      "total": {
+        "type": "String"
+      },
+      "table": {
+        "type": "int"
+      }
+    }
+  },
+  "sendOrder": "Send Order",
+  "orderSentTo": "Order sent to the {stations}.",
+  "@orderSentTo": {
+    "placeholders": {
+      "stations": {
+        "type": "String"
+      }
+    }
+  },
+  "and": "and",
+  "discardRoundQuestion": "Discard this round?",
+  "discardRoundMessage": "The {items} in the cart have not been sent yet.",
+  "@discardRoundMessage": {
+    "placeholders": {
+      "items": {
+        "type": "String"
+      }
+    }
+  },
+  "discard": "Discard",
+  "guestsAndItems": "{guests} · {items}",
+  "@guestsAndItems": {
+    "placeholders": {
+      "guests": {
+        "type": "String"
+      },
+      "items": {
+        "type": "String"
+      }
+    }
+  },
+  "addingToOrder": "Adding to {order} · {items}",
+  "@addingToOrder": {
+    "placeholders": {
+      "order": {
+        "type": "String"
+      },
+      "items": {
+        "type": "String"
+      }
+    }
+  },
+  "closeSearch": "Close search",
+  "searchMenu": "Search the menu",
+  "currentOrder": "Current order",
+  "searchByNameOrDescription": "Search by name or description",
+  "favorites": "Favorites",
+  "sending": "Sending…",
+  "reviewTotal": "Review · {total}",
+  "@reviewTotal": {
+    "placeholders": {
+      "total": {
+        "type": "String"
+      }
+    }
+  },
+  "favoritesSubtitle": "Your starred and most sold items · Updates based on your sales",
+  "noFavorites": "No favorites yet. Tap the star on any item to pin it here; your best sellers appear automatically.",
+  "noItemsFound": "No items found.",
+  "removeFromFavorites": "Remove from favorites",
+  "addToFavorites": "Add to favorites",
+  "soldOut": "Sold out",
+  "soldCount": "{count} sold",
+  "@soldCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "allCaughtUp": "All caught up",
+  "unreadCount": "{count} unread",
+  "@unreadCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "markAllAsRead": "Mark all as read",
+  "all": "All",
+  "unread": "Unread",
+  "noNotifications": "No notifications.",
+  "guideTablesTitle": "Select Tables",
+  "guideTablesText": "Choose from available tables with capacity and status tracking. Green means available, red means occupied.",
+  "guideOrdersTitle": "Take Orders",
+  "guideOrdersText": "Browse the menu by category. Your favorites and best sellers are one tap away, and items sold out today are greyed out.",
+  "guideSuggestionsTitle": "Smart Suggestions",
+  "guideSuggestionsText": "After you add an item, Servio suggests what usually goes with it, based on what guests order together.",
+  "guidePaymentTitle": "Serve & Get Paid",
+  "guidePaymentText": "You are notified when the kitchen or bar has an order ready. Take payment in cash or through PayPal, with a tip.",
+  "waiterGuide": "Waiter Guide",
+  "skip": "Skip",
+  "getStarted": "Get Started",
+  "next": "Next",
+  "seatCount": "{count, plural, =1{1 seat} other{{count} seats}}",
+  "@seatCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "upsellSuggestion": "Upsell Suggestion",
+  "guideUpsellQuestion": "Would your guest like a drink with that?",
+  "addWithPlus": "+ Add",
+  "guestsAndWaiter": "{guests} · {waiter}",
+  "@guestsAndWaiter": {
+    "placeholders": {
+      "guests": {
+        "type": "String"
+      },
+      "waiter": {
+        "type": "String"
+      }
+    }
+  },
+  "openedAt": "Opened {time}",
+  "@openedAt": {
+    "placeholders": {
+      "time": {
+        "type": "String"
+      }
+    }
+  },
+  "closedAt": " · closed {time}",
+  "@closedAt": {
+    "placeholders": {
+      "time": {
+        "type": "String"
+      }
+    }
+  },
+  "amountPaid": "Amount paid",
+  "refundOn": "Refund {date}",
+  "@refundOn": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "takenBy": "Taken by",
+  "viewReceipt": "View receipt",
+  "orderHistory": "Order History",
+  "yourClosedOrders": "Your closed orders",
+  "noOrdersYet": "No orders here yet.",
+  "historyLine": "{date} · {items} · {guests}",
+  "@historyLine": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      },
+      "items": {
+        "type": "String"
+      },
+      "guests": {
+        "type": "String"
+      }
+    }
+  },
+  "takePaymentQuestion": "Take payment?",
+  "cashPaymentMessage": "Record a cash payment of {amount} for table {table}?",
+  "@cashPaymentMessage": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      },
+      "table": {
+        "type": "int"
+      }
+    }
+  },
+  "cashPaymentWithTipMessage": "Record a cash payment of {amount} including a {tip} tip for table {table}?",
+  "@cashPaymentWithTipMessage": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      },
+      "tip": {
+        "type": "String"
+      },
+      "table": {
+        "type": "int"
+      }
+    }
+  },
+  "giveChange": "Give {change} change.",
+  "@giveChange": {
+    "placeholders": {
+      "change": {
+        "type": "String"
+      }
+    }
+  },
+  "cardPaymentMessage": "Charge {amount} for table {table} through PayPal?",
+  "@cardPaymentMessage": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      },
+      "table": {
+        "type": "int"
+      }
+    }
+  },
+  "cardPaymentWithTipMessage": "Charge {amount} including a {tip} tip for table {table} through PayPal?",
+  "@cardPaymentWithTipMessage": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      },
+      "tip": {
+        "type": "String"
+      },
+      "table": {
+        "type": "int"
+      }
+    }
+  },
+  "payPalCancelled": "The PayPal payment was cancelled. No money was taken.",
+  "paymentNotConfirmed": "Payment not confirmed",
+  "tablePaid": "Table {number} paid",
+  "@tablePaid": {
+    "placeholders": {
+      "number": {
+        "type": "int"
+      }
+    }
+  },
+  "paidBy": "Paid by",
+  "processPayment": "Process Payment",
+  "stillBeingPrepared": "Some items are still being prepared. The bill can be paid once everything is ready.",
+  "totalAmount": "Total Amount",
+  "orderSummary": "Order Summary",
+  "bill": "Bill",
+  "totalToPay": "Total to pay",
+  "tipAmount": "Tip Amount",
+  "plusTip": "+ {tip} tip",
+  "@plusTip": {
+    "placeholders": {
+      "tip": {
+        "type": "String"
+      }
+    }
+  },
+  "payPalSecurePage": "The guest pays on PayPal's secure page with their PayPal account.",
+  "selectPaymentMethod": "Select Payment Method",
+  "completeCashPayment": "Complete Cash Payment",
+  "enterCashReceived": "Enter Cash Received",
+  "payWithPayPal": "Pay with PayPal",
+  "cashReceivedTitle": "Cash Received",
+  "stillMissing": "Still missing",
+  "exact": "Exact",
+  "clear": "Clear",
+  "cancelPayment": "Cancel payment",
+  "profileSaved": "Your profile was saved.",
+  "takePhoto": "Take a photo",
+  "chooseFromGallery": "Choose from gallery",
+  "removePhoto": "Remove photo",
+  "passwordChanged": "Your password was changed.",
+  "myProfile": "My Profile",
+  "changePhoto": "Change photo",
+  "firstName": "First name",
+  "lastName": "Last name",
+  "phoneOptional": "Phone (optional)",
+  "saveChanges": "Save changes",
+  "cancelOrder": "Cancel order",
+  "cancelOrderMessage": "Only orders that the kitchen and bar have not started can be cancelled. Why is it cancelled?",
+  "orderCancelled": "The order was cancelled.",
+  "order": "Order",
+  "orderAndWaiter": "{order} · {waiter}",
+  "@orderAndWaiter": {
+    "placeholders": {
+      "order": {
+        "type": "String"
+      },
+      "waiter": {
+        "type": "String"
+      }
+    }
+  },
+  "welcomeName": "Welcome, {name}",
+  "@welcomeName": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "myActiveTables": "My active tables",
+  "myProfileMenu": "My profile",
+  "tableStatus": "Table Status",
+  "available": "Available",
+  "occupied": "Occupied",
+  "reserved": "Reserved",
+  "badgeAvailable": "AVAIL",
+  "badgeOccupied": "OCC",
+  "badgeReserved": "RES",
+  "allAreas": "All areas",
+  "noTablesInUse": "No tables are in use.",
+  "maxSeats": "Max: {count}",
+  "@maxSeats": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "nowSeated": "Now: {count}",
+  "@nowSeated": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "reservationAt": "{time} · {guests}",
+  "@reservationAt": {
+    "placeholders": {
+      "time": {
+        "type": "String"
+      },
+      "guests": {
+        "type": "String"
+      }
+    }
+  },
+  "reservedFor": "Reserved for {name} at {time} ({guests}).",
+  "@reservedFor": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      },
+      "time": {
+        "type": "String"
+      },
+      "guests": {
+        "type": "String"
+      }
+    }
+  },
+  "howManyGuests": "How many guests?",
+  "fewerGuests": "Fewer guests",
+  "moreGuests": "More guests",
+  "tableSeats": "The table seats {count}.",
+  "@tableSeats": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "startOrder": "Start order",
+  "currentOrderTitle": "Current Order",
+  "cartEmpty": "The cart is empty. Tap menu items to add them.",
+  "priceEach": "{price} each",
+  "@priceEach": {
+    "placeholders": {
+      "price": {
+        "type": "String"
+      }
+    }
+  },
+  "remove": "Remove",
+  "oneLess": "One less",
+  "oneMore": "One more",
+  "addNote": "Add note",
+  "alreadyOnOrder": "Already on {order}",
+  "@alreadyOnOrder": {
+    "placeholders": {
+      "order": {
+        "type": "String"
+      }
+    }
+  },
+  "thisRound": "This round",
+  "clearAll": "Clear All",
+  "noteFor": "Note for {name}",
+  "@noteFor": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "noteHint": "e.g. no onions, well done",
+  "stationOrderServed": "{station} order for table {table} served.",
+  "@stationOrderServed": {
+    "placeholders": {
+      "station": {
+        "type": "String"
+      },
+      "table": {
+        "type": "int"
+      }
+    }
+  },
+  "orderCardLine": "{items} · {order} · since {time}",
+  "@orderCardLine": {
+    "placeholders": {
+      "items": {
+        "type": "String"
+      },
+      "order": {
+        "type": "String"
+      },
+      "time": {
+        "type": "String"
+      }
+    }
+  },
+  "stationOrderReady": "{station} order is ready",
+  "@stationOrderReady": {
+    "placeholders": {
+      "station": {
+        "type": "String"
+      }
+    }
+  },
+  "markServed": "Mark served",
+  "addItems": "Add Items",
+  "upsellDrinkQuestion": "Would your guest like a drink with the {name}?",
+  "@upsellDrinkQuestion": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "upsellOftenAdd": "Guests who order {name} often add:",
+  "@upsellOftenAdd": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "add": "Add",
+  "notNow": "Not Now",
+  "appName": "Servio",
+  "cannotUseApp": "The {role} account cannot use this app.",
+  "@cannotUseApp": {
+    "placeholders": {
+      "role": {
+        "type": "String"
+      }
+    }
+  },
+  "sessionExpired": "Your session has expired. Please log in again.",
+  "justNow": "just now",
+  "minutesAgo": "{minutes} min ago",
+  "@minutesAgo": {
+    "placeholders": {
+      "minutes": {
+        "type": "int"
+      }
+    }
+  },
+  "todayAt": "today {time}",
+  "@todayAt": {
+    "placeholders": {
+      "time": {
+        "type": "String"
+      }
+    }
+  },
+  "fieldRequired": "{label} is required.",
+  "@fieldRequired": {
+    "placeholders": {
+      "label": {
+        "type": "String"
+      }
+    }
+  },
+  "fieldLengthBetween": "{label} must be between {min} and {max} characters long.",
+  "@fieldLengthBetween": {
+    "placeholders": {
+      "label": {
+        "type": "String"
+      },
+      "min": {
+        "type": "int"
+      },
+      "max": {
+        "type": "int"
+      }
+    }
+  },
+  "fieldLengthMax": "{label} can be at most {max} characters long.",
+  "@fieldLengthMax": {
+    "placeholders": {
+      "label": {
+        "type": "String"
+      },
+      "max": {
+        "type": "int"
+      }
+    }
+  },
+  "emailRequired": "Email is required.",
+  "emailInvalid": "Enter a valid email address, e.g. name@example.com.",
+  "phoneRequired": "Phone number is required.",
+  "phoneInvalid": "Enter a phone number with 6 to 19 digits, optionally starting with +, e.g. +387 61 123 456.",
+  "usernameRequired": "Username is required.",
+  "usernameInvalid": "Username must be 3 to 50 characters and may contain only letters, digits, dots and underscores.",
+  "passwordRequired": "Password is required.",
+  "passwordInvalid": "Password must be 8 to 100 characters long and contain at least one letter and one digit.",
+  "passwordsDoNotMatch": "Passwords do not match.",
+  "numberInvalid": "{label} must be a number, e.g. 12.50.",
+  "@numberInvalid": {
+    "placeholders": {
+      "label": {
+        "type": "String"
+      }
+    }
+  },
+  "numberBetween": "{label} must be between {min} and {max}.",
+  "@numberBetween": {
+    "placeholders": {
+      "label": {
+        "type": "String"
+      },
+      "min": {
+        "type": "String"
+      },
+      "max": {
+        "type": "String"
+      }
+    }
+  },
+  "wholeNumberInvalid": "{label} must be a whole number.",
+  "@wholeNumberInvalid": {
+    "placeholders": {
+      "label": {
+        "type": "String"
+      }
+    }
+  },
+  "courseAppetizer": "Appetizer",
+  "courseMainCourse": "Main course",
+  "courseSide": "Side",
+  "courseDessert": "Dessert",
+  "courseDrink": "Drink",
+  "reservationPending": "Pending",
+  "reservationConfirmed": "Confirmed",
+  "reservationCompleted": "Completed",
+  "reservationCancelled": "Cancelled",
+  "reservationNoShow": "No-show",
+  "ticketNew": "New",
+  "ticketPreparing": "Preparing",
+  "ticketReady": "Ready",
+  "ticketServed": "Served",
+  "ticketCancelled": "Cancelled",
+  "paymentPending": "Pending",
+  "paymentPaid": "Paid",
+  "paymentFailed": "Failed",
+  "paymentCancelled": "Cancelled",
+  "paymentPartiallyRefunded": "Partially refunded",
+  "paymentRefunded": "Refunded",
+  "roleAdmin": "Admin",
+  "roleWaiter": "Waiter",
+  "roleKitchen": "Kitchen",
+  "roleBar": "Bar",
+  "methodCash": "Cash",
+  "serverUnreachable": "Cannot reach the server at {url}. Check that the API is running.",
+  "@serverUnreachable": {
+    "placeholders": {
+      "url": {
+        "type": "String"
+      }
+    }
+  },
+  "confirm": "Confirm",
+  "back": "Back",
+  "cancelIt": "Cancel it",
+  "reason": "Reason",
+  "reasonHint": "e.g. Guest changed their mind",
+  "reasonRequired": "Please enter a reason.",
+  "reasonLength": "Reason must be between 3 and 500 characters long.",
+  "errorForbidden": "You do not have permission for this action.",
+  "errorNotFound": "The requested record was not found.",
+  "errorServer": "Something went wrong on the server. Please try again.",
+  "errorGeneric": "Something went wrong. Please try again.",
+  "tryAgain": "Try again",
+  "vatIncluded": "Includes {rate}% VAT: {tax} · base {base}",
+  "@vatIncluded": {
+    "placeholders": {
+      "rate": {
+        "type": "String"
+      },
+      "tax": {
+        "type": "String"
+      },
+      "base": {
+        "type": "String"
+      }
+    }
+  },
+  "language": "Language",
+  "languageEnglish": "English",
+  "languageBosnian": "Bosnian"
+}

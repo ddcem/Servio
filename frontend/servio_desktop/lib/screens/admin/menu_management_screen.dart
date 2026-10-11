@@ -89,10 +89,7 @@ class _MenuManagementScreenState extends State<MenuManagementScreen> {
     try {
       await _items.setAvailability(item.id, available);
       if (!mounted) return;
-      showSuccess(
-        context,
-        available ? '${item.name} is available again today.' : '${item.name} is now hidden from the waiters\' menu.',
-      );
+      showSuccess(context, available ? l10n.availableAgain(item.name) : l10n.nowHidden(item.name));
       await _load();
     } catch (e) {
       if (mounted) showError(context, e);
@@ -102,16 +99,16 @@ class _MenuManagementScreenState extends State<MenuManagementScreen> {
   Future<void> _delete(MenuItem item) async {
     final confirmed = await confirmAction(
       context,
-      title: 'Remove "${item.name}"?',
-      message: 'The item disappears from the menu. Past orders keep it, so sales reports stay correct.',
-      confirmLabel: 'Remove',
+      title: l10n.removeItemQuestion(item.name),
+      message: l10n.removeItemMessage,
+      confirmLabel: l10n.remove,
       destructive: true,
     );
     if (!confirmed || !mounted) return;
     try {
       await _items.delete(item.id);
       if (!mounted) return;
-      showSuccess(context, '"${item.name}" was removed from the menu.');
+      showSuccess(context, l10n.itemRemoved(item.name));
       await _load();
     } catch (e) {
       if (mounted) showError(context, e);
@@ -120,15 +117,15 @@ class _MenuManagementScreenState extends State<MenuManagementScreen> {
 
   @override
   Widget build(BuildContext _) => AdminPage(
-    title: 'Menu Management',
-    subtitle: 'Manage menu items and availability',
+    title: l10n.menuManagement,
+    subtitle: l10n.manageMenuSubtitle,
     actions: [
       Tooltip(
-        message: _categories.isEmpty ? 'Add a menu category first (Reference Data → Categories).' : '',
+        message: _categories.isEmpty ? l10n.addCategoryFirst : '',
         child: FilledButton.icon(
           onPressed: _categories.isEmpty ? null : () => _openForm(),
           icon: const Icon(Icons.add),
-          label: const Text('Add Item'),
+          label: Text(l10n.addItem),
         ),
       ),
     ],
@@ -139,17 +136,17 @@ class _MenuManagementScreenState extends State<MenuManagementScreen> {
           spacing: 16,
           runSpacing: 12,
           children: [
-            SearchField(hint: 'Search by name or description', onChanged: (value) => _filter(() => _search = value)),
+            SearchField(hint: l10n.searchByNameOrDescription, onChanged: (value) => _filter(() => _search = value)),
             FilterDropdown<int>(
-              label: 'Category',
+              label: l10n.category,
               value: _categoryId,
               items: {for (final c in _categories) c.id: c.name},
               onChanged: (value) => _filter(() => _categoryId = value),
             ),
             FilterDropdown<bool>(
-              label: 'Available today',
+              label: l10n.availableToday,
               value: _available,
-              items: const {true: 'Available', false: 'Unavailable'},
+              items: {true: l10n.availableLabel, false: l10n.unavailable},
               onChanged: (value) => _filter(() => _available = value),
             ),
           ],
@@ -162,28 +159,28 @@ class _MenuManagementScreenState extends State<MenuManagementScreen> {
 
   Widget _buildTable() {
     if (_error != null && _result == null) return ErrorView(error: _error!, onRetry: _load);
-    if (_result == null) return const LoadingView();
+    if (_result == null) return LoadingView();
     if (_result!.items.isEmpty) {
-      return const EmptyView(icon: Icons.inventory_2_outlined, message: 'No menu items match the filters.');
+      return EmptyView(icon: Icons.inventory_2_outlined, message: l10n.noMenuItemsMatch);
     }
 
     final api = context.read<ApiClient>();
     return Panel(
-      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 8),
+      padding: EdgeInsets.symmetric(horizontal: 8, vertical: 8),
       child: Column(
         children: [
           WideTable(
             child: DataTable(
-              headingTextStyle: const TextStyle(fontWeight: FontWeight.w600, color: ServioColors.textMuted),
+              headingTextStyle: TextStyle(fontWeight: FontWeight.w600, color: ServioColors.textMuted),
               dataRowMinHeight: 64,
               dataRowMaxHeight: 72,
-              columns: const [
-                DataColumn(label: Text('ITEM')),
-                DataColumn(label: Text('CATEGORY')),
-                DataColumn(label: Text('TYPE')),
-                DataColumn(label: Text('PRICE'), numeric: true),
-                DataColumn(label: Text('AVAILABLE TODAY')),
-                DataColumn(label: Text('ACTIONS')),
+              columns: [
+                DataColumn(label: Text(l10n.columnItem)),
+                DataColumn(label: Text(l10n.columnCategory)),
+                DataColumn(label: Text(l10n.columnType)),
+                DataColumn(label: Text(l10n.columnPrice), numeric: true),
+                DataColumn(label: Text(l10n.columnAvailableToday)),
+                DataColumn(label: Text(l10n.columnActions)),
               ],
               rows: [
                 for (final item in _result!.items)
@@ -209,7 +206,7 @@ class _MenuManagementScreenState extends State<MenuManagementScreen> {
                       DataCell(Text(item.categoryName)),
                       DataCell(
                         StatusBadge(
-                          item.isDrink ? 'drink' : 'food',
+                          item.isDrink ? l10n.drinkWord : l10n.food,
                           color: item.isDrink ? ServioColors.bar : ServioColors.kitchenDark,
                           background: item.isDrink ? const Color(0xFFF3E8FF) : const Color(0xFFFFEDD5),
                         ),
@@ -223,7 +220,7 @@ class _MenuManagementScreenState extends State<MenuManagementScreen> {
                             Switch(value: item.isAvailableToday, onChanged: (value) => _toggleAvailability(item, value)),
                             const SizedBox(width: 8),
                             Text(
-                              item.isAvailableToday ? 'Available' : 'Unavailable',
+                              item.isAvailableToday ? l10n.availableLabel : l10n.unavailable,
                               style: TextStyle(color: item.isAvailableToday ? ServioColors.success : ServioColors.danger),
                             ),
                           ],
@@ -234,13 +231,13 @@ class _MenuManagementScreenState extends State<MenuManagementScreen> {
                           children: [
                             ActionIcon(
                               icon: Icons.edit_outlined,
-                              tooltip: 'Edit',
+                              tooltip: l10n.edit,
                               color: ServioColors.primary,
                               onPressed: () => _openForm(item),
                             ),
                             ActionIcon(
                               icon: Icons.delete_outline,
-                              tooltip: 'Remove from menu',
+                              tooltip: l10n.removeFromMenu,
                               color: ServioColors.danger,
                               onPressed: () => _delete(item),
                             ),

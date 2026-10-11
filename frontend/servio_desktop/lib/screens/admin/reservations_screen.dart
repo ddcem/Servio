@@ -78,7 +78,7 @@ class _ReservationsScreenState extends State<ReservationsScreen> {
       firstDate: now.subtract(const Duration(days: 365)),
       lastDate: now.add(const Duration(days: 180)),
       initialDateRange: _range,
-      helpText: 'Reservations between',
+      helpText: l10n.reservationsBetween,
     );
     if (range != null) _filter(() => _range = range);
   }
@@ -104,14 +104,14 @@ class _ReservationsScreenState extends State<ReservationsScreen> {
   Future<void> _cancel(Reservation r) async {
     final reason = await askForReason(
       context,
-      title: 'Cancel reservation',
-      message:
-          'Cancel ${r.guestName}\'s reservation for ${Formatters.dateTime(r.startTime)}? '
-          '${r.guestEmail == null ? '' : 'The guest is emailed the reason. '}Waiters are notified.',
-      confirmLabel: 'Cancel reservation',
+      title: l10n.cancelReservation,
+      message: r.guestEmail == null
+          ? l10n.cancelReservationMessage(r.guestName, Formatters.dateTime(r.startTime))
+          : l10n.cancelReservationEmailMessage(r.guestName, Formatters.dateTime(r.startTime)),
+      confirmLabel: l10n.cancelReservation,
     );
     if (reason == null) return;
-    await _run(() => _reservations.cancel(r.id, reason), (x) => '${x.guestName}\'s reservation was cancelled.');
+    await _run(() => _reservations.cancel(r.id, reason), (x) => l10n.reservationCancelledFor(x.guestName));
   }
 
   Future<void> _showDetails(Reservation summary) async {
@@ -123,9 +123,11 @@ class _ReservationsScreenState extends State<ReservationsScreen> {
 
   @override
   Widget build(BuildContext _) => AdminPage(
-    title: 'Reservations',
-    subtitle: 'Book tables and follow each reservation through its statuses',
-    actions: [FilledButton.icon(onPressed: () => _openForm(), icon: const Icon(Icons.add), label: const Text('New Reservation'))],
+    title: l10n.reservations,
+    subtitle: l10n.reservationsSubtitle,
+    actions: [
+      FilledButton.icon(onPressed: () => _openForm(), icon: const Icon(Icons.add), label: Text(l10n.newReservationButton)),
+    ],
     child: ListView(
       padding: const EdgeInsets.all(28),
       children: [
@@ -134,7 +136,7 @@ class _ReservationsScreenState extends State<ReservationsScreen> {
           runSpacing: 12,
           crossAxisAlignment: WrapCrossAlignment.center,
           children: [
-            SearchField(hint: 'Guest name or phone', onChanged: (value) => _filter(() => _search = value)),
+            SearchField(hint: l10n.guestNameOrPhone, onChanged: (value) => _filter(() => _search = value)),
             FilterDropdown<ReservationStatus>(
               label: 'Status',
               value: _status,
@@ -144,10 +146,12 @@ class _ReservationsScreenState extends State<ReservationsScreen> {
             OutlinedButton.icon(
               onPressed: _pickRange,
               icon: const Icon(Icons.date_range),
-              label: Text(_range == null ? 'Any date' : '${Formatters.date(_range!.start)} – ${Formatters.date(_range!.end)}'),
+              label: Text(
+                _range == null ? l10n.anyDate : l10n.dateRange(Formatters.date(_range!.start), Formatters.date(_range!.end)),
+              ),
             ),
             if (_range != null)
-              IconButton(tooltip: 'Clear dates', onPressed: () => _filter(() => _range = null), icon: const Icon(Icons.clear)),
+              IconButton(tooltip: l10n.clearDates, onPressed: () => _filter(() => _range = null), icon: const Icon(Icons.clear)),
           ],
         ),
         const SizedBox(height: 20),
@@ -158,12 +162,12 @@ class _ReservationsScreenState extends State<ReservationsScreen> {
 
   Widget _buildTable() {
     if (_error != null && _result == null) return ErrorView(error: _error!, onRetry: _load);
-    if (_result == null) return const LoadingView();
-    if (_result!.items.isEmpty) return const EmptyView(icon: Icons.event_outlined, message: 'No reservations match the filters.');
+    if (_result == null) return LoadingView();
+    if (_result!.items.isEmpty) return EmptyView(icon: Icons.event_outlined, message: l10n.noReservationsMatch);
 
     final now = DateTime.now();
     return Panel(
-      padding: const EdgeInsets.all(8),
+      padding: EdgeInsets.all(8),
       child: Column(
         children: [
           WideTable(
@@ -171,14 +175,14 @@ class _ReservationsScreenState extends State<ReservationsScreen> {
               dataRowMinHeight: 56,
               dataRowMaxHeight: 64,
               showCheckboxColumn: false,
-              headingTextStyle: const TextStyle(fontWeight: FontWeight.w600, color: ServioColors.textMuted),
-              columns: const [
-                DataColumn(label: Text('GUEST')),
-                DataColumn(label: Text('WHEN')),
-                DataColumn(label: Text('TABLE')),
-                DataColumn(label: Text('GUESTS'), numeric: true),
-                DataColumn(label: Text('STATUS')),
-                DataColumn(label: Text('ACTIONS')),
+              headingTextStyle: TextStyle(fontWeight: FontWeight.w600, color: ServioColors.textMuted),
+              columns: [
+                DataColumn(label: Text(l10n.columnGuest)),
+                DataColumn(label: Text(l10n.columnWhen)),
+                DataColumn(label: Text(l10n.columnTable)),
+                DataColumn(label: Text(l10n.columnGuests), numeric: true),
+                DataColumn(label: Text(l10n.columnStatus)),
+                DataColumn(label: Text(l10n.columnActions)),
               ],
               rows: [
                 for (final r in _result!.items)
@@ -195,8 +199,8 @@ class _ReservationsScreenState extends State<ReservationsScreen> {
                           ],
                         ),
                       ),
-                      DataCell(Text('${Formatters.dateTime(r.startTime)} – ${Formatters.time(r.endTime)}')),
-                      DataCell(Text('Table ${r.tableNumber}')),
+                      DataCell(Text(l10n.timeRange(Formatters.dateTime(r.startTime), Formatters.time(r.endTime)))),
+                      DataCell(Text(l10n.tableNumber(r.tableNumber))),
                       DataCell(Text('${r.partySize}')),
                       DataCell(ReservationStatusBadge(r.status)),
                       DataCell(
@@ -205,45 +209,42 @@ class _ReservationsScreenState extends State<ReservationsScreen> {
                             if (r.status == ReservationStatus.pending)
                               ActionIcon(
                                 icon: Icons.check_circle_outline,
-                                tooltip: 'Confirm (emails the guest)',
+                                tooltip: l10n.confirmEmailsGuest,
                                 color: ServioColors.success,
                                 onPressed: () =>
-                                    _run(() => _reservations.confirm(r.id), (x) => '${x.guestName}\'s reservation is confirmed.'),
+                                    _run(() => _reservations.confirm(r.id), (x) => l10n.reservationConfirmedFor(x.guestName)),
                               ),
                             if (r.status == ReservationStatus.confirmed) ...[
                               ActionIcon(
                                 icon: Icons.event_seat_outlined,
-                                tooltip: 'Guests arrived',
+                                tooltip: l10n.guestsArrived,
                                 color: ServioColors.success,
                                 disabledReason: now.isBefore(r.startTime.subtract(const Duration(minutes: 30)))
-                                    ? 'Guests can be marked as arrived from 30 minutes before the reservation.'
+                                    ? l10n.arrivedTooEarly
                                     : null,
-                                onPressed: () => _run(
-                                  () => _reservations.complete(r.id),
-                                  (x) => '${x.guestName} has arrived; reservation completed.',
-                                ),
+                                onPressed: () => _run(() => _reservations.complete(r.id), (x) => l10n.guestArrived(x.guestName)),
                               ),
                               ActionIcon(
                                 icon: Icons.person_off_outlined,
-                                tooltip: 'No-show',
+                                tooltip: l10n.noShow,
                                 color: ServioColors.warning,
                                 disabledReason: now.isBefore(r.startTime.add(const Duration(minutes: 15)))
-                                    ? 'A no-show can be recorded 15 minutes after the reservation starts.'
+                                    ? l10n.noShowTooEarly
                                     : null,
                                 onPressed: () =>
-                                    _run(() => _reservations.markNoShow(r.id), (x) => '${x.guestName} was marked as a no-show.'),
+                                    _run(() => _reservations.markNoShow(r.id), (x) => l10n.markedNoShow(x.guestName)),
                               ),
                             ],
                             if (r.isActive) ...[
                               ActionIcon(
                                 icon: Icons.edit_outlined,
-                                tooltip: 'Edit',
+                                tooltip: l10n.edit,
                                 color: ServioColors.primary,
                                 onPressed: () => _openForm(r),
                               ),
                               ActionIcon(
                                 icon: Icons.cancel_outlined,
-                                tooltip: 'Cancel',
+                                tooltip: l10n.cancel,
                                 color: ServioColors.danger,
                                 onPressed: () => _cancel(r),
                               ),
@@ -316,27 +317,31 @@ class _ReservationDetails extends StatelessWidget {
                       child: Text(r.guestName, style: const TextStyle(fontSize: 22, fontWeight: FontWeight.bold)),
                     ),
                     ReservationStatusBadge(r.status),
-                    IconButton(tooltip: 'Close', onPressed: () => Navigator.pop(context), icon: const Icon(Icons.close)),
+                    IconButton(tooltip: l10n.close, onPressed: () => Navigator.pop(context), icon: const Icon(Icons.close)),
                   ],
                 ),
                 const SizedBox(height: 12),
-                _row(Icons.event, '${Formatters.dateTime(r.startTime)} – ${Formatters.time(r.endTime)}'),
-                _row(Icons.table_restaurant_outlined, 'Table ${r.tableNumber} · ${r.partySize} guests'),
+                _row(Icons.event, l10n.timeRange(Formatters.dateTime(r.startTime), Formatters.time(r.endTime))),
+                _row(Icons.table_restaurant_outlined, l10n.tableAndGuests(r.tableNumber, l10n.guestCount(r.partySize))),
                 _row(Icons.phone_outlined, r.guestPhone),
                 if (r.guestEmail != null) _row(Icons.email_outlined, r.guestEmail!),
                 if (r.note != null) _row(Icons.notes, r.note!),
-                _row(Icons.person_outline, 'Created by ${r.createdByName} on ${Formatters.dateTime(r.createdAt)}'),
+                _row(Icons.person_outline, l10n.createdByOn(r.createdByName, Formatters.dateTime(r.createdAt))),
                 const Divider(height: 32),
-                const Text('History', style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600)),
+                Text(l10n.history, style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w600)),
                 const SizedBox(height: 8),
                 for (final h in r.history)
                   ListTile(
                     dense: true,
                     contentPadding: EdgeInsets.zero,
                     leading: const Icon(Icons.history, size: 20),
-                    title: Text(h.fromStatus == null ? 'Created as ${h.toStatus}' : '${h.fromStatus} → ${h.toStatus}'),
+                    title: Text(
+                      h.fromStatus == null
+                          ? l10n.createdAs(_statusLabel(h.toStatus))
+                          : l10n.statusChange(_statusLabel(h.fromStatus!), _statusLabel(h.toStatus)),
+                    ),
                     subtitle: Text(
-                      '${h.changedByName} · ${Formatters.dateTime(h.changedAt)}${h.reason == null ? '' : '\nReason: ${h.reason}'}',
+                      '${h.changedByName} · ${Formatters.dateTime(h.changedAt)}${h.reason == null ? '' : '\n${l10n.reasonText(h.reason!)}'}',
                     ),
                   ),
               ],
@@ -358,3 +363,7 @@ class _ReservationDetails extends StatelessWidget {
     ),
   );
 }
+
+/// A status as the API names it ("NoShow") in the user's language.
+String _statusLabel(String apiName) =>
+    ReservationStatus.values.where((s) => enumToApi(s) == apiName).firstOrNull?.label ?? apiName;

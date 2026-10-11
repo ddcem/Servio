@@ -58,7 +58,7 @@ public class CurrencyService(ServioDbContext context)
         if (await IsInUseAsync(entity.Id, cancellationToken))
         {
             throw new BusinessException(
-                $"{entity.Code} is used by the restaurant settings or by existing orders and cannot be deleted.");
+                "{0} is used by the restaurant settings or by existing orders and cannot be deleted.", entity.Code);
         }
     }
 
@@ -77,7 +77,7 @@ public class CurrencyService(ServioDbContext context)
     {
         if (await Context.Currencies.AnyAsync(x => x.Id != entity.Id && x.Code == entity.Code, cancellationToken))
         {
-            throw new BusinessException($"The currency {entity.Code} already exists.");
+            throw new BusinessException("The currency {0} already exists.", entity.Code);
         }
     }
 }

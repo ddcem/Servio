@@ -40,9 +40,12 @@ class _ServioMobileAppState extends State<ServioMobileApp> {
   }
 
   @override
-  Widget build(BuildContext _) => MaterialApp(
+  Widget build(BuildContext context) => MaterialApp(
     title: 'Servio',
     debugShowCheckedModeBanner: false,
+    locale: context.watch<LanguageController>().locale,
+    supportedLocales: LanguageController.supportedLocales,
+    localizationsDelegates: ServioLocalizations.localizationsDelegates,
     navigatorKey: _navigatorKey,
     theme: ServioTheme.light(),
     home: !_guideSeen

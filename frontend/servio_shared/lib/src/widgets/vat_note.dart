@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../theme/servio_colors.dart';
 import '../utils/formatters.dart';
+import '../localization/language.dart';
 
 /// Menu prices include VAT, so it is never added on top; this line shows how much of [total] is VAT.
 class VatNote extends StatelessWidget {
@@ -23,7 +24,7 @@ class VatNote extends StatelessWidget {
     final tax = includedTax(total, taxRate);
     final rate = taxRate == taxRate.roundToDouble() ? taxRate.toInt().toString() : taxRate.toString();
     return Text(
-      'Includes $rate% VAT: ${Formatters.money(tax, currency)} · base ${Formatters.money(total - tax, currency)}',
+      l10n.vatIncluded(rate, Formatters.money(tax, currency), Formatters.money(total - tax, currency)),
       textAlign: textAlign,
       style: const TextStyle(color: ServioColors.textMuted, fontSize: 13),
     );

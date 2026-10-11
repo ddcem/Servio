@@ -11,26 +11,33 @@ class AdminHomeScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final user = context.watch<AuthProvider>().user!;
+    final user = context.watch<AuthProvider>().user;
+    // Right after logout this screen is built once more before the app returns to the login screen.
+    if (user == null) return const SizedBox.shrink();
 
     void open(Widget screen) => Navigator.of(context).push(MaterialPageRoute(builder: (_) => screen));
 
     return Scaffold(
       backgroundColor: const Color(0xFF111827),
+      appBar: AppBar(
+        backgroundColor: Colors.transparent,
+        automaticallyImplyLeading: false,
+        actions: const [LanguageMenuButton(), SizedBox(width: 16)],
+      ),
       body: Center(
         child: SingleChildScrollView(
           padding: const EdgeInsets.all(32),
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              const Text(
-                'Admin Dashboard',
+              Text(
+                l10n.adminDashboard,
                 style: TextStyle(color: Colors.white, fontSize: 44, fontWeight: FontWeight.bold),
               ),
               const SizedBox(height: 12),
-              Text('Welcome, ${user.firstName}', style: const TextStyle(color: Colors.white70, fontSize: 20)),
+              Text(l10n.welcomeName(user.firstName), style: const TextStyle(color: Colors.white70, fontSize: 20)),
               const SizedBox(height: 8),
-              const Text("Choose what you'd like to view", style: TextStyle(color: Colors.white54, fontSize: 16)),
+              Text(l10n.chooseView, style: const TextStyle(color: Colors.white54, fontSize: 16)),
               const SizedBox(height: 40),
               Wrap(
                 spacing: 28,
@@ -40,22 +47,22 @@ class AdminHomeScreen extends StatelessWidget {
                   _ChoiceCard(
                     icon: Icons.restaurant,
                     color: ServioColors.kitchen,
-                    title: 'Kitchen View',
-                    subtitle: 'Monitor food orders',
+                    title: l10n.kitchenView,
+                    subtitle: l10n.monitorFood,
                     onTap: () => open(const StationDisplayScreen(station: Stations.kitchen, viewOnly: true)),
                   ),
                   _ChoiceCard(
                     icon: Icons.wine_bar_outlined,
                     color: ServioColors.bar,
-                    title: 'Bar View',
-                    subtitle: 'Monitor drink orders',
+                    title: l10n.barView,
+                    subtitle: l10n.monitorDrinks,
                     onTap: () => open(const StationDisplayScreen(station: Stations.bar, viewOnly: true)),
                   ),
                   _ChoiceCard(
                     icon: Icons.verified_user_outlined,
                     color: ServioColors.primary,
-                    title: 'Admin Panel',
-                    subtitle: 'Manage system',
+                    title: l10n.adminPanel,
+                    subtitle: l10n.manageSystem,
                     onTap: () => open(const AdminShell()),
                   ),
                 ],
@@ -65,7 +72,7 @@ class AdminHomeScreen extends StatelessWidget {
                 style: TextButton.styleFrom(foregroundColor: Colors.white70),
                 onPressed: () => context.read<AuthProvider>().logout(),
                 icon: const Icon(Icons.logout),
-                label: const Text('Logout', style: TextStyle(fontSize: 16)),
+                label: Text(l10n.logout, style: const TextStyle(fontSize: 16)),
               ),
             ],
           ),

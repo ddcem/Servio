@@ -17,6 +17,7 @@ using Servio.Services.Configuration;
 using Servio.Services.Database;
 using Servio.Services.Database.Entities;
 using Servio.Services.Database.Seed;
+using Servio.Services.Localization;
 using Servio.Services.Menu;
 using Servio.Services.Messaging;
 using Servio.Services.Notifications;
@@ -160,13 +161,13 @@ public static class ServiceCollectionExtensions
                         context.HandleResponse();
                         context.Response.StatusCode = StatusCodes.Status401Unauthorized;
                         await context.Response.WriteAsJsonAsync(
-                            new ErrorResponse("Your session has expired or you are not logged in. Please log in again."));
+                            new ErrorResponse(Translator.T("Your session has expired or you are not logged in. Please log in again.")));
                     },
                     OnForbidden = async context =>
                     {
                         context.Response.StatusCode = StatusCodes.Status403Forbidden;
                         await context.Response.WriteAsJsonAsync(
-                            new ErrorResponse("Your role does not have permission for this action."));
+                            new ErrorResponse(Translator.T("Your role does not have permission for this action.")));
                     },
                     // WebSocket clients cannot send headers, so the hub accepts the token from the query string.
                     OnMessageReceived = context =>
@@ -215,6 +216,7 @@ public static class ServiceCollectionExtensions
     {
         services.AddControllers()
             .AddJsonOptions(o => o.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter()))
+
             .ConfigureApiBehaviorOptions(o =>
             {
                 // Validation errors are returned in the same shape as all other errors.
@@ -224,10 +226,11 @@ public static class ServiceCollectionExtensions
                         .Where(x => x.Value?.Errors.Count > 0)
                         .ToDictionary(
                             x => x.Key,
-                            x => x.Value!.Errors.Select(e => e.ErrorMessage).ToArray());
+                            // Attribute messages are written in English and translated here, in one place for every attribute type.
+                            x => x.Value!.Errors.Select(e => Translator.T(e.ErrorMessage)).ToArray());
 
                     return new BadRequestObjectResult(
-                        new ErrorResponse("Some fields are not valid. Please correct them and try again.", errors));
+                        new ErrorResponse(Translator.T("Some fields are not valid. Please correct them and try again."), errors));
                 };
             });
 

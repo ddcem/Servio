@@ -26,6 +26,10 @@ public class ProfileController(IProfileService service) : ControllerBase
     public async Task<ActionResult<UserResponse>> Update(ProfileUpdateRequest request, CancellationToken cancellationToken) =>
         Ok(await service.UpdateAsync(request, cancellationToken));
 
+    [HttpPut("language")]
+    public async Task<ActionResult<UserResponse>> SetLanguage(LanguageUpdateRequest request, CancellationToken cancellationToken) =>
+        Ok(await service.SetLanguageAsync(request, cancellationToken));
+
     [HttpPut("password")]
     public async Task<IActionResult> ChangePassword(ChangePasswordRequest request, CancellationToken cancellationToken)
     {

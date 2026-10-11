@@ -25,7 +25,7 @@ class _OrderCardState extends State<OrderCard> {
     setState(() => _serving.add(ticket.id));
     try {
       await context.read<OrderTicketProvider>().serve(ticket.id);
-      if (mounted) showSuccess(context, '${ticket.stationName} order for table ${widget.order.tableNumber} served.');
+      if (mounted) showSuccess(context, l10n.stationOrderServed(Stations.label(ticket.stationName), widget.order.tableNumber));
       widget.onChanged();
     } catch (e) {
       if (mounted) showError(context, e);
@@ -61,15 +61,18 @@ class _OrderCardState extends State<OrderCard> {
                     children: [
                       Row(
                         children: [
-                          Text('Table ${order.tableNumber}', style: const TextStyle(fontSize: 22, fontWeight: FontWeight.bold)),
+                          Text(
+                            l10n.tableNumber(order.tableNumber),
+                            style: const TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
+                          ),
                           const SizedBox(width: 8),
                           const Icon(Icons.people_outline, size: 18, color: ServioColors.textMuted),
                           const SizedBox(width: 4),
-                          Text('${order.guestCount} guests', style: const TextStyle(color: ServioColors.textMuted)),
+                          Text(l10n.guestCount(order.guestCount), style: const TextStyle(color: ServioColors.textMuted)),
                         ],
                       ),
                       Text(
-                        '$itemCount items · ${order.orderNumber} · since ${Formatters.time(order.openedAt)}',
+                        l10n.orderCardLine(l10n.itemCount(itemCount), order.orderNumber, Formatters.time(order.openedAt)),
                         style: const TextStyle(color: ServioColors.textMuted),
                       ),
                     ],
@@ -78,7 +81,7 @@ class _OrderCardState extends State<OrderCard> {
                 Column(
                   crossAxisAlignment: CrossAxisAlignment.end,
                   children: [
-                    const Text('Total', style: TextStyle(color: ServioColors.textMuted)),
+                    Text(l10n.total, style: const TextStyle(color: ServioColors.textMuted)),
                     Text(money(order.total), style: const TextStyle(fontSize: 22, fontWeight: FontWeight.bold)),
                   ],
                 ),
@@ -100,14 +103,14 @@ class _OrderCardState extends State<OrderCard> {
                     const SizedBox(width: 10),
                     Expanded(
                       child: Text(
-                        '${ticket.stationName} order is ready',
+                        l10n.stationOrderReady(Stations.label(ticket.stationName)),
                         style: const TextStyle(color: ServioColors.success, fontWeight: FontWeight.w600),
                       ),
                     ),
                     FilledButton(
                       style: FilledButton.styleFrom(backgroundColor: ServioColors.success),
                       onPressed: _serving.contains(ticket.id) ? null : () => _serve(ticket),
-                      child: const Text('Mark served'),
+                      child: Text(l10n.markServed),
                     ),
                   ],
                 ),
@@ -127,7 +130,7 @@ class _OrderCardState extends State<OrderCard> {
                         children: [
                           Text(item.menuItemName, style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w600)),
                           Text(
-                            '${money(item.unitPrice)} × ${item.quantity}',
+                            l10n.quantityTimesPrice(money(item.unitPrice), item.quantity),
                             style: const TextStyle(color: ServioColors.textMuted, fontSize: 13),
                           ),
                           if (item.note != null)
@@ -155,7 +158,7 @@ class _OrderCardState extends State<OrderCard> {
               child: FilledButton.icon(
                 onPressed: widget.onAddItems,
                 icon: const Icon(Icons.add),
-                label: const Text('Add Items', style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600)),
+                label: Text(l10n.addItems, style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600)),
               ),
             ),
             const SizedBox(height: 10),
@@ -164,8 +167,8 @@ class _OrderCardState extends State<OrderCard> {
               child: FilledButton.icon(
                 style: FilledButton.styleFrom(backgroundColor: const Color(0xFF3DA34A)),
                 onPressed: widget.onPayment,
-                icon: const Icon(Icons.credit_card),
-                label: const Text('Payment', style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600)),
+                icon: const Icon(Icons.point_of_sale_outlined),
+                label: Text(l10n.payment, style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600)),
               ),
             ),
           ],

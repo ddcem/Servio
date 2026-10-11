@@ -58,7 +58,7 @@ class _EmployeeFormState extends State<_EmployeeForm> {
     final askPassword = !_editing || _changePassword;
 
     return FormDialog(
-      title: _editing ? 'Edit employee' : 'Add employee',
+      title: _editing ? l10n.editEmployee : l10n.addEmployeeTitle,
       formKey: _formKey,
       serverErrors: _server,
       width: 600,
@@ -80,7 +80,7 @@ class _EmployeeFormState extends State<_EmployeeForm> {
         Navigator.pop(context, true);
         showSuccess(
           context,
-          _editing ? '${saved.fullName}\'s account was updated.' : '${saved.fullName} was added as ${saved.role.toLowerCase()}.',
+          _editing ? l10n.accountUpdated(saved.fullName) : l10n.employeeAdded(saved.fullName, Roles.label(saved.role)),
         );
       },
       children: [
@@ -90,23 +90,23 @@ class _EmployeeFormState extends State<_EmployeeForm> {
               child: TextFormField(
                 controller: _firstName,
                 autofocus: true,
-                decoration: const InputDecoration(labelText: 'First name'),
-                validator: (value) => _server['FirstName'] ?? Validators.length(value, 'First name', min: 2, max: 50),
+                decoration: InputDecoration(labelText: l10n.firstName),
+                validator: (value) => _server['FirstName'] ?? Validators.length(value, l10n.firstName, min: 2, max: 50),
               ),
             ),
             const SizedBox(width: 16),
             Expanded(
               child: TextFormField(
                 controller: _lastName,
-                decoration: const InputDecoration(labelText: 'Last name'),
-                validator: (value) => _server['LastName'] ?? Validators.length(value, 'Last name', min: 2, max: 50),
+                decoration: InputDecoration(labelText: l10n.lastName),
+                validator: (value) => _server['LastName'] ?? Validators.length(value, l10n.lastName, min: 2, max: 50),
               ),
             ),
           ],
         ),
         TextFormField(
           controller: _username,
-          decoration: const InputDecoration(labelText: 'Username', helperText: 'Used to log in, e.g. john.smith'),
+          decoration: InputDecoration(labelText: l10n.username, helperText: l10n.usernameHelper),
           validator: (value) => _server['Username'] ?? Validators.username(value),
         ),
         Row(
@@ -115,7 +115,7 @@ class _EmployeeFormState extends State<_EmployeeForm> {
             Expanded(
               child: TextFormField(
                 controller: _email,
-                decoration: const InputDecoration(labelText: 'Email', hintText: 'name@example.com'),
+                decoration: InputDecoration(labelText: l10n.email, hintText: l10n.emailHint),
                 validator: (value) => _server['Email'] ?? Validators.email(value),
               ),
             ),
@@ -123,7 +123,7 @@ class _EmployeeFormState extends State<_EmployeeForm> {
             Expanded(
               child: TextFormField(
                 controller: _phone,
-                decoration: const InputDecoration(labelText: 'Phone (optional)', hintText: '+387 61 123 456'),
+                decoration: InputDecoration(labelText: l10n.phoneOptional, hintText: '+387 61 123 456'),
                 validator: (value) => _server['PhoneNumber'] ?? Validators.phone(value),
               ),
             ),
@@ -132,20 +132,15 @@ class _EmployeeFormState extends State<_EmployeeForm> {
         DropdownButtonFormField<int>(
           key: ValueKey(_roles.length),
           initialValue: _roleId,
-          decoration: InputDecoration(
-            labelText: 'Role',
-            helperText: isSelf
-                ? 'You cannot change your own role'
-                : 'The role decides which app and screens the employee can use',
-          ),
-          items: _roles.map((r) => DropdownMenuItem(value: r.id, child: Text(r.name))).toList(),
+          decoration: InputDecoration(labelText: l10n.role, helperText: isSelf ? l10n.cannotChangeOwnRole : l10n.roleHelper),
+          items: _roles.map((r) => DropdownMenuItem(value: r.id, child: Text(Roles.label(r.name)))).toList(),
           onChanged: isSelf ? null : (value) => setState(() => _roleId = value),
-          validator: (value) => _server['RoleId'] ?? (value == null ? 'Role is required.' : null),
+          validator: (value) => _server['RoleId'] ?? (value == null ? l10n.roleRequired : null),
         ),
         SwitchListTile(
           contentPadding: EdgeInsets.zero,
-          title: const Text('Active'),
-          subtitle: Text(isSelf ? 'You cannot deactivate your own account' : 'Inactive employees cannot log in'),
+          title: Text(l10n.active),
+          subtitle: Text(isSelf ? l10n.cannotDeactivateOwnAccount : l10n.inactiveCannotLogIn),
           value: _active,
           onChanged: isSelf ? null : (value) => setState(() => _active = value),
         ),
@@ -153,8 +148,8 @@ class _EmployeeFormState extends State<_EmployeeForm> {
           CheckboxListTile(
             contentPadding: EdgeInsets.zero,
             controlAffinity: ListTileControlAffinity.leading,
-            title: const Text('Change password'),
-            subtitle: const Text('The employee is logged out on all devices after the change'),
+            title: Text(l10n.changePassword),
+            subtitle: Text(l10n.loggedOutEverywhere),
             value: _changePassword,
             onChanged: (value) => setState(() => _changePassword = value ?? false),
           ),
@@ -162,13 +157,13 @@ class _EmployeeFormState extends State<_EmployeeForm> {
           TextFormField(
             controller: _password,
             obscureText: true,
-            decoration: InputDecoration(labelText: _editing ? 'New password' : 'Password'),
+            decoration: InputDecoration(labelText: _editing ? l10n.newPassword : l10n.password),
             validator: (value) => _server[_editing ? 'NewPassword' : 'Password'] ?? Validators.newPassword(value),
           ),
           TextFormField(
             controller: _confirmation,
             obscureText: true,
-            decoration: InputDecoration(labelText: _editing ? 'Repeat new password' : 'Repeat password'),
+            decoration: InputDecoration(labelText: _editing ? l10n.repeatNewPassword : l10n.repeatPassword),
             validator: (value) =>
                 _server[_editing ? 'NewPasswordConfirmation' : 'PasswordConfirmation'] ??
                 Validators.confirmation(value, _password.text),

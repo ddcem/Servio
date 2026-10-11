@@ -23,26 +23,10 @@ class _CartSheet extends StatelessWidget {
   String _money(double value) => Formatters.money(value, currency);
 
   Future<void> _editNote(BuildContext context, CartLine line) async {
-    final controller = TextEditingController(text: line.note);
     final note = await showDialog<String>(
       context: context,
-      builder: (context) => AlertDialog(
-        title: Text('Note for ${line.item.name}'),
-        content: TextField(
-          controller: controller,
-          autofocus: true,
-          maxLength: 200,
-          maxLines: 3,
-          minLines: 1,
-          decoration: const InputDecoration(hintText: 'e.g. no onions, well done'),
-        ),
-        actions: [
-          TextButton(onPressed: () => Navigator.pop(context), child: const Text('Back')),
-          FilledButton(onPressed: () => Navigator.pop(context, controller.text), child: const Text('Save')),
-        ],
-      ),
+      builder: (_) => _NoteDialog(itemName: line.item.name, initial: line.note),
     );
-    controller.dispose();
     if (note != null) cart.setNote(line, note);
   }
 
@@ -60,21 +44,18 @@ class _CartSheet extends StatelessWidget {
               children: [
                 const Icon(Icons.shopping_cart_outlined),
                 const SizedBox(width: 10),
-                const Expanded(
-                  child: Text('Current Order', style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
+                Expanded(
+                  child: Text(l10n.currentOrderTitle, style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
                 ),
-                IconButton(tooltip: 'Close', onPressed: () => Navigator.pop(context), icon: const Icon(Icons.close)),
+                IconButton(tooltip: l10n.close, onPressed: () => Navigator.pop(context), icon: const Icon(Icons.close)),
               ],
             ),
           ),
           const Divider(height: 1),
           if (cart.isEmpty)
-            const Padding(
+            Padding(
               padding: EdgeInsets.all(32),
-              child: EmptyView(
-                icon: Icons.remove_shopping_cart_outlined,
-                message: 'The cart is empty. Tap menu items to add them.',
-              ),
+              child: EmptyView(icon: Icons.remove_shopping_cart_outlined, message: l10n.cartEmpty),
             )
           else
             Flexible(
@@ -99,14 +80,14 @@ class _CartSheet extends StatelessWidget {
                                   children: [
                                     Text(line.item.name, style: const TextStyle(fontSize: 17, fontWeight: FontWeight.bold)),
                                     Text(
-                                      '${_money(line.item.price)} each',
+                                      l10n.priceEach(_money(line.item.price)),
                                       style: const TextStyle(color: ServioColors.textMuted),
                                     ),
                                   ],
                                 ),
                               ),
                               IconButton(
-                                tooltip: 'Remove',
+                                tooltip: l10n.remove,
                                 color: ServioColors.danger,
                                 onPressed: () => cart.remove(line),
                                 icon: const Icon(Icons.delete_outline),
@@ -121,7 +102,7 @@ class _CartSheet extends StatelessWidget {
                                 child: Row(
                                   children: [
                                     IconButton(
-                                      tooltip: 'One less',
+                                      tooltip: l10n.oneLess,
                                       onPressed: () => cart.setQuantity(line, line.quantity - 1),
                                       icon: const Icon(Icons.remove),
                                     ),
@@ -134,7 +115,7 @@ class _CartSheet extends StatelessWidget {
                                       ),
                                     ),
                                     IconButton(
-                                      tooltip: 'One more',
+                                      tooltip: l10n.oneMore,
                                       onPressed: line.quantity < 50 ? () => cart.setQuantity(line, line.quantity + 1) : null,
                                       icon: const Icon(Icons.add),
                                     ),
@@ -155,7 +136,7 @@ class _CartSheet extends StatelessWidget {
                             style: TextButton.styleFrom(padding: EdgeInsets.zero, visualDensity: VisualDensity.compact),
                             onPressed: () => _editNote(context, line),
                             icon: Icon(line.note == null ? Icons.edit_note : Icons.sticky_note_2_outlined, size: 20),
-                            label: Text(line.note ?? 'Add note', maxLines: 2, overflow: TextOverflow.ellipsis),
+                            label: Text(line.note ?? l10n.addNote, maxLines: 2, overflow: TextOverflow.ellipsis),
                           ),
                         ],
                       ),
@@ -170,12 +151,12 @@ class _CartSheet extends StatelessWidget {
               top: false,
               child: Column(
                 children: [
-                  if (order != null) _row('Already on ${order!.orderNumber}', _money(order!.total)),
+                  if (order != null) _row(l10n.alreadyOnOrder(order!.orderNumber), _money(order!.total)),
                   Row(
                     children: [
                       Expanded(
                         child: Text(
-                          order == null ? 'Total' : 'This round',
+                          order == null ? l10n.total : l10n.thisRound,
                           style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
                         ),
                       ),
@@ -191,7 +172,7 @@ class _CartSheet extends StatelessWidget {
                     TextButton(
                       style: TextButton.styleFrom(foregroundColor: ServioColors.danger),
                       onPressed: cart.clear,
-                      child: const Text('Clear All', style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600)),
+                      child: Text(l10n.clearAll, style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600)),
                     ),
                   const SizedBox(height: 4),
                   SizedBox(
@@ -200,7 +181,7 @@ class _CartSheet extends StatelessWidget {
                     child: FilledButton.icon(
                       onPressed: cart.isEmpty ? null : () => Navigator.pop(context, true),
                       icon: const Icon(Icons.send_outlined),
-                      label: const Text('Send Order', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+                      label: Text(l10n.sendOrder, style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
                     ),
                   ),
                 ],
@@ -222,5 +203,43 @@ class _CartSheet extends StatelessWidget {
         Text(value, style: const TextStyle(fontSize: 15)),
       ],
     ),
+  );
+}
+
+/// Owns its text controller, so it is disposed only after the dialog's closing animation.
+class _NoteDialog extends StatefulWidget {
+  const _NoteDialog({required this.itemName, this.initial});
+
+  final String itemName;
+  final String? initial;
+
+  @override
+  State<_NoteDialog> createState() => _NoteDialogState();
+}
+
+class _NoteDialogState extends State<_NoteDialog> {
+  late final _controller = TextEditingController(text: widget.initial);
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) => AlertDialog(
+    title: Text(l10n.noteFor(widget.itemName)),
+    content: TextField(
+      controller: _controller,
+      autofocus: true,
+      maxLength: 200,
+      maxLines: 3,
+      minLines: 1,
+      decoration: InputDecoration(hintText: l10n.noteHint),
+    ),
+    actions: [
+      TextButton(onPressed: () => Navigator.pop(context), child: Text(l10n.back)),
+      FilledButton(onPressed: () => Navigator.pop(context, _controller.text), child: Text(l10n.save)),
+    ],
   );
 }

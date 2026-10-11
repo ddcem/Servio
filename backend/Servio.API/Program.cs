@@ -36,6 +36,7 @@ await using (var scope = app.Services.CreateAsyncScope())
     await scope.ServiceProvider.GetRequiredService<DataSeeder>().SeedAsync();
 }
 
+app.UseMiddleware<LanguageMiddleware>();
 app.UseMiddleware<ExceptionHandlingMiddleware>();
 
 if (app.Environment.IsDevelopment())

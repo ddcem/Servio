@@ -11,7 +11,7 @@ class FormDialog extends StatefulWidget {
     required this.children,
     required this.onSave,
     this.serverErrors,
-    this.saveLabel = 'Save',
+    this.saveLabel,
     this.width = 520,
   });
 
@@ -22,7 +22,7 @@ class FormDialog extends StatefulWidget {
 
   /// When given, the API's field messages are shown under the matching fields.
   final ServerErrors? serverErrors;
-  final String saveLabel;
+  final String? saveLabel;
   final double width;
 
   @override
@@ -67,7 +67,7 @@ class _FormDialogState extends State<FormDialog> {
                 Expanded(
                   child: Text(widget.title, style: const TextStyle(fontSize: 22, fontWeight: FontWeight.bold)),
                 ),
-                IconButton(tooltip: 'Close', icon: const Icon(Icons.close), onPressed: () => Navigator.pop(context)),
+                IconButton(tooltip: l10n.close, icon: const Icon(Icons.close), onPressed: () => Navigator.pop(context)),
               ],
             ),
           ),
@@ -96,13 +96,13 @@ class _FormDialogState extends State<FormDialog> {
             child: Row(
               mainAxisAlignment: MainAxisAlignment.end,
               children: [
-                TextButton(onPressed: () => Navigator.pop(context), child: const Text('Cancel')),
+                TextButton(onPressed: () => Navigator.pop(context), child: Text(l10n.cancel)),
                 const SizedBox(width: 12),
                 FilledButton(
                   onPressed: _saving ? null : _save,
                   child: _saving
                       ? const SizedBox(width: 20, height: 20, child: CircularProgressIndicator(strokeWidth: 2))
-                      : Text(widget.saveLabel),
+                      : Text(widget.saveLabel ?? l10n.save),
                 ),
               ],
             ),

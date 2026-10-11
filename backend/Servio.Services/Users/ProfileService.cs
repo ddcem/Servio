@@ -7,6 +7,7 @@ using Servio.Services.Auth;
 using Servio.Services.Database;
 using Servio.Services.Database.Entities;
 using Servio.Services.Images;
+using Servio.Services.Localization;
 using Servio.Services.Mapping;
 
 namespace Servio.Services.Users;
@@ -31,7 +32,7 @@ public class ProfileService(
         var normalizedEmail = email.ToLower();
         if (await context.Users.AnyAsync(x => x.Id != user.Id && x.Email.ToLower() == normalizedEmail, cancellationToken))
         {
-            throw new BusinessException($"The email {email} is already used by another employee.");
+            throw new BusinessException("The email {0} is already used by another employee.", email);
         }
 
         user.FirstName = request.FirstName.Trim();
@@ -39,6 +40,14 @@ public class ProfileService(
         user.Email = email;
         user.PhoneNumber = string.IsNullOrWhiteSpace(request.PhoneNumber) ? null : request.PhoneNumber.Trim();
 
+        await context.SaveChangesAsync(cancellationToken);
+        return user.ToResponse();
+    }
+
+    public async Task<UserResponse> SetLanguageAsync(LanguageUpdateRequest request, CancellationToken cancellationToken = default)
+    {
+        var user = await LoadCurrentUserAsync(cancellationToken);
+        user.PreferredLanguage = Languages.Normalize(request.Language);
         await context.SaveChangesAsync(cancellationToken);
         return user.ToResponse();
     }

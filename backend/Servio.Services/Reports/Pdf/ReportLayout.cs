@@ -1,11 +1,13 @@
 using QuestPDF.Fluent;
 using QuestPDF.Helpers;
 using QuestPDF.Infrastructure;
+using Servio.Services.Localization;
 
 namespace Servio.Services.Reports.Pdf;
 
 /// <summary>
-/// Shared look of the printable reports: header, KPI tiles, tables and footer.
+/// Shared look of the printable reports: header, KPI tiles, tables and footer. Titles, labels and column
+/// headers are passed in English and translated into the request's language here.
 /// </summary>
 internal static class ReportLayout
 {
@@ -26,10 +28,10 @@ internal static class ReportLayout
             row.RelativeItem().Column(col =>
             {
                 col.Item().Text(restaurantName).FontSize(11).FontColor(Muted);
-                col.Item().Text(title).FontSize(20).Bold().FontColor(Primary);
+                col.Item().Text(Translator.T(title)).FontSize(20).Bold().FontColor(Primary);
                 col.Item().Text($"{from:dd.MM.yyyy} – {to:dd.MM.yyyy}").FontColor(Muted);
             });
-            row.ConstantItem(150).AlignRight().AlignBottom().Text($"Generated {generatedAt}").FontSize(8).FontColor(Muted);
+            row.ConstantItem(150).AlignRight().AlignBottom().Text(Translator.Render(new Model.Localization.LocalizedText("Generated {0}", generatedAt))).FontSize(8).FontColor(Muted);
         });
 
         page.Content().Column(col =>
@@ -41,9 +43,9 @@ internal static class ReportLayout
         page.Footer().AlignCenter().Text(text =>
         {
             text.DefaultTextStyle(x => x.FontSize(8).FontColor(Muted));
-            text.Span("Servio · page ");
+            text.Span(Translator.T("Servio · page "));
             text.CurrentPageNumber();
-            text.Span(" of ");
+            text.Span(Translator.T(" of "));
             text.TotalPages();
         });
     }
@@ -63,7 +65,7 @@ internal static class ReportLayout
             {
                 table.Cell().Padding(3).Border(1).BorderColor(Border).Background(Zebra).Padding(8).Column(col =>
                 {
-                    col.Item().Text(label).FontSize(8).FontColor(Muted);
+                    col.Item().Text(Translator.T(label)).FontSize(8).FontColor(Muted);
                     col.Item().Text(value).FontSize(14).Bold();
                 });
             }
@@ -74,7 +76,7 @@ internal static class ReportLayout
         // Keeps a heading together with the first rows of its table instead of stranding it at a page end.
         column.Item().EnsureSpace(90).Column(col =>
         {
-            col.Item().PaddingBottom(6).Text(title).FontSize(13).SemiBold().FontColor(Primary);
+            col.Item().PaddingBottom(6).Text(Translator.T(title)).FontSize(13).SemiBold().FontColor(Primary);
             content(col.Item());
         });
     }
@@ -98,7 +100,7 @@ internal static class ReportLayout
                 for (var i = 0; i < headers.Length; i++)
                 {
                     var cell = header.Cell().BorderBottom(1).BorderColor(Primary).PaddingVertical(4).PaddingHorizontal(4);
-                    (i == 0 ? cell : cell.AlignRight()).Text(headers[i]).SemiBold().FontSize(9);
+                    (i == 0 ? cell : cell.AlignRight()).Text(Translator.T(headers[i])).SemiBold().FontSize(9);
                 }
             });
 
@@ -118,4 +120,8 @@ internal static class ReportLayout
     public static string Amount(decimal value, string symbol) => Common.Money.Format(value, symbol);
 
     public static string Percent(double? value) => value is null ? "–" : $"{value * 100:0}%";
+
+    /// <summary>"Mon, 05.10.2026" with the day name in the request's language.</summary>
+    public static string Day(DateOnly date) =>
+        $"{Translator.T(date.DayOfWeek.ToString()[..3])}, {date.ToString("dd.MM.yyyy", System.Globalization.CultureInfo.InvariantCulture)}";
 }

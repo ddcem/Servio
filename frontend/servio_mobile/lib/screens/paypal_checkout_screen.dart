@@ -51,7 +51,7 @@ class _PayPalCheckoutScreenState extends State<PayPalCheckoutScreen> {
     appBar: AppBar(
       backgroundColor: Colors.white,
       foregroundColor: ServioColors.textPrimary,
-      leading: IconButton(tooltip: 'Cancel payment', icon: const Icon(Icons.close), onPressed: () => _close(false)),
+      leading: IconButton(tooltip: l10n.cancelPayment, icon: const Icon(Icons.close), onPressed: () => _close(false)),
       title: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [

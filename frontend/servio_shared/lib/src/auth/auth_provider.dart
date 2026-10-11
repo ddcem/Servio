@@ -4,6 +4,8 @@ import '../api/api_client.dart';
 import '../api/api_exception.dart';
 import '../models/user.dart';
 import '../realtime/realtime_service.dart';
+import '../localization/language.dart';
+import '../utils/roles.dart';
 
 /// Holds the logged-in user. The token lives only in memory: closing the app logs out.
 class AuthProvider extends ChangeNotifier {
@@ -38,7 +40,7 @@ class AuthProvider extends ChangeNotifier {
     if (allowedRoles.isNotEmpty && !allowedRoles.contains(user.role)) {
       await _logoutOnServer();
       api.token = null;
-      throw ApiException('The ${user.role.toLowerCase()} account cannot use this app.');
+      throw ApiException(l10n.cannotUseApp(Roles.label(user.role)));
     }
 
     _user = user;
@@ -65,7 +67,7 @@ class AuthProvider extends ChangeNotifier {
   }
 
   void _expireSession() {
-    _sessionMessage = 'Your session has expired. Please log in again.';
+    _sessionMessage = l10n.sessionExpired;
     _clear();
   }
 

@@ -46,8 +46,8 @@ class _TableFormState extends State<_TableForm> {
     final area = await showNameForm<TableArea>(
       context,
       provider: context.read<TableAreaProvider>(),
-      entityLabel: 'Area',
-      hint: 'e.g. Garden',
+      entityLabel: l10n.entityArea,
+      hint: l10n.areaHint,
     );
     if (area == null) return;
     await _loadAreas();
@@ -63,7 +63,7 @@ class _TableFormState extends State<_TableForm> {
 
   @override
   Widget build(BuildContext _) => FormDialog(
-    title: _editing ? 'Edit table ${widget.table!.number}' : 'Add table',
+    title: _editing ? l10n.editTable(widget.table!.number) : l10n.addTable,
     formKey: _formKey,
     serverErrors: _server,
     width: 480,
@@ -80,7 +80,9 @@ class _TableFormState extends State<_TableForm> {
       Navigator.pop(context, true);
       showSuccess(
         context,
-        'Table ${saved.number} (${saved.capacity} seats, ${saved.areaName}) was ${_editing ? 'updated' : 'added'}.',
+        _editing
+            ? l10n.tableUpdated(saved.number, l10n.seatCount(saved.capacity), saved.areaName)
+            : l10n.tableAdded(saved.number, l10n.seatCount(saved.capacity), saved.areaName),
       );
     },
     children: [
@@ -91,16 +93,16 @@ class _TableFormState extends State<_TableForm> {
             child: TextFormField(
               controller: _number,
               autofocus: true,
-              decoration: const InputDecoration(labelText: 'Table number'),
-              validator: (value) => _server['Number'] ?? Validators.integer(value, 'Table number', min: 1, max: 999),
+              decoration: InputDecoration(labelText: l10n.tableNumberLabel),
+              validator: (value) => _server['Number'] ?? Validators.integer(value, l10n.tableNumberLabel, min: 1, max: 999),
             ),
           ),
           const SizedBox(width: 16),
           Expanded(
             child: TextFormField(
               controller: _capacity,
-              decoration: const InputDecoration(labelText: 'Seats'),
-              validator: (value) => _server['Capacity'] ?? Validators.integer(value, 'Seats', min: 1, max: 20),
+              decoration: InputDecoration(labelText: l10n.seats),
+              validator: (value) => _server['Capacity'] ?? Validators.integer(value, l10n.seats, min: 1, max: 20),
             ),
           ),
         ],
@@ -112,23 +114,23 @@ class _TableFormState extends State<_TableForm> {
             child: DropdownButtonFormField<int>(
               key: ValueKey(_areas.length),
               initialValue: _areaId,
-              decoration: const InputDecoration(labelText: 'Area'),
+              decoration: InputDecoration(labelText: l10n.area),
               items: _areas.map((a) => DropdownMenuItem(value: a.id, child: Text(a.name))).toList(),
               onChanged: (value) => setState(() => _areaId = value),
-              validator: (value) => _server['AreaId'] ?? (value == null ? 'Area is required.' : null),
+              validator: (value) => _server['AreaId'] ?? (value == null ? l10n.areaRequired : null),
             ),
           ),
           const SizedBox(width: 8),
           Padding(
             padding: const EdgeInsets.only(top: 6),
-            child: IconButton.filledTonal(tooltip: 'Add a new area', onPressed: _addArea, icon: const Icon(Icons.add)),
+            child: IconButton.filledTonal(tooltip: l10n.addNewArea, onPressed: _addArea, icon: const Icon(Icons.add)),
           ),
         ],
       ),
       SwitchListTile(
         contentPadding: EdgeInsets.zero,
-        title: const Text('In use'),
-        subtitle: const Text('Tables not in use cannot be ordered at or reserved'),
+        title: Text(l10n.inUse),
+        subtitle: Text(l10n.notInUseHelper),
         value: _active,
         onChanged: (value) => setState(() => _active = value),
       ),

@@ -70,16 +70,16 @@ class _EmployeesScreenState extends State<EmployeesScreen> {
   Future<void> _delete(User user) async {
     final confirmed = await confirmAction(
       context,
-      title: 'Delete ${user.fullName}?',
-      message: 'The account is removed permanently. This cannot be undone.',
-      confirmLabel: 'Delete',
+      title: l10n.deleteNameQuestion(user.fullName),
+      message: l10n.accountRemovedPermanently,
+      confirmLabel: l10n.delete,
       destructive: true,
     );
     if (!confirmed || !mounted) return;
     try {
       await _users.delete(user.id);
       if (!mounted) return;
-      showSuccess(context, '${user.fullName}\'s account was deleted.');
+      showSuccess(context, l10n.accountDeleted(user.fullName));
       await _load();
     } catch (e) {
       if (mounted) showError(context, e);
@@ -88,10 +88,10 @@ class _EmployeesScreenState extends State<EmployeesScreen> {
 
   @override
   Widget build(BuildContext _) => AdminPage(
-    title: 'Employee Management',
-    subtitle: 'Manage staff members',
+    title: l10n.employeeManagement,
+    subtitle: l10n.manageStaff,
     actions: [
-      FilledButton.icon(onPressed: () => _openForm(), icon: const Icon(Icons.person_add_alt), label: const Text('Add Employee')),
+      FilledButton.icon(onPressed: () => _openForm(), icon: const Icon(Icons.person_add_alt), label: Text(l10n.addEmployee)),
     ],
     child: ListView(
       padding: const EdgeInsets.all(28),
@@ -100,17 +100,17 @@ class _EmployeesScreenState extends State<EmployeesScreen> {
           spacing: 16,
           runSpacing: 12,
           children: [
-            SearchField(hint: 'Search by name, username or email', onChanged: (value) => _filter(() => _search = value)),
+            SearchField(hint: l10n.searchEmployees, onChanged: (value) => _filter(() => _search = value)),
             FilterDropdown<int>(
-              label: 'Role',
+              label: l10n.role,
               value: _roleId,
-              items: {for (final r in _roles) r.id: r.name},
+              items: {for (final r in _roles) r.id: Roles.label(r.name)},
               onChanged: (value) => _filter(() => _roleId = value),
             ),
             FilterDropdown<bool>(
               label: 'Status',
               value: _active,
-              items: const {true: 'Active', false: 'Inactive'},
+              items: {true: l10n.active, false: l10n.inactive},
               onChanged: (value) => _filter(() => _active = value),
             ),
           ],
@@ -124,7 +124,7 @@ class _EmployeesScreenState extends State<EmployeesScreen> {
   Widget _buildCards() {
     if (_error != null && _result == null) return ErrorView(error: _error!, onRetry: _load);
     if (_result == null) return const LoadingView();
-    if (_result!.items.isEmpty) return const EmptyView(icon: Icons.people_outline, message: 'No employees match the filters.');
+    if (_result!.items.isEmpty) return EmptyView(icon: Icons.people_outline, message: l10n.noEmployeesMatch);
 
     final api = context.read<ApiClient>();
     final me = context.read<AuthProvider>().user!;
@@ -159,23 +159,23 @@ class _EmployeesScreenState extends State<EmployeesScreen> {
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
                                 Text(user.fullName, style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
-                                Text(user.role, style: const TextStyle(color: ServioColors.textMuted, fontSize: 15)),
+                                Text(Roles.label(user.role), style: const TextStyle(color: ServioColors.textMuted, fontSize: 15)),
                                 const SizedBox(height: 4),
                                 Text(
-                                  '@${user.username} · ${user.email}',
+                                  l10n.usernameAndEmail(user.username, user.email),
                                   style: const TextStyle(color: ServioColors.textMuted, fontSize: 12),
                                 ),
                                 Text(
                                   user.lastLoginAt == null
-                                      ? 'Never logged in'
-                                      : 'Last login ${Formatters.dateTime(user.lastLoginAt!)}',
+                                      ? l10n.neverLoggedIn
+                                      : l10n.lastLogin(Formatters.dateTime(user.lastLoginAt!)),
                                   style: const TextStyle(color: ServioColors.textMuted, fontSize: 12),
                                 ),
                               ],
                             ),
                           ),
                           StatusBadge(
-                            user.isActive ? 'active' : 'inactive',
+                            user.isActive ? l10n.active : l10n.inactive,
                             color: user.isActive ? ServioColors.success : ServioColors.textMuted,
                             background: user.isActive ? ServioColors.successLight : ServioColors.background,
                           ),
@@ -185,17 +185,17 @@ class _EmployeesScreenState extends State<EmployeesScreen> {
                       Row(
                         children: [
                           Expanded(
-                            child: FilledButton(onPressed: () => _openForm(user), child: const Text('Edit')),
+                            child: FilledButton(onPressed: () => _openForm(user), child: Text(l10n.edit)),
                           ),
                           const SizedBox(width: 8),
                           ActionIcon(
                             icon: Icons.delete_outline,
-                            tooltip: 'Delete employee',
+                            tooltip: l10n.deleteEmployee,
                             color: ServioColors.danger,
                             disabledReason: user.id == me.id
-                                ? 'You cannot delete your own account.'
+                                ? l10n.cannotDeleteOwnAccount
                                 : user.hasActivity
-                                ? 'Has orders, reservations or payments in the system. Deactivate the account instead.'
+                                ? l10n.employeeHasActivity
                                 : null,
                             onPressed: () => _delete(user),
                           ),

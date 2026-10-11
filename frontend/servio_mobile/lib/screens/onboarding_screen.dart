@@ -19,27 +19,11 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
   final _pages = PageController();
   int _index = 0;
 
-  static const _steps = [
-    (
-      'Select Tables',
-      'Choose from available tables with capacity and status tracking. Green means available, red means occupied.',
-      _Illustration.tables,
-    ),
-    (
-      'Take Orders',
-      'Browse the menu by category. Your favorites and best sellers are one tap away, and items sold out today are greyed out.',
-      _Illustration.menu,
-    ),
-    (
-      'Smart Suggestions',
-      'After you add an item, Servio suggests what usually goes with it, based on what guests order together.',
-      _Illustration.suggestion,
-    ),
-    (
-      'Serve & Get Paid',
-      'You are notified when the kitchen or bar has an order ready. Take payment in cash or by card through PayPal, with a tip.',
-      _Illustration.payment,
-    ),
+  static List<(String, String, _Illustration)> get _steps => [
+    (l10n.guideTablesTitle, l10n.guideTablesText, _Illustration.tables),
+    (l10n.guideOrdersTitle, l10n.guideOrdersText, _Illustration.menu),
+    (l10n.guideSuggestionsTitle, l10n.guideSuggestionsText, _Illustration.suggestion),
+    (l10n.guidePaymentTitle, l10n.guidePaymentText, _Illustration.payment),
   ];
 
   @override
@@ -84,16 +68,16 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                     child: const Icon(Icons.grid_view_rounded, color: Colors.white),
                   ),
                   const SizedBox(width: 12),
-                  const Expanded(
+                  Expanded(
                     child: Text(
-                      'Waiter Guide',
+                      l10n.waiterGuide,
                       style: TextStyle(color: Colors.white, fontSize: 24, fontWeight: FontWeight.bold),
                     ),
                   ),
                   TextButton(
                     onPressed: _finish,
                     style: TextButton.styleFrom(foregroundColor: Colors.white),
-                    child: const Text('Skip', style: TextStyle(fontWeight: FontWeight.w600)),
+                    child: Text(l10n.skip, style: TextStyle(fontWeight: FontWeight.w600)),
                   ),
                 ],
               ),
@@ -162,7 +146,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
                       Text(
-                        _index == _steps.length - 1 ? 'Get Started' : 'Next',
+                        _index == _steps.length - 1 ? l10n.getStarted : l10n.next,
                         style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
                       ),
                       const SizedBox(width: 8),
@@ -212,7 +196,7 @@ class _IllustrationView extends StatelessWidget {
                   '$number',
                   style: const TextStyle(color: Colors.white, fontSize: 26, fontWeight: FontWeight.bold),
                 ),
-                Text('$seats seats', style: const TextStyle(color: Colors.white, fontSize: 13)),
+                Text(l10n.seatCount(seats), style: const TextStyle(color: Colors.white, fontSize: 13)),
               ],
             ),
           ),
@@ -250,18 +234,20 @@ class _IllustrationView extends StatelessWidget {
     ),
     _Illustration.suggestion => _whiteCard(
       width: 300,
-      child: const Column(
+      child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Row(
             children: [
               Icon(Icons.lightbulb, color: Color(0xFFFACC15)),
               SizedBox(width: 8),
-              Text('Upsell Suggestion', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+              Expanded(
+                child: Text(l10n.upsellSuggestion, style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+              ),
             ],
           ),
           SizedBox(height: 12),
-          Text('Would your guest like a drink with that?'),
+          Text(l10n.guideUpsellQuestion),
           SizedBox(height: 12),
           Row(
             children: [
@@ -270,7 +256,7 @@ class _IllustrationView extends StatelessWidget {
               Expanded(
                 child: Text('Red Wine', style: TextStyle(fontWeight: FontWeight.w600)),
               ),
-              Chip(label: Text('+ Add')),
+              Chip(label: Text(l10n.addWithPlus)),
             ],
           ),
         ],
@@ -280,8 +266,8 @@ class _IllustrationView extends StatelessWidget {
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
         for (final (icon, label, color) in [
-          (Icons.payments_outlined, 'Cash', ServioColors.success),
-          (Icons.credit_card, 'Card', ServioColors.primary),
+          (Icons.payments_outlined, l10n.methodCash, ServioColors.success),
+          (Icons.account_balance_wallet_outlined, l10n.payPal, ServioColors.primary),
         ])
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 8),

@@ -110,14 +110,15 @@ cover different parts of the meal (e.g. a drink, a side and a dessert) instead o
 
 ## 7. Explanations
 
-Each suggestion carries a reason that names the signal that contributed most:
+Each suggestion carries a reason that names the signal that contributed most. The reason is written in the
+waiter's app language (English or Bosnian):
 
-| Dominant signal | Example reason |
-|---|---|
-| History | *Ordered with Ribeye Steak in 66% of orders* |
-| Content (shared traits) | *Pairs with Ribeye Steak: same premium price range, both meat* |
-| Content (no shared traits) | *Completes the order with a dessert* |
-| + feedback, once a pair was suggested at least 5 times | *… · accepted 65% of the times it was suggested* |
+| Dominant signal | Example reason | In Bosnian |
+|---|---|---|
+| History | *Ordered with Ribeye Steak in 66% of orders* | *Naručuje se uz Ribeye Steak u 66% narudžbi* |
+| Content (shared traits) | *Pairs with Ribeye Steak: same premium price range, both meat* | *Slaže se uz Ribeye Steak: isti cjenovni razred (premium), zajedničke oznake: meat* |
+| Content (no shared traits) | *Completes the order with a dessert* | *Upotpunjuje narudžbu: desert* |
+| + feedback, once a pair was suggested at least 5 times | *… · accepted 65% of the times it was suggested* | *… · prihvaćeno u 65% slučajeva kad je predloženo* |
 
 The response also returns `contentScore`, `historyScore` and `acceptanceScore`, so the calculation can be
 inspected for every suggestion.

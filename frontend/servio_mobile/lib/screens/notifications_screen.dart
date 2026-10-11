@@ -86,18 +86,18 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
     final unread = context.watch<NotificationCenter>().unreadCount;
     return Scaffold(
       appBar: GradientAppBar(
-        title: 'Notifications',
-        subtitle: unread == 0 ? 'All caught up' : '$unread unread',
-        actions: [if (unread > 0) HeaderButton(icon: Icons.done_all, tooltip: 'Mark all as read', onPressed: _markAllRead)],
+        title: l10n.notifications,
+        subtitle: unread == 0 ? l10n.allCaughtUp : l10n.unreadCount(unread),
+        actions: [if (unread > 0) HeaderButton(icon: Icons.done_all, tooltip: l10n.markAllAsRead, onPressed: _markAllRead)],
       ),
       body: Column(
         children: [
           Padding(
-            padding: const EdgeInsets.fromLTRB(16, 12, 16, 0),
+            padding: EdgeInsets.fromLTRB(16, 12, 16, 0),
             child: SegmentedButton<bool>(
-              segments: const [
-                ButtonSegment(value: false, label: Text('All')),
-                ButtonSegment(value: true, label: Text('Unread')),
+              segments: [
+                ButtonSegment(value: false, label: Text(l10n.all)),
+                ButtonSegment(value: true, label: Text(l10n.unread)),
               ],
               selected: {_unreadOnly},
               onSelectionChanged: (value) {
@@ -110,14 +110,14 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
             child: _error != null && _items.isEmpty
                 ? ErrorView(error: _error!, onRetry: _reload)
                 : _items.isEmpty && _loading
-                ? const LoadingView()
+                ? LoadingView()
                 : RefreshIndicator(
                     onRefresh: _reload,
                     child: _items.isEmpty
                         ? ListView(
-                            children: const [
+                            children: [
                               SizedBox(height: 100),
-                              EmptyView(icon: Icons.notifications_none, message: 'No notifications.'),
+                              EmptyView(icon: Icons.notifications_none, message: l10n.noNotifications),
                             ],
                           )
                         : ListView.builder(
@@ -133,7 +133,7 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
                                             _page++;
                                             _loadPage();
                                           },
-                                    child: const Text('Load more'),
+                                    child: Text(l10n.loadMore),
                                   ),
                                 );
                               }
@@ -160,6 +160,7 @@ class _NotificationTile extends StatelessWidget {
       NotificationType.ticketReady => (Icons.room_service, ServioColors.success),
       NotificationType.ticketCancelled => (Icons.cancel, ServioColors.danger),
       NotificationType.paymentCompleted || NotificationType.refundIssued => (Icons.payments, ServioColors.primary),
+      NotificationType.tablesAssigned => (Icons.person_pin_outlined, ServioColors.primary),
       _ => (Icons.notifications, ServioColors.primary),
     };
     return Card(

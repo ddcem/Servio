@@ -72,11 +72,11 @@ class _StationDisplayScreenState extends State<StationDisplayScreen> {
     try {
       if (ticket.status == TicketStatus.newTicket) {
         await _tickets.start(ticket.id);
-        if (mounted) showSuccess(context, 'Ticket ${ticket.ticketNumber} for table ${ticket.tableNumber} is being prepared.');
+        if (mounted) showSuccess(context, l10n.ticketBeingPrepared(ticket.ticketNumber, ticket.tableNumber));
       } else {
         await _tickets.markReady(ticket.id);
         if (mounted) {
-          showSuccess(context, 'Ticket ${ticket.ticketNumber} is ready. ${ticket.waiterName} has been notified.');
+          showSuccess(context, l10n.ticketReadyNotified(ticket.ticketNumber, ticket.waiterName));
         }
       }
       await _load();
@@ -103,7 +103,7 @@ class _StationDisplayScreenState extends State<StationDisplayScreen> {
               children: [
                 if (widget.viewOnly) ...[
                   IconButton(
-                    tooltip: 'Back',
+                    tooltip: l10n.back,
                     color: Colors.white,
                     icon: const Icon(Icons.arrow_back),
                     onPressed: () => Navigator.of(context).pop(),
@@ -121,18 +121,15 @@ class _StationDisplayScreenState extends State<StationDisplayScreen> {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        '${widget.station} Display',
+                        _isKitchen ? l10n.kitchenDisplay : l10n.barDisplay,
                         style: const TextStyle(color: Colors.white, fontSize: 28, fontWeight: FontWeight.bold),
                       ),
-                      Text(
-                        '$count active ${count == 1 ? 'order' : 'orders'}',
-                        style: const TextStyle(color: Colors.white70, fontSize: 16),
-                      ),
+                      Text(l10n.activeOrdersCount(count), style: const TextStyle(color: Colors.white70, fontSize: 16)),
                     ],
                   ),
                 ),
                 if (widget.viewOnly)
-                  const _HeaderChip(icon: Icons.visibility_outlined, label: 'View only')
+                  _HeaderChip(icon: Icons.visibility_outlined, label: l10n.viewOnly)
                 else if (user != null)
                   _UserMenu(user: user),
               ],
@@ -151,7 +148,7 @@ class _StationDisplayScreenState extends State<StationDisplayScreen> {
     if (_items!.isEmpty) {
       return EmptyView(
         icon: _isKitchen ? Icons.restaurant : Icons.wine_bar_outlined,
-        message: 'No pending ${_isKitchen ? 'food' : 'drink'} orders',
+        message: _isKitchen ? l10n.noPendingFood : l10n.noPendingDrinks,
       );
     }
 
@@ -225,8 +222,14 @@ class _TicketCard extends StatelessWidget {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text('Order ${ticket.ticketNumber}', style: const TextStyle(color: ServioColors.textMuted, fontSize: 15)),
-                      Text('Table ${ticket.tableNumber}', style: const TextStyle(fontSize: 26, fontWeight: FontWeight.bold)),
+                      Text(
+                        l10n.ticketTitle(ticket.ticketNumber),
+                        style: const TextStyle(color: ServioColors.textMuted, fontSize: 15),
+                      ),
+                      Text(
+                        l10n.tableNumber(ticket.tableNumber),
+                        style: const TextStyle(fontSize: 26, fontWeight: FontWeight.bold),
+                      ),
                       Text(ticket.waiterName, style: const TextStyle(color: ServioColors.textMuted, fontSize: 13)),
                     ],
                   ),
@@ -287,7 +290,7 @@ class _TicketCard extends StatelessWidget {
                 icon: busy
                     ? const SizedBox(width: 20, height: 20, child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white))
                     : Icon(_isNew ? Icons.schedule : Icons.check_circle_outline),
-                label: Text(_isNew ? 'Start Preparing' : (isKitchen ? 'Mark as Ready' : 'Complete Order')),
+                label: Text(_isNew ? l10n.startPreparing : (isKitchen ? l10n.markAsReady : l10n.completeOrder)),
               ),
             const SizedBox(height: 8),
             Container(
@@ -326,14 +329,16 @@ class _SummaryBar extends StatelessWidget {
         spacing: 40,
         runSpacing: 8,
         children: [
-          _metric('New', '${summary.newCount}'),
-          _metric('Preparing', '${summary.preparingCount}'),
-          _metric('Longest wait', oldest == null ? '–' : Formatters.elapsed(DateTime.now().difference(oldest))),
+          _metric(l10n.summaryNew, '${summary.newCount}'),
+          _metric(l10n.summaryPreparing, '${summary.preparingCount}'),
+          _metric(l10n.longestWait, oldest == null ? '–' : Formatters.elapsed(DateTime.now().difference(oldest))),
           _metric(
-            'Avg. time to ready today',
-            summary.averageMinutesToReadyToday == null ? '–' : '${summary.averageMinutesToReadyToday!.toStringAsFixed(1)} min',
+            l10n.avgTimeToReadyToday,
+            summary.averageMinutesToReadyToday == null
+                ? '–'
+                : l10n.minutesValue(Formatters.decimal(summary.averageMinutesToReadyToday!)),
           ),
-          _metric('Completed today', '${summary.completedToday}'),
+          _metric(l10n.completedToday, '${summary.completedToday}'),
         ],
       ),
     );
@@ -382,7 +387,7 @@ class _UserMenu extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => PopupMenuButton<void>(
-    tooltip: 'Account',
+    tooltip: l10n.account,
     offset: const Offset(0, 56),
     itemBuilder: (_) => [
       PopupMenuItem(
@@ -390,7 +395,7 @@ class _UserMenu extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text('${user.role} staff', style: const TextStyle(color: ServioColors.textMuted)),
+            Text(l10n.roleStaff(Roles.label(user.role)), style: const TextStyle(color: ServioColors.textMuted)),
             Text(
               user.fullName,
               style: const TextStyle(color: ServioColors.textPrimary, fontWeight: FontWeight.bold),
@@ -400,10 +405,41 @@ class _UserMenu extends StatelessWidget {
       ),
       const PopupMenuDivider(),
       PopupMenuItem(
+        onTap: () => showDialog<void>(context: context, builder: (_) => const _SettingsDialog()),
+        child: ListTile(
+          leading: const Icon(Icons.settings_outlined),
+          title: Text(l10n.settings),
+          contentPadding: EdgeInsets.zero,
+        ),
+      ),
+      PopupMenuItem(
         onTap: () => context.read<AuthProvider>().logout(),
-        child: const ListTile(leading: Icon(Icons.logout), title: Text('Logout'), contentPadding: EdgeInsets.zero),
+        child: ListTile(leading: const Icon(Icons.logout), title: Text(l10n.logout), contentPadding: EdgeInsets.zero),
       ),
     ],
     child: _HeaderChip(icon: Icons.person_outline, label: user.username),
+  );
+}
+
+/// Kitchen and bar staff choose their language here; the display switches immediately.
+class _SettingsDialog extends StatelessWidget {
+  const _SettingsDialog();
+
+  @override
+  Widget build(BuildContext context) => AlertDialog(
+    title: Text(l10n.settings),
+    content: SizedBox(
+      width: 420,
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(l10n.language, style: const TextStyle(fontWeight: FontWeight.bold)),
+          const LanguagePicker(),
+          Text(l10n.languageHint, style: const TextStyle(color: ServioColors.textMuted)),
+        ],
+      ),
+    ),
+    actions: [FilledButton(onPressed: () => Navigator.pop(context), child: Text(l10n.close))],
   );
 }

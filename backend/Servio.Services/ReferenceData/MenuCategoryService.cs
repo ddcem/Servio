@@ -68,7 +68,7 @@ public class MenuCategoryService(ServioDbContext context)
         if (itemCount > 0)
         {
             throw new BusinessException(
-                $"The category '{entity.Name}' has {itemCount} menu item(s), including removed items kept for order history, and cannot be deleted.");
+                "The category '{0}' has {1} menu item(s), including removed items kept for order history, and cannot be deleted.", entity.Name, itemCount);
         }
     }
 
@@ -90,7 +90,7 @@ public class MenuCategoryService(ServioDbContext context)
         var name = entity.Name.ToLower();
         if (await Context.MenuCategories.AnyAsync(x => x.Id != entity.Id && x.Name.ToLower() == name, cancellationToken))
         {
-            throw new BusinessException($"A category named '{entity.Name}' already exists.");
+            throw new BusinessException("A category named '{0}' already exists.", entity.Name);
         }
     }
 }

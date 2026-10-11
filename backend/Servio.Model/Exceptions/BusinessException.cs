@@ -1,3 +1,3 @@
 namespace Servio.Model.Exceptions;
 
-public class BusinessException(string message) : Exception(message);
+public class BusinessException(string format, params object?[] args) : ServioException(format, args);

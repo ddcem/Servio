@@ -52,7 +52,7 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
           'newPasswordConfirmation': _confirmation.text,
         });
         if (!mounted) return;
-        showSuccess(context, 'Your password was changed. You can log in now.');
+        showSuccess(context, l10n.passwordChangedLogIn);
         Navigator.of(context).pop();
       }
     } on ApiException catch (e) {
@@ -64,7 +64,7 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
 
   @override
   Widget build(BuildContext context) => Scaffold(
-    appBar: AppBar(title: const Text('Reset password')),
+    appBar: AppBar(title: Text(l10n.resetPassword)),
     body: SafeArea(
       child: SingleChildScrollView(
         padding: const EdgeInsets.all(20),
@@ -74,9 +74,7 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
               Text(
-                _codeSent
-                    ? 'Enter the code from the email and choose a new password.'
-                    : 'Enter the email address of your account. We will send you a 6-digit code.',
+                _codeSent ? l10n.resetEnterCode : l10n.resetEnterEmail,
                 style: const TextStyle(fontSize: 15, color: ServioColors.textMuted),
               ),
               const SizedBox(height: 20),
@@ -85,7 +83,7 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
                 enabled: !_codeSent,
                 keyboardType: TextInputType.emailAddress,
                 autocorrect: false,
-                decoration: const InputDecoration(labelText: 'Email', prefixIcon: Icon(Icons.email_outlined)),
+                decoration: InputDecoration(labelText: l10n.email, prefixIcon: Icon(Icons.email_outlined)),
                 validator: Validators.email,
               ),
               if (_codeSent) ...[
@@ -98,16 +96,16 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
                   controller: _code,
                   keyboardType: TextInputType.number,
                   maxLength: 6,
-                  decoration: const InputDecoration(labelText: 'Reset code', prefixIcon: Icon(Icons.pin_outlined)),
-                  validator: (value) => RegExp(r'^\d{6}$').hasMatch(value?.trim() ?? '') ? null : 'The reset code has 6 digits.',
+                  decoration: InputDecoration(labelText: l10n.resetCode, prefixIcon: Icon(Icons.pin_outlined)),
+                  validator: (value) => RegExp(r'^\d{6}$').hasMatch(value?.trim() ?? '') ? null : l10n.resetCodeInvalid,
                 ),
                 const SizedBox(height: 8),
                 TextFormField(
                   controller: _password,
                   obscureText: true,
-                  decoration: const InputDecoration(
-                    labelText: 'New password',
-                    helperText: 'At least 8 characters, with a letter and a number',
+                  decoration: InputDecoration(
+                    labelText: l10n.newPassword,
+                    helperText: l10n.passwordHint,
                     prefixIcon: Icon(Icons.lock_outline),
                   ),
                   validator: Validators.newPassword,
@@ -116,7 +114,7 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
                 TextFormField(
                   controller: _confirmation,
                   obscureText: true,
-                  decoration: const InputDecoration(labelText: 'Repeat new password', prefixIcon: Icon(Icons.lock_outline)),
+                  decoration: InputDecoration(labelText: l10n.repeatNewPassword, prefixIcon: Icon(Icons.lock_outline)),
                   validator: (value) => Validators.confirmation(value, _password.text),
                 ),
               ],
@@ -127,7 +125,10 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
               const SizedBox(height: 24),
               SizedBox(
                 height: 52,
-                child: FilledButton(onPressed: _busy ? null : _submit, child: Text(_codeSent ? 'Change password' : 'Send code')),
+                child: FilledButton(
+                  onPressed: _busy ? null : _submit,
+                  child: Text(_codeSent ? l10n.changePassword : l10n.sendCode),
+                ),
               ),
               if (_codeSent)
                 TextButton(
@@ -137,7 +138,7 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
                           _codeSent = false;
                           _error = null;
                         }),
-                  child: const Text('Send a new code'),
+                  child: Text(l10n.sendNewCode),
                 ),
             ],
           ),

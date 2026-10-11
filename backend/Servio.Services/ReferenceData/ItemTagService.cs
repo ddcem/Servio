@@ -47,7 +47,7 @@ public class ItemTagService(ServioDbContext context)
         if (itemCount > 0)
         {
             throw new BusinessException(
-                $"The tag '{entity.Name}' is used by {itemCount} menu item(s). Remove it from those items first.");
+                "The tag '{0}' is used by {1} menu item(s). Remove it from those items first.", entity.Name, itemCount);
         }
     }
 
@@ -56,7 +56,7 @@ public class ItemTagService(ServioDbContext context)
         var name = entity.Name.ToLower();
         if (await Context.ItemTags.AnyAsync(x => x.Id != entity.Id && x.Name.ToLower() == name, cancellationToken))
         {
-            throw new BusinessException($"A tag named '{entity.Name}' already exists.");
+            throw new BusinessException("A tag named '{0}' already exists.", entity.Name);
         }
     }
 }

@@ -3,11 +3,21 @@ import 'package:servio_shared/servio_shared.dart';
 
 /// Header (back arrow, title, subtitle, actions) and scrollable body of an admin panel section.
 class AdminPage extends StatelessWidget {
-  const AdminPage({super.key, required this.title, required this.subtitle, this.actions = const [], required this.child});
+  const AdminPage({
+    super.key,
+    required this.title,
+    required this.subtitle,
+    this.actions = const [],
+    this.backTooltip,
+    required this.child,
+  });
 
   final String title;
   final String subtitle;
   final List<Widget> actions;
+
+  /// Defaults to "Back to dashboard"; pages opened from a section go back to that section.
+  final String? backTooltip;
   final Widget child;
 
   @override
@@ -20,7 +30,7 @@ class AdminPage extends StatelessWidget {
         child: Row(
           children: [
             IconButton(
-              tooltip: 'Back to dashboard',
+              tooltip: backTooltip ?? l10n.backToDashboardShort,
               icon: const Icon(Icons.arrow_back),
               onPressed: () => Navigator.of(context).pop(),
             ),
@@ -71,16 +81,16 @@ class Pager extends StatelessWidget {
     padding: const EdgeInsets.only(top: 12),
     child: Row(
       children: [
-        Text('$totalCount ${totalCount == 1 ? 'record' : 'records'}', style: const TextStyle(color: ServioColors.textMuted)),
+        Text(l10n.resultsCount(totalCount), style: const TextStyle(color: ServioColors.textMuted)),
         const Spacer(),
         IconButton(
-          tooltip: 'Previous page',
+          tooltip: l10n.previousPage,
           onPressed: page > 1 ? () => onChanged(page - 1) : null,
           icon: const Icon(Icons.chevron_left),
         ),
-        Text('Page $page of $pageCount'),
+        Text(l10n.pageOf(page, pageCount)),
         IconButton(
-          tooltip: 'Next page',
+          tooltip: l10n.nextPage,
           onPressed: page < pageCount ? () => onChanged(page + 1) : null,
           icon: const Icon(Icons.chevron_right),
         ),

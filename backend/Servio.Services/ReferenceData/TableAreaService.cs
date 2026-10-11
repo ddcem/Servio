@@ -44,7 +44,7 @@ public class TableAreaService(ServioDbContext context)
         if (tableCount > 0)
         {
             throw new BusinessException(
-                $"The area '{entity.Name}' still has {tableCount} table(s). Move them to another area or delete them first.");
+                "The area '{0}' still has {1} table(s). Move them to another area or delete them first.", entity.Name, tableCount);
         }
     }
 
@@ -53,7 +53,7 @@ public class TableAreaService(ServioDbContext context)
         var name = entity.Name.ToLower();
         if (await Context.TableAreas.AnyAsync(x => x.Id != entity.Id && x.Name.ToLower() == name, cancellationToken))
         {
-            throw new BusinessException($"An area named '{entity.Name}' already exists.");
+            throw new BusinessException("An area named '{0}' already exists.", entity.Name);
         }
     }
 }

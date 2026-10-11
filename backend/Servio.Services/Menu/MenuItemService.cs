@@ -266,7 +266,7 @@ public class MenuItemService(
         var name = entity.Name.ToLower();
         if (await Query.AnyAsync(x => x.Id != entity.Id && x.Name.ToLower() == name, cancellationToken))
         {
-            throw new BusinessException($"A menu item named '{entity.Name}' already exists.");
+            throw new BusinessException("A menu item named '{0}' already exists.", entity.Name);
         }
 
         var tagIds = request.TagIds.Distinct().ToList();

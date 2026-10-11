@@ -7,6 +7,7 @@ using Servio.Model.Requests;
 using Servio.Model.Responses;
 using Servio.Services.Database;
 using Servio.Services.Database.Entities;
+using Servio.Services.Localization;
 using Servio.Services.Mapping;
 using Servio.Services.Messaging;
 
@@ -102,7 +103,7 @@ public class AuthService(
         if (user is null)
         {
             logger.LogInformation("Password reset requested for unknown or inactive email {Email}", request.Email);
-            return new MessageResponse(ResetCodeSentMessage);
+            return new MessageResponse(Translator.T(ResetCodeSentMessage));
         }
 
         var now = DateTime.UtcNow;
@@ -133,10 +134,10 @@ public class AuthService(
         await context.SaveChangesAsync(cancellationToken);
 
         await messagePublisher.PublishEmailAsync(
-            EmailTemplates.PasswordReset(user.Email, user.FirstName, code, (int)ResetCodeLifetime.TotalMinutes),
+            EmailTemplates.PasswordReset(user.Email, user.FirstName, code, (int)ResetCodeLifetime.TotalMinutes, user.PreferredLanguage),
             cancellationToken);
 
-        return new MessageResponse(ResetCodeSentMessage);
+        return new MessageResponse(Translator.T(ResetCodeSentMessage));
     }
 
     public async Task<MessageResponse> ResetPasswordAsync(ResetPasswordRequest request, CancellationToken cancellationToken = default)
@@ -172,6 +173,6 @@ public class AuthService(
         await sessionValidator.RevokeUserSessionsAsync(user.Id, cancellationToken: cancellationToken);
 
         await context.SaveChangesAsync(cancellationToken);
-        return new MessageResponse("Your password was changed. You can now log in with the new password.");
+        return new MessageResponse(Translator.T("Your password was changed. You can now log in with the new password."));
     }
 }

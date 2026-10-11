@@ -43,7 +43,9 @@ class _NameFormState<T> extends State<_NameForm<T>> {
 
   @override
   Widget build(BuildContext _) => FormDialog(
-    title: widget.id == null ? 'Add ${widget.entityLabel.toLowerCase()}' : 'Edit ${widget.entityLabel.toLowerCase()}',
+    title: widget.id == null
+        ? l10n.addEntity(widget.entityLabel.toLowerCase())
+        : l10n.editEntity(widget.entityLabel.toLowerCase()),
     formKey: _formKey,
     serverErrors: _server,
     width: 440,
@@ -52,15 +54,20 @@ class _NameFormState<T> extends State<_NameForm<T>> {
       final saved = widget.id == null ? await widget.provider.insert(request) : await widget.provider.update(widget.id!, request);
       if (!mounted) return;
       Navigator.pop(context, saved);
-      showSuccess(context, '${widget.entityLabel} "${_name.text.trim()}" was ${widget.id == null ? 'added' : 'updated'}.');
+      showSuccess(
+        context,
+        widget.id == null
+            ? l10n.entityAdded(widget.entityLabel, _name.text.trim())
+            : l10n.entityUpdated(widget.entityLabel, _name.text.trim()),
+      );
     },
     children: [
       TextFormField(
         controller: _name,
         autofocus: true,
         maxLength: 30,
-        decoration: InputDecoration(labelText: 'Name', hintText: widget.hint),
-        validator: (value) => _server['Name'] ?? Validators.length(value, 'Name', min: 2, max: 30),
+        decoration: InputDecoration(labelText: l10n.name, hintText: widget.hint),
+        validator: (value) => _server['Name'] ?? Validators.length(value, l10n.name, min: 2, max: 30),
       ),
     ],
   );
@@ -109,7 +116,7 @@ class _CategoryFormState extends State<_CategoryForm> {
   Widget build(BuildContext _) {
     final editing = widget.category != null;
     return FormDialog(
-      title: editing ? 'Edit category' : 'Add category',
+      title: editing ? l10n.editCategory : l10n.addCategory,
       formKey: _formKey,
       serverErrors: _server,
       onSave: () async {
@@ -123,37 +130,34 @@ class _CategoryFormState extends State<_CategoryForm> {
         final saved = editing ? await provider.update(widget.category!.id, request) : await provider.insert(request);
         if (!mounted) return;
         Navigator.pop(context, saved);
-        showSuccess(context, 'Category "${saved.name}" was ${editing ? 'updated' : 'added'}.');
+        showSuccess(context, editing ? l10n.categoryUpdated(saved.name) : l10n.categoryAdded(saved.name));
       },
       children: [
         TextFormField(
           controller: _name,
           autofocus: true,
           maxLength: 50,
-          decoration: const InputDecoration(labelText: 'Name', hintText: 'e.g. Main Course'),
-          validator: (value) => _server['Name'] ?? Validators.length(value, 'Name', min: 2, max: 50),
+          decoration: InputDecoration(labelText: l10n.name, hintText: l10n.categoryNameHint),
+          validator: (value) => _server['Name'] ?? Validators.length(value, l10n.name, min: 2, max: 50),
         ),
         DropdownButtonFormField<CourseType>(
           initialValue: _courseType,
-          decoration: const InputDecoration(labelText: 'Course type', helperText: 'Used by the recommender to complete a meal'),
+          decoration: InputDecoration(labelText: l10n.courseType, helperText: l10n.courseTypeHelper),
           items: CourseType.values.map((e) => DropdownMenuItem(value: e, child: Text(e.label))).toList(),
           onChanged: (value) => setState(() => _courseType = value),
-          validator: (value) => _server['CourseType'] ?? (value == null ? 'Course type is required.' : null),
+          validator: (value) => _server['CourseType'] ?? (value == null ? l10n.courseTypeRequired : null),
         ),
         DropdownButtonFormField<int>(
           initialValue: _stationId,
-          decoration: const InputDecoration(
-            labelText: 'Prepared at',
-            helperText: 'Items of this category are sent to this station',
-          ),
-          items: (_stations ?? []).map((e) => DropdownMenuItem(value: e.id, child: Text(e.name))).toList(),
+          decoration: InputDecoration(labelText: l10n.preparedAt, helperText: l10n.preparedAtHelper),
+          items: (_stations ?? []).map((e) => DropdownMenuItem(value: e.id, child: Text(Stations.label(e.name)))).toList(),
           onChanged: (value) => setState(() => _stationId = value),
-          validator: (value) => _server['PreparationStationId'] ?? (value == null ? 'Preparation station is required.' : null),
+          validator: (value) => _server['PreparationStationId'] ?? (value == null ? l10n.stationRequired : null),
         ),
         TextFormField(
           controller: _sortOrder,
-          decoration: const InputDecoration(labelText: 'Sort order', helperText: 'Lower numbers are shown first in the menu'),
-          validator: (value) => _server['SortOrder'] ?? Validators.integer(value, 'Sort order', min: 0, max: 999),
+          decoration: InputDecoration(labelText: l10n.sortOrder, helperText: l10n.sortOrderHelper),
+          validator: (value) => _server['SortOrder'] ?? Validators.integer(value, l10n.sortOrder, min: 0, max: 999),
         ),
       ],
     );
@@ -197,7 +201,7 @@ class _CurrencyFormState extends State<_CurrencyForm> {
     final editing = widget.currency != null;
     final codeLocked = widget.currency?.isInUse ?? false;
     return FormDialog(
-      title: editing ? 'Edit currency' : 'Add currency',
+      title: editing ? l10n.editCurrency : l10n.addCurrency,
       formKey: _formKey,
       serverErrors: _server,
       width: 460,
@@ -207,7 +211,7 @@ class _CurrencyFormState extends State<_CurrencyForm> {
         final saved = editing ? await provider.update(widget.currency!.id, request) : await provider.insert(request);
         if (!mounted) return;
         Navigator.pop(context, saved);
-        showSuccess(context, 'Currency ${saved.code} was ${editing ? 'updated' : 'added'}.');
+        showSuccess(context, editing ? l10n.currencyUpdated(saved.code) : l10n.currencyAdded(saved.code));
       },
       children: [
         TextFormField(
@@ -216,27 +220,24 @@ class _CurrencyFormState extends State<_CurrencyForm> {
           maxLength: 3,
           textCapitalization: TextCapitalization.characters,
           decoration: InputDecoration(
-            labelText: 'Code',
-            hintText: 'e.g. EUR',
-            helperText: codeLocked ? 'The code cannot change while orders or the settings use this currency' : null,
+            labelText: l10n.code,
+            hintText: l10n.codeHint,
+            helperText: codeLocked ? l10n.codeLocked : null,
           ),
           validator: (value) =>
-              _server['Code'] ??
-              (_codePattern.hasMatch(value?.trim().toUpperCase() ?? '')
-                  ? null
-                  : 'Currency code must be exactly 3 uppercase letters (ISO 4217), e.g. EUR.'),
+              _server['Code'] ?? (_codePattern.hasMatch(value?.trim().toUpperCase() ?? '') ? null : l10n.currencyCodeInvalid),
         ),
         TextFormField(
           controller: _name,
           maxLength: 50,
-          decoration: const InputDecoration(labelText: 'Name', hintText: 'e.g. Euro'),
-          validator: (value) => _server['Name'] ?? Validators.length(value, 'Name', min: 2, max: 50),
+          decoration: InputDecoration(labelText: l10n.name, hintText: l10n.currencyNameHint),
+          validator: (value) => _server['Name'] ?? Validators.length(value, l10n.name, min: 2, max: 50),
         ),
         TextFormField(
           controller: _symbol,
           maxLength: 5,
-          decoration: const InputDecoration(labelText: 'Symbol', hintText: 'e.g. €'),
-          validator: (value) => _server['Symbol'] ?? Validators.length(value, 'Symbol', min: 1, max: 5),
+          decoration: InputDecoration(labelText: l10n.symbol, hintText: 'KM, €'),
+          validator: (value) => _server['Symbol'] ?? Validators.length(value, l10n.symbol, min: 1, max: 5),
         ),
       ],
     );

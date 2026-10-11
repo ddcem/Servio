@@ -24,6 +24,7 @@ public class UserConfiguration : IEntityTypeConfiguration<User>
         builder.Property(x => x.PhoneNumber).HasMaxLength(20);
         builder.Property(x => x.PasswordHash).IsRequired();
         builder.Property(x => x.ProfileImageContentType).HasMaxLength(50);
+        builder.Property(x => x.PreferredLanguage).IsRequired().HasMaxLength(5).HasDefaultValue("en");
 
         builder.HasIndex(x => x.Username).IsUnique();
         builder.HasIndex(x => x.Email).IsUnique();

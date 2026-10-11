@@ -23,6 +23,11 @@ public class RestaurantTableConfiguration : IEntityTypeConfiguration<RestaurantT
             .WithMany(x => x.Tables)
             .HasForeignKey(x => x.AreaId)
             .OnDelete(DeleteBehavior.Restrict);
+
+        builder.HasOne(x => x.AssignedWaiter)
+            .WithMany()
+            .HasForeignKey(x => x.AssignedWaiterId)
+            .OnDelete(DeleteBehavior.SetNull);
     }
 }
 

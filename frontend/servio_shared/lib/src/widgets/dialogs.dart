@@ -1,13 +1,14 @@
 import 'package:flutter/material.dart';
 
 import '../theme/servio_colors.dart';
+import '../localization/language.dart';
 
 /// Confirmation for actions that cannot be undone (delete, cancel, payment, sending an order).
 Future<bool> confirmAction(
   BuildContext context, {
   required String title,
   required String message,
-  String confirmLabel = 'Confirm',
+  String? confirmLabel,
   bool destructive = false,
 }) async {
   final result = await showDialog<bool>(
@@ -16,11 +17,11 @@ Future<bool> confirmAction(
       title: Text(title),
       content: Text(message),
       actions: [
-        TextButton(onPressed: () => Navigator.pop(context, false), child: const Text('Back')),
+        TextButton(onPressed: () => Navigator.pop(context, false), child: Text(l10n.back)),
         FilledButton(
           style: destructive ? FilledButton.styleFrom(backgroundColor: ServioColors.danger) : null,
           onPressed: () => Navigator.pop(context, true),
-          child: Text(confirmLabel),
+          child: Text(confirmLabel ?? l10n.confirm),
         ),
       ],
     ),
@@ -29,15 +30,11 @@ Future<bool> confirmAction(
 }
 
 /// Asks for the reason of a cancellation; returns null when the user backs out.
-Future<String?> askForReason(
-  BuildContext context, {
-  required String title,
-  required String message,
-  String confirmLabel = 'Cancel it',
-}) => showDialog<String>(
-  context: context,
-  builder: (_) => _ReasonDialog(title: title, message: message, confirmLabel: confirmLabel),
-);
+Future<String?> askForReason(BuildContext context, {required String title, required String message, String? confirmLabel}) =>
+    showDialog<String>(
+      context: context,
+      builder: (_) => _ReasonDialog(title: title, message: message, confirmLabel: confirmLabel ?? l10n.cancelIt),
+    );
 
 class _ReasonDialog extends StatefulWidget {
   const _ReasonDialog({required this.title, required this.message, required this.confirmLabel});
@@ -78,11 +75,11 @@ class _ReasonDialogState extends State<_ReasonDialog> {
               autofocus: true,
               maxLines: 3,
               maxLength: 500,
-              decoration: const InputDecoration(labelText: 'Reason', hintText: 'e.g. Guest changed their mind'),
+              decoration: InputDecoration(labelText: l10n.reason, hintText: l10n.reasonHint),
               validator: (value) {
                 final text = value?.trim() ?? '';
-                if (text.isEmpty) return 'Please enter a reason.';
-                if (text.length < 3) return 'Reason must be between 3 and 500 characters long.';
+                if (text.isEmpty) return l10n.reasonRequired;
+                if (text.length < 3) return l10n.reasonLength;
                 return null;
               },
             ),
@@ -91,7 +88,7 @@ class _ReasonDialogState extends State<_ReasonDialog> {
       ),
     ),
     actions: [
-      TextButton(onPressed: () => Navigator.pop(context), child: const Text('Back')),
+      TextButton(onPressed: () => Navigator.pop(context), child: Text(l10n.back)),
       FilledButton(
         style: FilledButton.styleFrom(backgroundColor: ServioColors.danger),
         onPressed: () {

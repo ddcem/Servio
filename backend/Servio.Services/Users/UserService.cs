@@ -38,6 +38,7 @@ public class UserService(
         Role = x.Role.Name,
         IsActive = x.IsActive,
         HasProfileImage = x.ProfileImage != null,
+        PreferredLanguage = x.PreferredLanguage,
         CreatedAt = x.CreatedAt,
         LastLoginAt = x.LastLoginAt,
         HasActivity = Context.Orders.Any(o => o.WaiterId == x.Id)
@@ -125,6 +126,14 @@ public class UserService(
             await EnsureAnotherActiveAdminAsync(entity, (int)entry.Property(x => x.RoleId).OriginalValue, cancellationToken);
         }
 
+        // Someone who no longer works as a waiter leaves their tables free for the others.
+        if (roleChanged || deactivated)
+        {
+            await Context.RestaurantTables
+                .Where(x => x.AssignedWaiterId == entity.Id)
+                .ForEachAsync(x => x.AssignedWaiterId = null, cancellationToken);
+        }
+
         // Deactivation, a new role or a new password take effect immediately: existing logins stop working.
         if (roleChanged || deactivated || entry.Property(x => x.PasswordHash).IsModified)
         {
@@ -144,7 +153,7 @@ public class UserService(
         if (hasActivity)
         {
             throw new BusinessException(
-                $"{entity.FirstName} {entity.LastName} has orders, reservations or payments in the system and cannot be deleted. Deactivate the account instead.");
+                "{0} {1} has orders, reservations or payments in the system and cannot be deleted. Deactivate the account instead.", entity.FirstName, entity.LastName);
         }
 
         await EnsureAnotherActiveAdminAsync(entity, entity.RoleId, cancellationToken);
@@ -171,13 +180,13 @@ public class UserService(
         var username = entity.Username.ToLower();
         if (await Context.Users.AnyAsync(x => x.Id != entity.Id && x.Username.ToLower() == username, cancellationToken))
         {
-            throw new BusinessException($"The username '{entity.Username}' is already taken.");
+            throw new BusinessException("The username '{0}' is already taken.", entity.Username);
         }
 
         var email = entity.Email.ToLower();
         if (await Context.Users.AnyAsync(x => x.Id != entity.Id && x.Email.ToLower() == email, cancellationToken))
         {
-            throw new BusinessException($"The email {entity.Email} is already used by another employee.");
+            throw new BusinessException("The email {0} is already used by another employee.", entity.Email);
         }
     }
 

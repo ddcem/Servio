@@ -9,6 +9,7 @@ import '../../widgets/action_icon.dart';
 import '../../widgets/admin_page.dart';
 import '../../widgets/search_field.dart';
 import 'forms/table_form.dart';
+import 'table_assignments_screen.dart';
 import 'table_status_badge.dart';
 
 class TablesScreen extends StatefulWidget {
@@ -92,16 +93,16 @@ class _TablesScreenState extends State<TablesScreen> {
   Future<void> _delete(RestaurantTable table) async {
     final confirmed = await confirmAction(
       context,
-      title: 'Delete table ${table.number}?',
-      message: 'The table is removed permanently.',
-      confirmLabel: 'Delete',
+      title: l10n.deleteTableQuestion(table.number),
+      message: l10n.tableRemovedPermanently,
+      confirmLabel: l10n.delete,
       destructive: true,
     );
     if (!confirmed || !mounted) return;
     try {
       await _tables.delete(table.id);
       if (!mounted) return;
-      showSuccess(context, 'Table ${table.number} was deleted.');
+      showSuccess(context, l10n.tableDeleted(table.number));
       await _load();
     } catch (e) {
       if (mounted) showError(context, e);
@@ -110,28 +111,36 @@ class _TablesScreenState extends State<TablesScreen> {
 
   @override
   Widget build(BuildContext _) => AdminPage(
-    title: 'Tables',
-    subtitle: 'Seating plan with live status',
+    title: l10n.tables,
+    subtitle: l10n.tablesSubtitle,
     actions: [
+      OutlinedButton.icon(
+        onPressed: () async {
+          await Navigator.of(context).push(MaterialPageRoute(builder: (_) => const TableAssignmentsScreen()));
+          _load();
+        },
+        icon: const Icon(Icons.badge_outlined),
+        label: Text(l10n.assignWaiters),
+      ),
       Tooltip(
-        message: _areas.isEmpty ? 'Add a table area first (Reference Data → Table areas).' : '',
+        message: _areas.isEmpty ? l10n.addAreaFirst : '',
         child: FilledButton.icon(
           onPressed: _areas.isEmpty ? null : () => _openForm(),
           icon: const Icon(Icons.add),
-          label: const Text('Add Table'),
+          label: Text(l10n.addTableButton),
         ),
       ),
     ],
     child: ListView(
-      padding: const EdgeInsets.all(28),
+      padding: EdgeInsets.all(28),
       children: [
         Wrap(
           spacing: 16,
           runSpacing: 12,
           children: [
-            SearchField(hint: 'Table number', width: 180, onChanged: (value) => _filter(() => _search = value)),
+            SearchField(hint: l10n.tableNumberLabel, width: 180, onChanged: (value) => _filter(() => _search = value)),
             FilterDropdown<int>(
-              label: 'Area',
+              label: l10n.area,
               value: _areaId,
               items: {for (final a in _areas) a.id: a.name},
               onChanged: (value) => _filter(() => _areaId = value),
@@ -139,10 +148,10 @@ class _TablesScreenState extends State<TablesScreen> {
             FilterDropdown<TableStatus>(
               label: 'Status',
               value: _status,
-              items: const {
-                TableStatus.available: 'Available',
-                TableStatus.occupied: 'Occupied',
-                TableStatus.reserved: 'Reserved',
+              items: {
+                TableStatus.available: l10n.available,
+                TableStatus.occupied: l10n.occupied,
+                TableStatus.reserved: l10n.reserved,
               },
               onChanged: (value) => _filter(() => _status = value),
             ),
@@ -156,26 +165,27 @@ class _TablesScreenState extends State<TablesScreen> {
 
   Widget _buildTable() {
     if (_error != null && _result == null) return ErrorView(error: _error!, onRetry: _load);
-    if (_result == null) return const LoadingView();
+    if (_result == null) return LoadingView();
     if (_result!.items.isEmpty) {
-      return const EmptyView(icon: Icons.table_restaurant_outlined, message: 'No tables match the filters.');
+      return EmptyView(icon: Icons.table_restaurant_outlined, message: l10n.noTablesMatch);
     }
 
     return Panel(
-      padding: const EdgeInsets.all(8),
+      padding: EdgeInsets.all(8),
       child: Column(
         children: [
           WideTable(
             child: DataTable(
-              headingTextStyle: const TextStyle(fontWeight: FontWeight.w600, color: ServioColors.textMuted),
-              columns: const [
-                DataColumn(label: Text('TABLE')),
-                DataColumn(label: Text('AREA')),
-                DataColumn(label: Text('SEATS'), numeric: true),
-                DataColumn(label: Text('STATUS')),
-                DataColumn(label: Text('CURRENT BILL'), numeric: true),
-                DataColumn(label: Text('NEXT RESERVATION')),
-                DataColumn(label: Text('ACTIONS')),
+              headingTextStyle: TextStyle(fontWeight: FontWeight.w600, color: ServioColors.textMuted),
+              columns: [
+                DataColumn(label: Text(l10n.columnTable)),
+                DataColumn(label: Text(l10n.columnArea)),
+                DataColumn(label: Text(l10n.columnSeats), numeric: true),
+                DataColumn(label: Text(l10n.columnStatus)),
+                DataColumn(label: Text(l10n.columnWaiter)),
+                DataColumn(label: Text(l10n.columnCurrentBill), numeric: true),
+                DataColumn(label: Text(l10n.columnNextReservation)),
+                DataColumn(label: Text(l10n.columnActions)),
               ],
               rows: [
                 for (final table in _result!.items)
@@ -183,7 +193,7 @@ class _TablesScreenState extends State<TablesScreen> {
                     cells: [
                       DataCell(
                         Text(
-                          'Table ${table.number}${table.isActive ? '' : ' (not in use)'}',
+                          table.isActive ? l10n.tableNumber(table.number) : l10n.tableNotInUse(table.number),
                           style: TextStyle(fontWeight: FontWeight.w600, color: table.isActive ? null : ServioColors.textMuted),
                         ),
                       ),
@@ -192,16 +202,28 @@ class _TablesScreenState extends State<TablesScreen> {
                       DataCell(TableStatusBadge(table.status)),
                       DataCell(
                         Text(
+                          table.assignedWaiterName ?? l10n.unassigned,
+                          style: TextStyle(color: table.assignedWaiterName == null ? ServioColors.textMuted : null),
+                        ),
+                      ),
+                      DataCell(
+                        Text(
                           table.currentOrderTotal == null
                               ? '–'
-                              : '${Formatters.money(table.currentOrderTotal!, _currency)} · ${table.currentGuestCount} guests',
+                              : l10n.billAndGuests(
+                                  Formatters.money(table.currentOrderTotal!, _currency),
+                                  l10n.guestCount(table.currentGuestCount ?? 0),
+                                ),
                         ),
                       ),
                       DataCell(
                         Text(
                           table.upcomingReservation == null
                               ? '–'
-                              : '${Formatters.dateTime(table.upcomingReservation!.startTime)} · ${table.upcomingReservation!.guestName}',
+                              : l10n.reservationTimeAndGuest(
+                                  Formatters.dateTime(table.upcomingReservation!.startTime),
+                                  table.upcomingReservation!.guestName,
+                                ),
                         ),
                       ),
                       DataCell(
@@ -209,17 +231,15 @@ class _TablesScreenState extends State<TablesScreen> {
                           children: [
                             ActionIcon(
                               icon: Icons.edit_outlined,
-                              tooltip: 'Edit',
+                              tooltip: l10n.edit,
                               color: ServioColors.primary,
                               onPressed: () => _openForm(table),
                             ),
                             ActionIcon(
                               icon: Icons.delete_outline,
-                              tooltip: 'Delete table',
+                              tooltip: l10n.deleteTable,
                               color: ServioColors.danger,
-                              disabledReason: table.hasHistory
-                                  ? 'The table has orders or reservations in its history. Mark it as not in use instead.'
-                                  : null,
+                              disabledReason: table.hasHistory ? l10n.tableHasHistory : null,
                               onPressed: () => _delete(table),
                             ),
                           ],

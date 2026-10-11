@@ -17,6 +17,7 @@
 
   <ItemGroup>
     <EmbeddedResource Include="Database\Seed\Images\*.png" LogicalName="seed-images/%(Filename)%(Extension)" />
+    <EmbeddedResource Include="Localization\Translations\*.json" LogicalName="translations/%(Filename)%(Extension)" />
   </ItemGroup>
 
   <PropertyGroup>

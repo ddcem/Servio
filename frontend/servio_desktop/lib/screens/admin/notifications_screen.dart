@@ -63,7 +63,7 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
   Future<void> _markAllRead() async {
     try {
       await context.read<NotificationCenter>().markAllAsRead();
-      if (mounted) showSuccess(context, 'All notifications are marked as read.');
+      if (mounted) showSuccess(context, l10n.allMarkedRead);
       await _load();
     } catch (e) {
       if (mounted) showError(context, e);
@@ -74,22 +74,22 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
   Widget build(BuildContext _) {
     final unread = context.watch<NotificationCenter>().unreadCount;
     return AdminPage(
-      title: 'Notifications',
-      subtitle: unread == 0 ? 'You are all caught up' : '$unread unread',
+      title: l10n.notifications,
+      subtitle: unread == 0 ? l10n.youAreAllCaughtUp : l10n.unreadCount(unread),
       actions: [
         OutlinedButton.icon(
           onPressed: unread == 0 ? null : _markAllRead,
           icon: const Icon(Icons.done_all),
-          label: const Text('Mark all as read'),
+          label: Text(l10n.markAllAsRead),
         ),
       ],
       child: ListView(
         padding: const EdgeInsets.all(28),
         children: [
           FilterDropdown<bool>(
-            label: 'Show',
+            label: l10n.show,
             value: _isRead,
-            items: const {false: 'Unread', true: 'Read'},
+            items: {false: l10n.unread, true: l10n.read},
             onChanged: (value) {
               setState(() {
                 _isRead = value;
@@ -104,7 +104,7 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
           else if (_result == null)
             const LoadingView()
           else if (_result!.items.isEmpty)
-            const EmptyView(icon: Icons.notifications_none, message: 'No notifications.')
+            EmptyView(icon: Icons.notifications_none, message: l10n.noNotifications)
           else ...[
             for (final n in _result!.items)
               Card(
@@ -120,8 +120,8 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
                   subtitle: Text('${n.body}\n${Formatters.relative(n.createdAt)}'),
                   isThreeLine: true,
                   trailing: n.isRead
-                      ? const Text('Read', style: TextStyle(color: ServioColors.textMuted))
-                      : TextButton(onPressed: () => _markRead(n), child: const Text('Mark as read')),
+                      ? Text(l10n.read, style: const TextStyle(color: ServioColors.textMuted))
+                      : TextButton(onPressed: () => _markRead(n), child: Text(l10n.markAsRead)),
                 ),
               ),
             Pager(

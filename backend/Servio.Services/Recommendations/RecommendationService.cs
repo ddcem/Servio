@@ -2,9 +2,11 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Caching.Memory;
 using Servio.Model.Enums;
 using Servio.Model.Exceptions;
+using Servio.Model.Localization;
 using Servio.Model.Requests;
 using Servio.Model.Responses;
 using Servio.Services.Database;
+using Servio.Services.Localization;
 
 namespace Servio.Services.Recommendations;
 
@@ -109,30 +111,30 @@ public class RecommendationService(ServioDbContext context, IMemoryCache cache) 
         string reason;
         if (historyPart >= contentPart && confidence > 0)
         {
-            reason = $"Ordered with {source.Name} in {confidence * 100:0}% of orders";
+            reason = Translator.Render(new LocalizedText("Ordered with {0} in {1:0}% of orders", source.Name, confidence * 100));
         }
         else
         {
             var traits = new List<string>();
             if (candidate.PriceTier == source.PriceTier)
             {
-                traits.Add($"same {candidate.PriceTier.ToString().ToLower()} price range");
+                traits.Add(Translator.Render(new LocalizedText("same {0} price range", candidate.PriceTier)));
             }
 
             var sharedTags = candidate.Tags.Intersect(source.Tags).Take(2).ToList();
             if (sharedTags.Count > 0)
             {
-                traits.Add($"both {string.Join(" and ", sharedTags).ToLower()}");
+                traits.Add(Translator.Render(new LocalizedText("both {0}", string.Join(Translator.T(" and "), sharedTags).ToLower())));
             }
 
             reason = traits.Count > 0
-                ? $"Pairs with {source.Name}: {string.Join(", ", traits)}"
-                : $"Completes the order with {CourseLabel(candidate.CourseType)}";
+                ? Translator.Render(new LocalizedText("Pairs with {0}: {1}", source.Name, string.Join(", ", traits)))
+                : Translator.Render(new LocalizedText("Completes the order with {0}", new Localized(CourseLabel(candidate.CourseType))));
         }
 
         if (shown >= RecommenderWeights.MinShownForAcceptanceReason)
         {
-            reason += $" · accepted {acceptanceRate * 100:0}% of the times it was suggested";
+            reason += Translator.Render(new LocalizedText(" · accepted {0:0}% of the times it was suggested", acceptanceRate * 100));
         }
 
         return reason.Length <= 200 ? reason : reason[..199] + "…";

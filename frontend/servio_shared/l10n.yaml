@@ -1,0 +1,6 @@
+arb-dir: lib/l10n
+template-arb-file: app_en.arb
+output-dir: lib/src/l10n
+output-localization-file: servio_localizations.dart
+output-class: ServioLocalizations
+nullable-getter: false

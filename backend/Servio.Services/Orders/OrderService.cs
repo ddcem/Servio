@@ -2,17 +2,19 @@ using System.Linq.Expressions;
 using Microsoft.EntityFrameworkCore;
 using Servio.Model.Enums;
 using Servio.Model.Exceptions;
+using Servio.Model.Localization;
 using Servio.Model.Requests;
 using Servio.Model.Responses;
 using Servio.Model.SearchObjects;
 using Servio.Services.Auth;
 using Servio.Services.Base;
 using Servio.Services.Common;
-using Servio.Services.Database;
 using Servio.Services.Database.Entities;
+using Servio.Services.Database;
 using Servio.Services.Notifications;
 using Servio.Services.Settings;
 using Servio.Services.StateMachines;
+using Servio.Services.Tables;
 
 namespace Servio.Services.Orders;
 
@@ -123,8 +125,11 @@ public class OrderService(
         return query;
     }
 
+    /// <summary>Open orders by when they were opened; paid and cancelled ones by when they were closed, latest first.</summary>
     protected override IQueryable<Order> ApplyOrdering(IQueryable<Order> query, OrderSearchObject search) =>
-        query.OrderByDescending(x => x.OpenedAt).ThenByDescending(x => x.Id);
+        search.Status is OrderStatus.Completed or OrderStatus.Cancelled
+            ? query.OrderByDescending(x => x.ClosedAt).ThenByDescending(x => x.Id)
+            : query.OrderByDescending(x => x.OpenedAt).ThenByDescending(x => x.Id);
 
     public async Task<OrderResponse> CreateAsync(OrderCreateRequest request, CancellationToken cancellationToken = default)
     {
@@ -133,17 +138,19 @@ public class OrderService(
 
         if (!table.IsActive)
         {
-            throw new BusinessException($"Table {table.Number} is not in use.");
+            throw new BusinessException("Table {0} is not in use.", table.Number);
         }
+
+        await TableAccess.EnsureCanServeAsync(Context, currentUser, table, cancellationToken);
 
         if (request.GuestCount > table.Capacity)
         {
-            throw new BusinessException($"Table {table.Number} seats at most {table.Capacity} guests.");
+            throw new BusinessException("Table {0} seats at most {1} guests.", table.Number, table.Capacity);
         }
 
         if (await Context.Orders.AnyAsync(x => x.TableId == table.Id && x.Status == OrderStatus.Open, cancellationToken))
         {
-            throw new BusinessException($"Table {table.Number} already has an open order. Add the items to that order instead.");
+            throw new BusinessException("Table {0} already has an open order. Add the items to that order instead.", table.Number);
         }
 
         var settings = await settingsService.GetAsync(cancellationToken);
@@ -175,6 +182,7 @@ public class OrderService(
     {
         var order = await LoadWithItemsAsync(id, cancellationToken);
         EnsureOpen(order);
+        await TableAccess.EnsureCanServeAsync(Context, currentUser, order.Table, cancellationToken);
 
         var roundItemIds = await AddRoundAsync(order, request.Items, cancellationToken);
         await RecordShownRecommendationsAsync(order, request.ShownRecommendations, roundItemIds, cancellationToken);
@@ -188,6 +196,7 @@ public class OrderService(
     public async Task<OrderResponse> CancelAsync(int id, ReasonRequest request, CancellationToken cancellationToken = default)
     {
         var order = await LoadWithItemsAsync(id, cancellationToken);
+        await TableAccess.EnsureCanServeAsync(Context, currentUser, order.Table, cancellationToken);
         await Context.Entry(order).Collection(x => x.Payments).LoadAsync(cancellationToken);
 
         if (order.Payments.Any(x => x.Status is PaymentStatus.Pending or PaymentStatus.Completed))
@@ -220,8 +229,8 @@ public class OrderService(
             ticket.Status = TicketStatus.Cancelled;
 
             await dispatcher.NotifyRoleAsync(ticket.Station.Name, NotificationType.TicketCancelled,
-                $"Ticket {ticket.TicketNumber} cancelled – table {order.Table.Number}",
-                $"The whole order was cancelled. Reason: {reason}",
+                new LocalizedText("Ticket {0} cancelled – table {1}", ticket.TicketNumber, order.Table.Number),
+                new LocalizedText("The whole order was cancelled. Reason: {0}", reason),
                 ticket: ticket, cancellationToken: cancellationToken);
         }
 
@@ -250,7 +259,7 @@ public class OrderService(
     {
         if (order.Status != OrderStatus.Open)
         {
-            throw new BusinessException($"Order {order.OrderNumber} is {order.Status.ToString().ToLower()} and can no longer be changed.");
+            throw new BusinessException("Order {0} is {1} and can no longer be changed.", order.OrderNumber, order.Status);
         }
     }
 
@@ -282,7 +291,7 @@ public class OrderService(
         var unavailable = menuItems.Values.Where(x => !x.IsAvailableToday).Select(x => x.Name).ToList();
         if (unavailable.Count > 0)
         {
-            throw new BusinessException($"Not available today: {string.Join(", ", unavailable)}. Remove them from the order.");
+            throw new BusinessException("Not available today: {0}. Remove them from the order.", string.Join(", ", unavailable));
         }
 
         var now = DateTime.UtcNow;

@@ -1,4 +1,5 @@
 using Servio.Model.Exceptions;
+using Servio.Model.Localization;
 
 namespace Servio.Services.StateMachines;
 
@@ -16,7 +17,7 @@ public sealed class StateMachine<TState>(string entityName, IReadOnlyDictionary<
     {
         if (!CanTransition(from, to))
         {
-            throw new BusinessException($"{entityName} cannot be changed from {from} to {to}.");
+            throw new BusinessException("{0} cannot be changed from {1} to {2}.", new Localized(entityName), from, to);
         }
     }
 }

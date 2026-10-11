@@ -53,9 +53,49 @@ public class DataSeeder(
         await context.SaveChangesAsync(cancellationToken);
 
         await new HistorySeeder(context, clock).SeedAsync(cancellationToken);
+        await SeedTableAssignmentsAsync(cancellationToken);
 
         await transaction.CommitAsync(cancellationToken);
         logger.LogInformation("Database seeded");
+    }
+
+    /// <summary>
+    /// Today's shift: each active waiter has a section. Open demo orders belong to the waiter of their table,
+    /// as they would after the admin assigned the tables.
+    /// </summary>
+    private async Task SeedTableAssignmentsAsync(CancellationToken cancellationToken)
+    {
+        var sections = new Dictionary<string, int[]>
+        {
+            ["mobile"] = [1, 2, 3, 4, 5, 6],
+            ["waiter"] = [7, 8, 13, 14, 15, 16],
+            ["waiter2"] = [9, 10, 11, 12]
+        };
+
+        var waiters = await context.Users
+            .Where(x => sections.Keys.Contains(x.Username))
+            .ToDictionaryAsync(x => x.Username, x => x.Id, cancellationToken);
+        var tables = await context.RestaurantTables.ToListAsync(cancellationToken);
+        foreach (var (username, numbers) in sections)
+        {
+            foreach (var table in tables.Where(t => numbers.Contains(t.Number)))
+            {
+                table.AssignedWaiterId = waiters[username];
+            }
+        }
+
+        var openOrders = await context.Orders.Where(x => x.Status == OrderStatus.Open).ToListAsync(cancellationToken);
+        foreach (var order in openOrders)
+        {
+            order.WaiterId = tables.First(t => t.Id == order.TableId).AssignedWaiterId ?? order.WaiterId;
+
+            // "Order ready" notifications of these orders go to the waiter who now serves the table.
+            await context.Notifications
+                .Where(x => x.OrderTicket != null && x.OrderTicket.OrderId == order.Id)
+                .ForEachAsync(x => x.UserId = order.WaiterId, cancellationToken);
+        }
+
+        await context.SaveChangesAsync(cancellationToken);
     }
 
     private Dictionary<string, Role> SeedRoles()
