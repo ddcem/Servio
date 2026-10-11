@@ -11,4 +11,4 @@ PRODUCT_NAME = servio_desktop
 PRODUCT_BUNDLE_IDENTIFIER = com.servio.servioDesktop
 
 // The copyright displayed in application information
-PRODUCT_COPYRIGHT = Copyright © 2026 com.servio. All rights reserved.
+PRODUCT_COPYRIGHT = Copyright © 2026 Servio. All rights reserved.

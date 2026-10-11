@@ -89,13 +89,13 @@ BEGIN
     BEGIN
         BLOCK "040904e4"
         BEGIN
-            VALUE "CompanyName", "com.servio" "\0"
-            VALUE "FileDescription", "servio_desktop" "\0"
+            VALUE "CompanyName", "Servio" "\0"
+            VALUE "FileDescription", "Servio" "\0"
             VALUE "FileVersion", VERSION_AS_STRING "\0"
             VALUE "InternalName", "servio_desktop" "\0"
-            VALUE "LegalCopyright", "Copyright (C) 2026 com.servio. All rights reserved." "\0"
+            VALUE "LegalCopyright", "Copyright (C) 2026 Servio. All rights reserved." "\0"
             VALUE "OriginalFilename", "servio_desktop.exe" "\0"
-            VALUE "ProductName", "servio_desktop" "\0"
+            VALUE "ProductName", "Servio" "\0"
             VALUE "ProductVersion", VERSION_AS_STRING "\0"
         END
     END
