@@ -29,7 +29,8 @@ All demo accounts use the password **`test`**.
 | Deactivated account (cannot log in) | `waiter3` | `test` | Waiter |
 
 **PayPal (sandbox):** besides cash, guests pay through PayPal. On the PayPal page, log in with the sandbox buyer account
-**`buyerGermany@personal.paypal.com`** / **`paypal1234`**. No real money is used.
+**`buyerGermany@personal.paypal.com`** / **`paypal1234`**. No real money is used. PayPal does not accept every currency
+(for example BAM/KM); for such a restaurant currency the app offers cash only and explains why.
 
 ---
 
@@ -125,10 +126,12 @@ To build them yourself:
 
 ```bash
 cd frontend/servio_mobile
+flutter clean
 flutter build apk --release --dart-define=API_BASE_URL=http://10.0.2.2:5050
 # -> build/app/outputs/flutter-apk/app-release.apk
 
-cd frontend/servio_desktop
+cd ../servio_desktop
+flutter clean
 flutter build windows --release --dart-define=API_BASE_URL=http://localhost:5050
 # -> build/windows/x64/runner/Release/
 ```
@@ -199,7 +202,7 @@ End-to-end tests drive the real apps against the running backend:
 cd frontend/servio_mobile
 flutter test integration_test/waiter_flow_test.dart -d <android-device-id>   # see: flutter devices
 
-cd frontend/servio_desktop
+cd ../servio_desktop
 flutter test integration_test/screens_test.dart -d windows      # or -d macos
 ```
 

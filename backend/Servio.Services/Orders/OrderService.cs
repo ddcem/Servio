@@ -12,6 +12,7 @@ using Servio.Services.Common;
 using Servio.Services.Database.Entities;
 using Servio.Services.Database;
 using Servio.Services.Notifications;
+using Servio.Services.Payments.PayPal;
 using Servio.Services.Settings;
 using Servio.Services.StateMachines;
 using Servio.Services.Tables;
@@ -55,6 +56,7 @@ public class OrderService(
         ClosedAt = x.ClosedAt,
         CancellationReason = x.CancellationReason,
         IsPaid = x.Payments.Any(p => PaidStatuses.Contains(p.Status)),
+        PayPalAvailable = PayPalCurrencies.Supported.Contains(x.Currency.Code),
         Items = x.Items
             .OrderBy(i => i.Id)
             .Select(i => new OrderItemResponse

@@ -1782,6 +1782,14 @@
     }
   },
   "payPalSecurePage": "The guest pays on PayPal's secure page with their PayPal account.",
+  "payPalCurrencyNotSupported": "PayPal does not accept payments in {currency}. Take the payment in cash.",
+  "@payPalCurrencyNotSupported": {
+    "placeholders": {
+      "currency": {
+        "type": "String"
+      }
+    }
+  },
   "selectPaymentMethod": "Select Payment Method",
   "completeCashPayment": "Complete Cash Payment",
   "enterCashReceived": "Enter Cash Received",

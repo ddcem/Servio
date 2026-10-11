@@ -2105,6 +2105,11 @@ class ServioLocalizationsEn extends ServioLocalizations {
       'The guest pays on PayPal\'s secure page with their PayPal account.';
 
   @override
+  String payPalCurrencyNotSupported(String currency) {
+    return 'PayPal does not accept payments in $currency. Take the payment in cash.';
+  }
+
+  @override
   String get selectPaymentMethod => 'Select Payment Method';
 
   @override

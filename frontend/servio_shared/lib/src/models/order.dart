@@ -21,6 +21,7 @@ class Order {
     this.closedAt,
     this.cancellationReason,
     required this.isPaid,
+    this.payPalAvailable = true,
     required this.items,
     required this.tickets,
   });
@@ -44,6 +45,7 @@ class Order {
     closedAt: toLocalDateOrNull(json['closedAt']),
     cancellationReason: json['cancellationReason'] as String?,
     isPaid: json['isPaid'] as bool,
+    payPalAvailable: json['payPalAvailable'] as bool? ?? true,
     items: toList(json['items'], OrderItem.fromJson),
     tickets: toList(json['tickets'], OrderTicketSummary.fromJson),
   );
@@ -66,6 +68,9 @@ class Order {
   final DateTime? closedAt;
   final String? cancellationReason;
   final bool isPaid;
+
+  /// False when PayPal does not accept the order's currency (e.g. KM); only cash is offered then.
+  final bool payPalAvailable;
   final List<OrderItem> items;
   final List<OrderTicketSummary> tickets;
 

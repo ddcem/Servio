@@ -2120,6 +2120,11 @@ class ServioLocalizationsBs extends ServioLocalizations {
       'Gost plaća na sigurnoj PayPal stranici svojim PayPal računom.';
 
   @override
+  String payPalCurrencyNotSupported(String currency) {
+    return 'PayPal ne prihvata plaćanja u valuti $currency. Naplatite gotovinom.';
+  }
+
+  @override
   String get selectPaymentMethod => 'Odaberite način plaćanja';
 
   @override

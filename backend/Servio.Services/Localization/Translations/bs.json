@@ -133,6 +133,7 @@
   "Password is required.": "Lozinka je obavezna.",
   "PayPal": "PayPal",
   "PayPal could not complete the refund. No money was returned; try again later.": "PayPal nije mogao izvršiti povrat. Novac nije vraćen; pokušajte ponovo kasnije.",
+  "PayPal does not accept payments in {0}. Please take the payment in cash.": "PayPal ne prihvata plaćanja u valuti {0}. Molimo naplatite gotovinom.",
   "PayPal could not process the request right now. Please try again in a moment.": "PayPal trenutno ne može obraditi zahtjev. Pokušajte ponovo za trenutak.",
   "PayPal declined the payment method. Ask the guest to choose another one or pay in cash.": "PayPal je odbio način plaćanja. Zamolite gosta da odabere drugi ili plati gotovinom.",
   "PayPal declined the payment. Ask the guest to try again or pay in cash.": "PayPal je odbio plaćanje. Zamolite gosta da pokuša ponovo ili plati gotovinom.",

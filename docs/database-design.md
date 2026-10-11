@@ -1,7 +1,8 @@
-# Servio – Database Design (draft v1)
+# Servio – Database Design
 
 Database: **PostgreSQL 17**, database name **`220208`**.
-Approach: EF Core Code First, all FKs configured in EF, seed via `HasData` + migrations.
+Approach: EF Core Code First, all FKs configured in EF. Migrations are applied on start-up and an empty database is filled
+by the runtime seeder (`DataSeeder`, `HistorySeeder`), which hashes passwords with the same hasher as the login.
 All timestamps are `timestamptz` stored as UTC (`DateTime.UtcNow` everywhere).
 Statuses are C# enums stored as `int` (no magic numbers); they are fixed by the state machine, so they are not editable tables.
 
@@ -18,10 +19,12 @@ Statuses are C# enums stored as `int` (no magic numbers); they are fixed by the 
 | Username | varchar(50) NOT NULL UNIQUE | login |
 | Email | varchar(100) NOT NULL UNIQUE | password reset, welcome email |
 | PhoneNumber | varchar(20) NULL | format validated |
-| PasswordHash | varchar NOT NULL | PBKDF2 / BCrypt (same format in HasData and runtime) |
-| ProfileImage | bytea / ImageUrl NULL | mobile profile edit |
+| PasswordHash | varchar NOT NULL | ASP.NET Core `PasswordHasher` (PBKDF2), same in seed and runtime |
+| ProfileImage | bytea NULL | mobile profile edit |
+| ProfileImageContentType | varchar(50) NULL | image/jpeg, image/png… |
 | RoleId | FK → Roles NOT NULL | Admin, Waiter, Kitchen, Bar |
 | IsActive | bool NOT NULL | admin "deactivate" instead of delete |
+| PreferredLanguage | varchar(5) NOT NULL, default `en` | `en` or `bs`; app texts, notifications, emails and PDFs |
 | CreatedAt | timestamptz NOT NULL | |
 | LastLoginAt | timestamptz NULL | |
 
@@ -52,7 +55,8 @@ Statuses are C# enums stored as `int` (no magic numbers); they are fixed by the 
 | Description | varchar(500) NULL | |
 | Price | numeric(10,2) NOT NULL | > 0 |
 | CategoryId | FK → MenuCategories NOT NULL | category decides the station (kitchen/bar) |
-| Image | bytea / ImageUrl NOT NULL | seeded with real images |
+| Image | bytea NULL | seeded with real images; uploads are checked by MIME type and magic bytes |
+| ImageContentType | varchar(50) NULL | |
 | IsAvailableToday | bool NOT NULL | "Available today" toggle |
 | IsDeleted | bool NOT NULL | soft delete (item is referenced by old orders) |
 | CreatedAt | timestamptz | |
@@ -65,6 +69,7 @@ Statuses are C# enums stored as `int` (no magic numbers); they are fixed by the 
 | Capacity | int NOT NULL | 1–20 |
 | AreaId | FK → TableAreas | Main hall, Terrace… |
 | IsActive | bool | |
+| AssignedWaiterId | FK → Users NULL (SET NULL) | waiter serving the table this shift; others see it as blocked | |
 
 Table status (Available / Occupied / Reserved) is **computed**, not stored:
 Occupied = has an `Open` order; Reserved = has a `Confirmed` reservation in the current time window.
@@ -224,7 +229,7 @@ Saved in the DB, then pushed live via SignalR. The phone shows a local notificat
 | MenuItemTags | MenuItemId, ItemTagId | M:N, no extra columns, so it counts as reference |
 | FavoriteItems | UserId, MenuItemId (composite PK) | M:N, waiter adds/removes favorites themselves (star icon on item); UserId always taken from JWT |
 | TableAreas | Id, Name | Main hall, Terrace, Bar area |
-| Currencies | Id, Code, Symbol | EUR, USD (PayPal does not support BAM) |
+| Currencies | Id, Code, Name, Symbol | EUR, USD; others (e.g. BAM) can be added, PayPal is offered only for currencies it supports |
 | PaymentMethods | Id, Name | Cash, PayPal |
 
 ---
@@ -277,6 +282,7 @@ erDiagram
     PreparationStations ||--o{ MenuCategories : prepares
     MenuItems }o--o{ ItemTags : "MenuItemTags"
     TableAreas ||--o{ RestaurantTables : contains
+    Users |o--o{ RestaurantTables : serves
     RestaurantTables ||--o{ Reservations : booked
     Reservations ||--o{ ReservationStatusHistory : audit
     RestaurantTables ||--o{ Orders : seats

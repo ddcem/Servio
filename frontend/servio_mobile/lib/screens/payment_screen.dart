@@ -37,8 +37,9 @@ class _PaymentScreenState extends State<PaymentScreen> {
   double get _cashReceived => double.tryParse(_cash) ?? 0;
 
   /// The amount as it is typed, written like money in the app's language ("€30.8" / "30,8 €").
-  String get _cashText =>
-      Formatters.language == 'bs' ? '${_cash.replaceAll('.', ',')} ${_order.currencySymbol}' : '${_order.currencySymbol}$_cash';
+  String get _cashText => Formatters.language == 'bs'
+      ? '${_cash.replaceAll('.', ',')} ${_order.currencySymbol}'
+      : '${_order.currencySymbol}$_cash';
   double get _change => _cashReceived - _amount;
 
   bool get _waitingForKitchen =>
@@ -172,7 +173,10 @@ class _PaymentScreenState extends State<PaymentScreen> {
     final cashReady = _cashReceived > 0 && _change >= -0.004;
 
     return Scaffold(
-      appBar: GradientAppBar(title: l10n.processPayment, subtitle: l10n.tableAndOrder(_order.tableNumber, _order.orderNumber)),
+      appBar: GradientAppBar(
+        title: l10n.processPayment,
+        subtitle: l10n.tableAndOrder(_order.tableNumber, _order.orderNumber),
+      ),
       body: ListView(
         padding: const EdgeInsets.all(16),
         children: [
@@ -267,11 +271,20 @@ class _PaymentScreenState extends State<PaymentScreen> {
                           label: l10n.payPal,
                           color: ServioColors.primary,
                           selected: _method == _Method.payPal,
-                          onTap: () => setState(() => _method = _Method.payPal),
+                          onTap: _order.payPalAvailable ? () => setState(() => _method = _Method.payPal) : null,
                         ),
                       ),
                     ],
                   ),
+                  if (!_order.payPalAvailable)
+                    Padding(
+                      padding: const EdgeInsets.only(top: 10),
+                      child: Text(
+                        l10n.payPalCurrencyNotSupported(_order.currencyCode),
+                        textAlign: TextAlign.center,
+                        style: const TextStyle(color: ServioColors.textMuted),
+                      ),
+                    ),
                   if (_method == _Method.cash) ...[const SizedBox(height: 16), _buildCash()],
                   if (_method == _Method.payPal)
                     Padding(
@@ -287,7 +300,8 @@ class _PaymentScreenState extends State<PaymentScreen> {
                     height: 56,
                     child: FilledButton.icon(
                       style: FilledButton.styleFrom(backgroundColor: const Color(0xFF2E7D32)),
-                      onPressed: _busy || _waitingForKitchen || _method == null || (_method == _Method.cash && !cashReady)
+                      onPressed:
+                          _busy || _waitingForKitchen || _method == null || (_method == _Method.cash && !cashReady)
                           ? null
                           : (_method == _Method.cash ? _payCash : _payPayPal),
                       icon: _busy
@@ -470,30 +484,33 @@ class _MethodButton extends StatelessWidget {
   final String label;
   final Color color;
   final bool selected;
-  final VoidCallback onTap;
+  final VoidCallback? onTap;
 
   @override
-  Widget build(BuildContext context) => Material(
-    color: selected ? color : color.withValues(alpha: 0.12),
-    shape: RoundedRectangleBorder(
-      borderRadius: BorderRadius.circular(14),
-      side: selected ? BorderSide(color: color.withValues(alpha: 0.4), width: 3) : BorderSide.none,
-    ),
-    child: InkWell(
-      borderRadius: BorderRadius.circular(14),
-      onTap: onTap,
-      child: SizedBox(
-        height: 64,
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Icon(icon, color: selected ? Colors.white : color),
-            const SizedBox(width: 8),
-            Text(
-              label,
-              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: selected ? Colors.white : color),
-            ),
-          ],
+  Widget build(BuildContext context) => Opacity(
+    opacity: onTap == null ? 0.4 : 1,
+    child: Material(
+      color: selected ? color : color.withValues(alpha: 0.12),
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(14),
+        side: selected ? BorderSide(color: color.withValues(alpha: 0.4), width: 3) : BorderSide.none,
+      ),
+      child: InkWell(
+        borderRadius: BorderRadius.circular(14),
+        onTap: onTap,
+        child: SizedBox(
+          height: 64,
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Icon(icon, color: selected ? Colors.white : color),
+              const SizedBox(width: 8),
+              Text(
+                label,
+                style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: selected ? Colors.white : color),
+              ),
+            ],
+          ),
         ),
       ),
     ),

@@ -26,6 +26,8 @@ public class OrderResponse
     public DateTime? ClosedAt { get; set; }
     public string? CancellationReason { get; set; }
     public bool IsPaid { get; set; }
+    /// <summary>False when PayPal does not accept the order's currency (e.g. BAM).</summary>
+    public bool PayPalAvailable { get; set; }
     public List<OrderItemResponse> Items { get; set; } = [];
     public List<OrderTicketSummaryResponse> Tickets { get; set; } = [];
 }

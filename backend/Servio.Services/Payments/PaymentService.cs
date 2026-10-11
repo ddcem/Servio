@@ -187,6 +187,11 @@ public class PaymentService(
     {
         var order = await LoadPayableOrderAsync(request.OrderId!.Value, cancellationToken);
         await TableAccess.EnsureCanServeAsync(Context, currentUser, order.Table, cancellationToken);
+        if (!PayPalCurrencies.Supported.Contains(order.Currency.Code))
+        {
+            throw new BusinessException("PayPal does not accept payments in {0}. Please take the payment in cash.", order.Currency.Code);
+        }
+
         var (tipAmount, amount) = CalculateAmount(order, request.TipPercent!.Value);
 
         CancelAbandonedCheckouts(order);

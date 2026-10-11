@@ -3446,6 +3446,12 @@ abstract class ServioLocalizations {
   /// **'The guest pays on PayPal\'s secure page with their PayPal account.'**
   String get payPalSecurePage;
 
+  /// No description provided for @payPalCurrencyNotSupported.
+  ///
+  /// In en, this message translates to:
+  /// **'PayPal does not accept payments in {currency}. Take the payment in cash.'**
+  String payPalCurrencyNotSupported(String currency);
+
   /// No description provided for @selectPaymentMethod.
   ///
   /// In en, this message translates to:

@@ -558,6 +558,7 @@
   "tipAmount": "Napojnica",
   "plusTip": "+ {tip} napojnica",
   "payPalSecurePage": "Gost plaća na sigurnoj PayPal stranici svojim PayPal računom.",
+  "payPalCurrencyNotSupported": "PayPal ne prihvata plaćanja u valuti {currency}. Naplatite gotovinom.",
   "selectPaymentMethod": "Odaberite način plaćanja",
   "completeCashPayment": "Završi gotovinsko plaćanje",
   "enterCashReceived": "Unesite primljenu gotovinu",
