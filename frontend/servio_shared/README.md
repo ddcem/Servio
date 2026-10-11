@@ -1,10 +1,10 @@
-# Servio – shared package
+# Servio – zajednički paket
 
-Code used by both apps: API client, models, providers, live updates (SignalR), theme, common widgets and the
-translations.
+Kod koji koriste obje aplikacije: API klijent, modeli, provideri, uživo ažuriranja (SignalR), tema, zajednički
+widgeti i prijevodi.
 
-Translations: the English and Bosnian texts are in `lib/l10n/app_en.arb` and `lib/l10n/app_bs.arb`. After
-changing them, regenerate the Dart code:
+Prijevodi: engleski i bosanski tekstovi nalaze se u `lib/l10n/app_en.arb` i `lib/l10n/app_bs.arb`. Nakon
+izmjene potrebno je ponovo generisati Dart kod:
 
 ```bash
 flutter gen-l10n

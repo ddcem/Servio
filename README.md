@@ -1,97 +1,99 @@
 # Servio
 
-Servio is a restaurant point-of-sale system. Waiters take orders on an Android phone, the kitchen and the bar
-see them instantly on their displays, and the admin manages the menu, staff, tables, reservations, payments
-and business reports in a desktop app.
+Servio je sistem za naplatu i vođenje narudžbi u restoranu (POS). Konobari primaju narudžbe na Android telefonu,
+kuhinja i šank ih odmah vide na svojim ekranima, a administrator u desktop aplikaciji upravlja menijem,
+uposlenicima, stolovima, rezervacijama, plaćanjima i poslovnim izvještajima.
 
-| Part | Technology | Used by |
+| Dio | Tehnologija | Koristi |
 |---|---|---|
-| **Mobile app** (`frontend/servio_mobile`) | Flutter, Android | Waiters |
-| **Desktop app** (`frontend/servio_desktop`) | Flutter, Windows / macOS | Kitchen, bar, admin |
-| **API** (`backend/Servio.API`) | ASP.NET Core (.NET 10), REST + SignalR | Both apps |
-| **Worker** (`backend/Servio.Worker`) | .NET 10 worker service | Sends emails from the RabbitMQ queue |
-| **Database / messaging** | PostgreSQL 17, RabbitMQ 4.1 | API and worker |
+| **Mobilna aplikacija** (`frontend/servio_mobile`) | Flutter, Android | Konobari |
+| **Desktop aplikacija** (`frontend/servio_desktop`) | Flutter, Windows / macOS | Kuhinja, šank, administrator |
+| **API** (`backend/Servio.API`) | ASP.NET Core (.NET 10), REST + SignalR | Obje aplikacije |
+| **Worker** (`backend/Servio.Worker`) | .NET 10 worker servis | Šalje e-mailove iz RabbitMQ reda |
+| **Baza / poruke** | PostgreSQL 17, RabbitMQ 4.1 | API i worker |
 
 ---
 
-## Login credentials
+## Korisnički podaci za pristup
 
-All demo accounts use the password **`test`**.
+Svi demo računi koriste lozinku **`test`**.
 
-| Context | Username | Password | Role |
+| Kontekst | Korisničko ime | Lozinka | Uloga |
 |---|---|---|---|
-| Desktop app (admin panel) | `desktop` | `test` | Admin |
-| Mobile app (waiter) | `mobile` | `test` | Waiter |
-| Kitchen display (desktop app) | `kitchen` | `test` | Kitchen |
-| Bar display (desktop app) | `bar` | `test` | Bar |
-| Other waiters | `waiter`, `waiter2` | `test` | Waiter |
-| Second admin | `admin` | `test` | Admin |
-| Deactivated account (cannot log in) | `waiter3` | `test` | Waiter |
+| Desktop verzija (administracija) | `desktop` | `test` | Admin |
+| Mobilna verzija (konobar) | `mobile` | `test` | Waiter |
+| Ekran kuhinje (desktop verzija) | `kitchen` | `test` | Kitchen |
+| Ekran šanka (desktop verzija) | `bar` | `test` | Bar |
+| Ostali konobari | `waiter`, `waiter2` | `test` | Waiter |
+| Drugi administrator | `admin` | `test` | Admin |
+| Deaktiviran račun (prijava nije moguća) | `waiter3` | `test` | Waiter |
 
-**PayPal (sandbox):** besides cash, guests pay through PayPal. On the PayPal page, log in with the sandbox buyer account
-**`buyerGermany@personal.paypal.com`** / **`paypal1234`**. No real money is used. PayPal does not accept every currency
-(for example BAM/KM); for such a restaurant currency the app offers cash only and explains why.
+**PayPal (sandbox):** osim gotovinom, gosti mogu platiti putem PayPala. Na PayPal stranici prijavite se sandbox
+računom kupca **`buyerGermany@personal.paypal.com`** / **`paypal1234`**. Ne koristi se pravi novac.
+PayPal ne podržava sve valute (npr. BAM/KM); ako je valuta restorana takva, aplikacija nudi samo gotovinu i
+objašnjava zašto.
 
 ---
 
-## Running Servio from scratch
+## Pokretanje od nule
 
-### 1. Requirements
+### 1. Preduslovi
 
-| To run | You need |
+| Za pokretanje | Potrebno je |
 |---|---|
-| Backend (API, worker, database, RabbitMQ) | [Docker Desktop](https://www.docker.com/products/docker-desktop/) |
-| Mobile app | [Flutter 3.47](https://docs.flutter.dev/get-started/install) (stable) with the Android SDK and an emulator or phone |
-| Desktop app on Windows | Flutter 3.47 and Visual Studio 2022 with the **Desktop development with C++** workload |
-| Desktop app on macOS (optional) | Flutter 3.47 and Xcode |
+| Backend (API, worker, baza, RabbitMQ) | [Docker Desktop](https://www.docker.com/products/docker-desktop/) |
+| Mobilna aplikacija | [Flutter 3.47](https://docs.flutter.dev/get-started/install) (stable) sa Android SDK-om i emulatorom ili telefonom |
+| Desktop aplikacija na Windowsu | Flutter 3.47 i Visual Studio 2022 sa workloadom **Desktop development with C++** |
+| Desktop aplikacija na macOS-u (opcionalno) | Flutter 3.47 i Xcode |
 
-Alternatively, the ready-made builds (Android APK and Windows EXE) are attached to the GitHub Release
-(see [Release builds](#5-release-builds)); then only Docker is needed.
+Umjesto toga mogu se koristiti gotovi buildovi (Android APK i Windows EXE) iz GitHub Release-a
+(vidjeti [Release buildovi](#5-release-buildovi)); tada je potreban samo Docker.
 
-### 2. Configuration (`.env`)
+### 2. Konfiguracija (`.env`)
 
-All configuration (database, RabbitMQ, JWT, PayPal, SMTP, API port) lives in **one `.env` file** in the
-repository root. Nothing is hard-coded in the code or in `appsettings.json`.
+Sva konfiguracija (baza, RabbitMQ, JWT, PayPal, SMTP, port API-ja) nalazi se u **jednoj `.env` datoteci** u
+korijenu repozitorija. Ništa nije hardkodirano u kodu niti u `appsettings.json`.
 
-The repository contains **`.env-tajne.zip`** instead of the real `.env`. Extract it into the repository root
-with the password provided together with the submission:
+Umjesto stvarne `.env` datoteke repozitorij sadrži **`.env-tajne.zip`**. Raspakujte je u korijen repozitorija
+pomoću šifre koja je dostavljena uz predaju rada:
 
 ```bash
-# from the repository root
-unzip .env-tajne.zip        # asks for the password, creates .env next to docker-compose.yml
+# iz korijena repozitorija
+unzip .env-tajne.zip        # traži šifru i kreira .env pored docker-compose.yml
 ```
 
-On Windows: right-click the file → *Extract All*, enter the password, and extract into the repository root.
+Na Windowsu: desni klik na datoteku → *Extract All*, unesite šifru i raspakujte u korijen repozitorija
+(tako da se `.env` nalazi pored `docker-compose.yml`, a ne u podfolderu).
 
-### 3. Start the backend
+### 3. Pokretanje backenda
 
 ```bash
 docker compose up -d --build
 ```
 
-This builds and starts four containers: `servio-db`, `servio-rabbitmq`, `servio-api` and `servio-worker`.
-On the first start the API creates the database and fills it with demo data (menu with images, tables,
-staff, reservations and about six weeks of order history for the reports). This takes about 15 seconds.
+Ovo builda i pokreće četiri kontejnera: `servio-db`, `servio-rabbitmq`, `servio-api` i `servio-worker`.
+Pri prvom pokretanju API kreira bazu i puni je demo podacima (meni sa slikama, stolovi, uposlenici,
+rezervacije i oko tri mjeseca historije narudžbi za izvještaje). To traje oko 15 sekundi.
 
-| Service | Address |
+| Servis | Adresa |
 |---|---|
 | API | http://localhost:5050 |
-| RabbitMQ management | http://localhost:15672 (user and password from `.env`) |
-| PostgreSQL | `localhost:5440` (database, user and password from `.env`) |
+| RabbitMQ management | http://localhost:15672 (korisnik i lozinka iz `.env`) |
+| PostgreSQL | `localhost:5440` (baza, korisnik i lozinka iz `.env`) |
 
-Check that the API is running:
+Provjera da API radi:
 
 ```bash
-docker compose ps                       # all four containers "Up" / "healthy"
-docker compose logs servio-api | tail   # ends with "Database seeded" on the first start
+docker compose ps                       # sva četiri kontejnera "Up" / "healthy"
+docker compose logs servio-api | tail   # pri prvom pokretanju završava sa "Database seeded"
 ```
 
-### 4. Start the apps
+### 4. Pokretanje aplikacija
 
-The API address is passed at start-up with `--dart-define=API_BASE_URL=...` and read with
-`String.fromEnvironment('API_BASE_URL')`. The defaults below work without the flag.
+Adresa API-ja se zadaje pri pokretanju sa `--dart-define=API_BASE_URL=...` i čita preko
+`String.fromEnvironment('API_BASE_URL')`. Navedene adrese su ujedno i zadane vrijednosti, pa rade i bez parametra.
 
-**Mobile app (Android emulator):**
+**Mobilna aplikacija (Android emulator):**
 
 ```bash
 cd frontend/servio_mobile
@@ -99,10 +101,10 @@ flutter pub get
 flutter run --dart-define=API_BASE_URL=http://10.0.2.2:5050
 ```
 
-`10.0.2.2` is the host computer as seen from the Android emulator. On a real phone, use the computer's
-address on the same Wi-Fi network instead, e.g. `--dart-define=API_BASE_URL=http://192.168.1.20:5050`.
+`10.0.2.2` je adresa računara gledano iz Android emulatora. Na stvarnom telefonu koristite adresu računara u
+istoj mreži, npr. `--dart-define=API_BASE_URL=http://192.168.1.20:5050`.
 
-**Desktop app (Windows):**
+**Desktop aplikacija (Windows):**
 
 ```bash
 cd frontend/servio_desktop
@@ -110,19 +112,19 @@ flutter pub get
 flutter run -d windows --dart-define=API_BASE_URL=http://localhost:5050
 ```
 
-On macOS use `-d macos`.
+Na macOS-u koristite `-d macos`.
 
-### 5. Release builds
+### 5. Release buildovi
 
-The GitHub Release contains one archive, `servio-build-YYYY-MM-DD.zip`, with:
+GitHub Release sadrži jednu arhivu, `servio-build-GGGG-MM-DD.zip`, sa:
 
-* `app-release.apk` – install on an Android emulator or phone (drag the file onto the emulator).
-  It connects to `http://10.0.2.2:5050`.
-* `Release/` – the Windows desktop app; run `servio_desktop.exe`. It connects to `http://localhost:5050`.
+* `app-release.apk` – instalira se na Android emulator ili telefon (prevucite datoteku na emulator).
+  Spaja se na `http://10.0.2.2:5050`.
+* `Release/` – Windows desktop aplikacija; pokrenite `servio_desktop.exe`. Spaja se na `http://localhost:5050`.
 
-The backend (step 3) must be running for both.
+Za oba je potrebno da backend (korak 3) radi.
 
-To build them yourself:
+Samostalni build:
 
 ```bash
 cd frontend/servio_mobile
@@ -136,82 +138,90 @@ flutter build windows --release --dart-define=API_BASE_URL=http://localhost:5050
 # -> build/windows/x64/runner/Release/
 ```
 
-### 6. Stopping and resetting
+### 6. Zaustavljanje i resetovanje
 
 ```bash
-docker compose down        # stop, keep the data
-docker compose down -v     # stop and delete the database; the next start seeds fresh demo data
+docker compose down        # zaustavlja, podaci ostaju
+docker compose down -v     # zaustavlja i briše bazu; sljedeće pokretanje ponovo puni demo podatke
 ```
 
 ---
 
-## What to try
+## Šta isprobati
 
-**Waiter (mobile, `mobile` / `test`)**
+Aplikacije su po zadanim postavkama na engleskom jeziku; jezik se mijenja na ekranu za prijavu ili u
+*Settings* (*Postavke*). U nastavku su nazivi navedeni na engleskom, a u zagradi na bosanskom.
 
-1. The waiter guide appears on the first start; it can be reopened in *Settings*.
-2. Tap a free table, choose the number of guests and add items. After each item Servio suggests what usually
-   goes with it and explains why (the recommender).
-3. Open the cart, add a note to an item and send the order to the kitchen and bar.
-4. When the kitchen or bar marks the order ready, the waiter is notified instantly. Mark it served in
-   *Active Tables*, then take payment: choose a tip, then cash (with change calculation) or PayPal.
-5. Show the receipt, and find past orders and their receipts under *Order history*.
+**Konobar (mobilna, `mobile` / `test`)**
 
-**Kitchen / bar (desktop, `kitchen` or `bar` / `test`)**
+1. Pri prvom pokretanju prikazuje se vodič za konobare; može se ponovo otvoriti u *Settings* (*Postavke*).
+2. Odaberite slobodan sto, unesite broj gostiju i dodajte stavke. Nakon svake stavke Servio predlaže šta se
+   obično naručuje uz nju i objašnjava zašto (sistem preporuke).
+3. Otvorite korpu, dodajte napomenu na stavku i pošaljite narudžbu kuhinji i šanku
+   (*Send Order* / *Pošalji narudžbu*).
+4. Kada kuhinja ili šank označe narudžbu spremnom, konobar odmah dobija obavijest. Označite je posluženom u
+   *Active Tables* (*Aktivni stolovi*), zatim naplatite: odaberite napojnicu, pa gotovinu (uz izračun kusura)
+   ili PayPal.
+5. Prikažite račun; ranije narudžbe i njihovi računi nalaze se u *Order History* (*Historija narudžbi*).
 
-* New orders appear live; *Start Preparing* → *Mark as Ready* notifies the waiter.
+**Kuhinja / šank (desktop, `kitchen` ili `bar` / `test`)**
 
-**Admin (desktop, `desktop` / `test`)**
+* Nove narudžbe se pojavljuju uživo; *Start Preparing* (*Započni pripremu*) → *Mark as Ready*
+  (*Označi spremnim*) obavještava konobara.
 
-* *Kitchen View* / *Bar View*: watch the stations (view only).
-* *Admin Panel*: menu (with images and daily availability), employees, tables, reservations (with
-  confirmation emails), orders and payments (receipts, PayPal refunds), reference data, notifications and settings.
-* *Tables → Assign waiters*: drag tables to the waiter who serves them this shift. A waiter can only take orders
-  at their own tables and at unassigned ones.
-* *Reports*: today's figures, period analysis with charts, and the **Sales** and **Staff** reports as PDF.
+**Administrator (desktop, `desktop` / `test`)**
 
-**Languages:** every user can switch between **English** and **Bosnian** (login screen or *Settings*).
-The choice is saved in the account, so notifications, emails, receipts and PDF reports use it too.
-Menu prices include 17% VAT; receipts show the base amount and the VAT.
+* *Kitchen View* / *Bar View* (*Pregled kuhinje* / *Pregled šanka*): praćenje stanica (samo pregled).
+* *Admin Panel* (*Administracija*): meni (sa slikama i dnevnom dostupnošću), uposlenici, stolovi,
+  rezervacije (sa e-mailovima potvrde), narudžbe i plaćanja (računi, PayPal povrat novca), šifarnici,
+  obavijesti i postavke.
+* *Tables → Assign waiters* (*Stolovi → Dodijeli konobare*): prevlačenjem se stolovi dodjeljuju konobaru koji
+  ih poslužuje u toj smjeni. Konobar može primati narudžbe samo za svoje i nedodijeljene stolove.
+* *Reports* (*Izvještaji*): današnje brojke, analiza perioda sa grafikonima te izvještaji **prodaje** i
+  **uposlenika** u PDF formatu.
+
+**Jezici:** svaki korisnik može birati između **engleskog** i **bosanskog** jezika. Izbor se pamti u
+korisničkom računu, pa ga koriste i obavijesti, e-mailovi, računi i PDF izvještaji.
+Cijene u meniju uključuju PDV od 17%; na računu su prikazani osnovica i PDV.
 
 ---
 
-## Project structure
+## Struktura projekta
 
 ```
 backend/
-  Servio.API/        REST API, SignalR hub (live updates and notifications), authentication, Swagger (Development)
-  Servio.Services/   business logic, EF Core, migrations, seed data, recommender, PayPal, PDF reports, translations
-  Servio.Model/      requests, responses, enums, search objects
-  Servio.Worker/     separate service: reads email jobs from RabbitMQ and sends them over SMTP
+  Servio.API/        REST API, SignalR hub (uživo ažuriranja i obavijesti), autentifikacija, Swagger (Development)
+  Servio.Services/   poslovna logika, EF Core, migracije, seed podaci, sistem preporuke, PayPal, PDF izvještaji, prijevodi
+  Servio.Model/      requestovi, responsovi, enumi, search objekti
+  Servio.Worker/     zaseban servis: čita e-mail poruke iz RabbitMQ-a i šalje ih preko SMTP-a
 frontend/
-  servio_shared/     API client, models, providers, theme, translations (lib/l10n) – used by both apps
-  servio_mobile/     waiter app (Android)
-  servio_desktop/    kitchen, bar and admin app (Windows / macOS)
-docs/database-design.md      database diagram and tables
-recommender-dokumentacija.md how the recommender works
-docker-compose.yml           all backend services
-.env-tajne.zip               the .env configuration file (password protected)
+  servio_shared/     API klijent, modeli, provideri, tema, prijevodi (lib/l10n) – koriste ga obje aplikacije
+  servio_mobile/     aplikacija za konobare (Android)
+  servio_desktop/    aplikacija za kuhinju, šank i administraciju (Windows / macOS)
+docs/database-design.md      dijagram i tabele baze podataka
+recommender-dokumentacija.md opis sistema preporuke
+docker-compose.yml           svi backend servisi
+.env-tajne.zip               konfiguracijska datoteka .env (zaštićena šifrom)
 ```
 
-## Tests
+## Testovi
 
-End-to-end tests drive the real apps against the running backend:
+End-to-end testovi pokreću stvarne aplikacije nad pokrenutim backendom:
 
 ```bash
 cd frontend/servio_mobile
-flutter test integration_test/waiter_flow_test.dart -d <android-device-id>   # see: flutter devices
+flutter test integration_test/waiter_flow_test.dart -d <android-device-id>   # vidjeti: flutter devices
 
 cd ../servio_desktop
-flutter test integration_test/screens_test.dart -d windows      # or -d macos
+flutter test integration_test/screens_test.dart -d windows      # ili -d macos
 ```
 
-## Troubleshooting
+## Rješavanje problema
 
-| Problem | Fix |
+| Problem | Rješenje |
 |---|---|
-| The app says it cannot reach the server | Check that `docker compose ps` shows `servio-api` as Up, and that the app uses the right address (`10.0.2.2` in the Android emulator, `localhost` on the desktop). |
-| A port is already in use | Change `API_PORT` or `DB_HOST_PORT` in `.env`, then pass the new API port with `--dart-define`. Port 5000 is avoided because macOS uses it for AirPlay. |
-| PayPal page does not load in the emulator | The emulator needs internet access; PayPal sandbox runs at `sandbox.paypal.com`. |
-| No emails arrive | Check the SMTP values in `.env` and `docker compose logs servio-worker`. |
-| Start over with fresh demo data | `docker compose down -v` and `docker compose up -d --build`. |
+| Aplikacija javlja da ne može dohvatiti server | Provjerite da `docker compose ps` prikazuje `servio-api` kao Up i da aplikacija koristi ispravnu adresu (`10.0.2.2` u Android emulatoru, `localhost` na desktopu). |
+| Port je već zauzet | Promijenite `API_PORT` ili `DB_HOST_PORT` u `.env`, a novi port API-ja proslijedite sa `--dart-define`. Port 5000 se ne koristi jer ga macOS koristi za AirPlay. |
+| PayPal stranica se ne učitava u emulatoru | Emulator treba pristup internetu; PayPal sandbox radi na `sandbox.paypal.com`. |
+| E-mailovi ne stižu | Provjerite SMTP vrijednosti u `.env` i `docker compose logs servio-worker`. |
+| Ponovni početak sa svježim demo podacima | `docker compose down -v` pa `docker compose up -d --build`. |

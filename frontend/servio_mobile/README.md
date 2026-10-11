@@ -1,5 +1,6 @@
-# Servio – mobile app
+# Servio – mobilna aplikacija
 
-The waiter app (Android): tables, orders with suggestions, payments (cash and PayPal), receipts and order history.
+Aplikacija za konobare (Android): stolovi, narudžbe sa prijedlozima, plaćanja (gotovina i PayPal), računi i
+historija narudžbi.
 
-How to run it: see [Running Servio from scratch](../../README.md#running-servio-from-scratch) in the main README.
+Pokretanje: vidjeti [Pokretanje od nule](../../README.md#pokretanje-od-nule) u glavnom README-u.

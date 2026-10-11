@@ -1,5 +1,5 @@
-# Servio – desktop app
+# Servio – desktop aplikacija
 
-The kitchen and bar displays and the admin panel (Windows / macOS).
+Ekrani kuhinje i šanka te administracija (Windows / macOS).
 
-How to run it: see [Running Servio from scratch](../../README.md#running-servio-from-scratch) in the main README.
+Pokretanje: vidjeti [Pokretanje od nule](../../README.md#pokretanje-od-nule) u glavnom README-u.
