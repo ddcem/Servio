@@ -1,6 +1,8 @@
 using QuestPDF.Fluent;
 using QuestPDF.Helpers;
 using QuestPDF.Infrastructure;
+using Servio.Model.Localization;
+using Servio.Model.Responses;
 using Servio.Services.Localization;
 
 namespace Servio.Services.Reports.Pdf;
@@ -70,6 +72,26 @@ internal static class ReportLayout
                 });
             }
         });
+
+    /// <summary>Shown only when the period also has paid orders in other currencies, which the amounts leave out.</summary>
+    public static void CurrencyNote(ColumnDescriptor column, string currencyCode, IReadOnlyList<OtherCurrencyResponse> others)
+    {
+        if (others.Count == 0)
+        {
+            return;
+        }
+
+        column.Item().PaddingBottom(10).Border(1).BorderColor("#F59E0B").Background("#FFFBEB").Padding(8).Column(col =>
+        {
+            col.Item().Text(Translator.Render(new LocalizedText(
+                "All amounts are in {0}. Paid orders in other currencies are not included:", currencyCode))).SemiBold();
+            foreach (var other in others)
+            {
+                col.Item().Text(Translator.Render(new LocalizedText("{0} – orders: {1}, total {2}",
+                    other.CurrencyCode, other.OrderCount, new LocalizedMoney(other.Revenue, other.CurrencySymbol))));
+            }
+        });
+    }
 
     public static void Section(ColumnDescriptor column, string title, Action<IContainer> content)
     {

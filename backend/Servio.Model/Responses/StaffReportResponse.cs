@@ -4,7 +4,13 @@ public class StaffReportResponse
 {
     public DateOnly From { get; set; }
     public DateOnly To { get; set; }
+
+    /// <summary>All amounts in this report are in the restaurant's current currency.</summary>
+    public string CurrencyCode { get; set; } = string.Empty;
     public string CurrencySymbol { get; set; } = string.Empty;
+
+    /// <summary>Paid orders in other currencies, which are not included in the amounts.</summary>
+    public List<OtherCurrencyResponse> OtherCurrencies { get; set; } = [];
     public List<WaiterPerformanceResponse> Waiters { get; set; } = [];
     public List<StationPerformanceResponse> Stations { get; set; } = [];
 }

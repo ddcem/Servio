@@ -4,7 +4,13 @@ public class SalesReportResponse
 {
     public DateOnly From { get; set; }
     public DateOnly To { get; set; }
+
+    /// <summary>All amounts in this report are in the restaurant's current currency.</summary>
+    public string CurrencyCode { get; set; } = string.Empty;
     public string CurrencySymbol { get; set; } = string.Empty;
+
+    /// <summary>Paid orders in other currencies, which are not included in the amounts.</summary>
+    public List<OtherCurrencyResponse> OtherCurrencies { get; set; } = [];
 
     /// <summary>Totals of paid orders (prices include VAT), excluding tips.</summary>
     public decimal Revenue { get; set; }

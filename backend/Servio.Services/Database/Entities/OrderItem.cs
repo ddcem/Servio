@@ -6,6 +6,10 @@ public class OrderItem : IEntity
     public int OrderId { get; set; }
     public int OrderTicketId { get; set; }
     public int MenuItemId { get; set; }
+
+    /// <summary>The item's name when it was ordered, so later menu changes do not alter old receipts.</summary>
+    public string MenuItemName { get; set; } = string.Empty;
+
     public int Quantity { get; set; }
     public decimal UnitPrice { get; set; }
     public string? Note { get; set; }

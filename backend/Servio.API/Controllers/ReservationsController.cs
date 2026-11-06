@@ -11,8 +11,10 @@ namespace Servio.API.Controllers;
 
 /// <summary>
 /// Reservations are managed by the admin; waiters can see them. They are never deleted, only cancelled.
+/// Kitchen and bar have no access, since the guests' contact details are of no use to them.
 /// </summary>
 [Route("api/reservations")]
+[Authorize(Roles = Roles.Admin + "," + Roles.Waiter)]
 public class ReservationsController(IReservationService service)
     : BaseReadController<ReservationResponse, ReservationSearchObject>(service)
 {

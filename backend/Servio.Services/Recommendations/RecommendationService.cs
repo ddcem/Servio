@@ -54,7 +54,8 @@ public class RecommendationService(ServioDbContext context, IMemoryCache cache) 
             .ToDictionaryAsync(x => x.MenuItemId, x => (x.Shown, x.Accepted), cancellationToken);
 
         var weights = RecommenderWeights.For(history.OrdersWithSource);
-        var maxConfidence = history.Confidence.Count == 0 ? 0 : history.Confidence.Values.Max();
+        // Normalised against the strongest pair among the remaining candidates, so the best candidate gets 1.
+        var maxConfidence = candidates.Max(x => history.Confidence.GetValueOrDefault(x.Id));
 
         var scored = candidates.Select(candidate =>
         {
@@ -237,6 +238,8 @@ public class RecommendationService(ServioDbContext context, IMemoryCache cache) 
 
     /// <summary>
     /// Co-occurrence from paid orders: confidence(source → item) = orders with both / orders with source.
+    /// One GROUP BY over the items of the orders that contain the source gives both numbers: the source item's
+    /// own group is the number of orders containing it.
     /// </summary>
     private async Task<HistoryStats> GetHistoryAsync(int sourceId, CancellationToken cancellationToken)
     {
@@ -252,15 +255,17 @@ public class RecommendationService(ServioDbContext context, IMemoryCache cache) 
             .Select(x => x.OrderId)
             .Distinct();
 
-        var sourceCount = await ordersWithSource.CountAsync(cancellationToken);
-        var together = await context.OrderItems
-            .Where(x => x.MenuItemId != sourceId && ordersWithSource.Contains(x.OrderId))
+        var ordersPerItem = await context.OrderItems
+            .Where(x => ordersWithSource.Contains(x.OrderId))
             .GroupBy(x => x.MenuItemId)
             .Select(g => new { MenuItemId = g.Key, Orders = g.Select(x => x.OrderId).Distinct().Count() })
-            .ToListAsync(cancellationToken);
+            .ToDictionaryAsync(x => x.MenuItemId, x => x.Orders, cancellationToken);
 
+        var sourceCount = ordersPerItem.GetValueOrDefault(sourceId);
         var stats = new HistoryStats(sourceCount,
-            sourceCount == 0 ? [] : together.ToDictionary(x => x.MenuItemId, x => (double)x.Orders / sourceCount));
+            sourceCount == 0
+                ? []
+                : ordersPerItem.Where(x => x.Key != sourceId).ToDictionary(x => x.Key, x => (double)x.Value / sourceCount));
 
         cache.Set(cacheKey, stats, HistoryCacheDuration);
         return stats;

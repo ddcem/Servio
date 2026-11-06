@@ -921,6 +921,28 @@
       }
     }
   },
+  "amountsInCurrency": "All amounts are in {currency}. Paid orders in other currencies are not included:",
+  "@amountsInCurrency": {
+    "placeholders": {
+      "currency": {
+        "type": "String"
+      }
+    }
+  },
+  "otherCurrencyOrders": "{currency} – orders: {count}, total {total}",
+  "@otherCurrencyOrders": {
+    "placeholders": {
+      "currency": {
+        "type": "String"
+      },
+      "count": {
+        "type": "int"
+      },
+      "total": {
+        "type": "String"
+      }
+    }
+  },
   "paymentsByMethod": "Payments by method",
   "paymentsAndAmount": "{count, plural, =1{1 payment} other{{count} payments}} · {amount}",
   "@paymentsAndAmount": {

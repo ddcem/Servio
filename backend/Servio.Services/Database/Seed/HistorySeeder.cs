@@ -246,6 +246,7 @@ public class HistorySeeder(ServioDbContext context, IRestaurantClock clock)
                         Order = order,
                         OrderTicket = ticket,
                         MenuItem = menuItem,
+                        MenuItemName = menuItem.Name,
                         Quantity = quantity,
                         UnitPrice = menuItem.Price,
                         Note = menuItem.Name == "Ribeye Steak" && _random.NextDouble() < 0.4 ? "Medium rare" : null

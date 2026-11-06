@@ -98,6 +98,7 @@ public class OrderItemConfiguration : IEntityTypeConfiguration<OrderItem>
 {
     public void Configure(EntityTypeBuilder<OrderItem> builder)
     {
+        builder.Property(x => x.MenuItemName).IsRequired().HasMaxLength(100);
         builder.Property(x => x.UnitPrice).HasPrecision(10, 2);
         builder.Property(x => x.Note).HasMaxLength(200);
 

@@ -63,11 +63,17 @@ Iz **plaćenih narudžbi u posljednjih 180 dana**:
 
 ```
 confidence(s → c) = broj narudžbi koje sadrže i s i c / broj narudžbi koje sadrže s
-history(s, c)     = confidence(s → c) / najveći confidence(s → ·) među kandidatima     ∈ [0, 1]
+history(s, c)     = confidence(s → c) / najveći confidence(s → k) među preostalim kandidatima k     ∈ [0, 1]
 ```
 
-Normalizacija prema najjačem paru drži signal historije na istoj skali 0–1 kao i ostala dva signala.
-Oba broja dolaze iz jednog `GROUP BY` upita i keširaju se po izvornoj stavci 10 minuta.
+Normalizacija drži signal historije na istoj skali 0–1 kao i ostala dva signala. Maksimum se računa samo
+nad **preostalim kandidatima** iz odjeljka 2, dakle bez stavki koje su već u korpi ili na narudžbi i bez stavki
+isključenih zato što sto već ima tu vrstu jela. Tako najjači kandidat koji se stvarno može predložiti uvijek dobija
+vrijednost 1, a stavka koja je već naručena ne oslabljuje signal ostalih kandidata.
+
+Oba broja dolaze iz **jednog `GROUP BY` upita**: upit grupiše stavke svih plaćenih narudžbi koje sadrže izvornu
+stavku `s` i za svaku stavku broji te narudžbe. Grupa same izvorne stavke daje broj narudžbi koje sadrže `s`
+(nazivnik), a ostale grupe daju brojnike. Rezultat se kešira po izvornoj stavci 10 minuta.
 
 ## 5. Povratna informacija (stopa prihvatanja)
 
@@ -139,7 +145,8 @@ signali historije i povratne informacije aktivni odmah nakon prvog pokretanja. I
 
 ## 9. Primjer
 
-`POST /api/recommendations` kao korisnik `mobile`:
+`POST /api/recommendations` kao korisnik `mobile`, odmah nakon prvog pokretanja (demo podaci se pune u odnosu na
+dan pokretanja, pa se zadnje decimale mogu malo razlikovati):
 
 ```json
 { "sourceMenuItemId": 6, "cartMenuItemIds": [] }
@@ -148,20 +155,37 @@ signali historije i povratne informacije aktivni odmah nakon prvog pokretanja. I
 ```json
 [
   {
-    "name": "Red Wine", "categoryName": "Alcoholic Drinks", "score": 0.7061,
-    "contentScore": 0.2887, "historyScore": 1.0, "acceptanceScore": 0.6462,
-    "reason": "Ordered with Ribeye Steak in 66% of orders · accepted 65% of the times it was suggested"
+    "name": "Red Wine", "categoryName": "Alcoholic Drinks", "score": 0.7064,
+    "contentScore": 0.2887, "historyScore": 1.0, "acceptanceScore": 0.6466,
+    "reason": "Ordered with Ribeye Steak in 65% of orders · accepted 65% of the times it was suggested"
   },
   {
-    "name": "French Fries", "categoryName": "Sides", "score": 0.6141,
-    "reason": "Ordered with Ribeye Steak in 57% of orders · accepted 56% of the times it was suggested"
+    "name": "French Fries", "categoryName": "Sides", "score": 0.6182,
+    "contentScore": 0.25, "historyScore": 0.8815, "acceptanceScore": 0.5546,
+    "reason": "Ordered with Ribeye Steak in 57% of orders · accepted 55% of the times it was suggested"
   },
   {
-    "name": "Chicken Wings", "categoryName": "Appetizers", "score": 0.3598,
+    "name": "Chicken Wings", "categoryName": "Appetizers", "score": 0.3608,
+    "contentScore": 0.5, "historyScore": 0.2128, "acceptanceScore": 0.5,
     "reason": "Pairs with Ribeye Steak: same premium price range, both meat"
   }
 ]
 ```
 
-Kada je crno vino već u korpi, vrsta „piće” je popunjena, pa prijedlozi postaju French Fries, Chicken Wings i
-Chocolate Lava Cake.
+Kada je crno vino (id 31) već u korpi, vrsta „piće” je popunjena i crno vino više nije kandidat:
+
+```json
+{ "sourceMenuItemId": 6, "cartMenuItemIds": [31] }
+```
+
+```json
+[
+  { "name": "French Fries", "score": 0.6757, "historyScore": 1.0, "...": "..." },
+  { "name": "Chicken Wings", "score": 0.3746, "historyScore": 0.2414, "...": "..." },
+  { "name": "Chocolate Lava Cake", "score": 0.27, "historyScore": 0.1862, "...": "..." }
+]
+```
+
+French Fries sada dobija `historyScore` 1, jer je najjači par među **preostalim** kandidatima (odjeljak 4). Kada bi
+se maksimum računao nad cijelom historijom, crno vino (65 %) bi i dalje bilo nazivnik iako je već u korpi, pa bi
+French Fries dobio samo 0,88.

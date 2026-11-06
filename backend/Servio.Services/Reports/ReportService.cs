@@ -16,7 +16,8 @@ namespace Servio.Services.Reports;
 
 /// <summary>
 /// Sales and staff analytics. Every figure is aggregated in the database with one GROUP BY query;
-/// days are counted in the restaurant's local time zone.
+/// days are counted in the restaurant's local time zone. Amounts in different currencies are never added
+/// together: a report covers the orders in the restaurant's current currency and lists the others separately.
 /// </summary>
 public class ReportService(
     ServioDbContext context,
@@ -38,7 +39,8 @@ public class ReportService(
     {
         var (from, to, fromUtc, toUtc) = Resolve(period);
         var settings = await settingsService.GetAsync(cancellationToken);
-        var paidOrders = PaidOrders(fromUtc, toUtc);
+        var currencyId = settings.CurrencyId;
+        var paidOrders = PaidOrders(fromUtc, toUtc, currencyId);
 
         var totals = await paidOrders
             .GroupBy(_ => 1)
@@ -52,14 +54,15 @@ public class ReportService(
             .FirstOrDefaultAsync(cancellationToken);
 
         var cancelledOrders = await context.Orders
-            .CountAsync(x => x.Status == OrderStatus.Cancelled && x.ClosedAt >= fromUtc && x.ClosedAt < toUtc, cancellationToken);
+            .CountAsync(x => x.Status == OrderStatus.Cancelled && x.ClosedAt >= fromUtc && x.ClosedAt < toUtc
+                             && x.CurrencyId == currencyId, cancellationToken);
 
         var refunds = await context.Refunds
-            .Where(x => x.Status == RefundStatus.Completed && x.CreatedAt >= fromUtc && x.CreatedAt < toUtc)
+            .Where(x => x.Status == RefundStatus.Completed && x.CreatedAt >= fromUtc && x.CreatedAt < toUtc
+                        && x.Payment.Order.CurrencyId == currencyId)
             .SumAsync(x => x.Amount, cancellationToken);
 
-        var paymentMethods = await context.Payments
-            .Where(x => PaidStatuses.Contains(x.Status) && x.CompletedAt >= fromUtc && x.CompletedAt < toUtc)
+        var paymentMethods = await PaidPayments(fromUtc, toUtc, currencyId)
             .GroupBy(x => x.PaymentMethod.Name)
             .Select(g => new { Method = g.Key, Count = g.Count(), Amount = g.Sum(x => x.Amount), Tips = g.Sum(x => x.TipAmount) })
             .ToListAsync(cancellationToken);
@@ -122,7 +125,9 @@ public class ReportService(
         {
             From = from,
             To = to,
+            CurrencyCode = settings.CurrencyCode,
             CurrencySymbol = settings.CurrencySymbol,
+            OtherCurrencies = await OtherCurrenciesAsync(fromUtc, toUtc, currencyId, cancellationToken),
             Revenue = revenue,
             TaxCollected = totals?.Tax ?? 0,
             Tips = paymentMethods.Sum(x => x.Tips),
@@ -155,19 +160,19 @@ public class ReportService(
     {
         var (from, to, fromUtc, toUtc) = Resolve(period);
         var settings = await settingsService.GetAsync(cancellationToken);
+        var currencyId = settings.CurrencyId;
 
         var waiters = await context.Users
             .Where(x => x.Role.Name == Roles.Waiter)
             .Select(x => new { x.Id, Name = x.FirstName + " " + x.LastName, x.IsActive })
             .ToListAsync(cancellationToken);
 
-        var orders = await PaidOrders(fromUtc, toUtc)
+        var orders = await PaidOrders(fromUtc, toUtc, currencyId)
             .GroupBy(x => x.WaiterId)
             .Select(g => new { WaiterId = g.Key, Orders = g.Count(), Guests = g.Sum(x => x.GuestCount), Revenue = g.Sum(x => x.Total) })
             .ToDictionaryAsync(x => x.WaiterId, cancellationToken);
 
-        var tips = await context.Payments
-            .Where(x => PaidStatuses.Contains(x.Status) && x.CompletedAt >= fromUtc && x.CompletedAt < toUtc)
+        var tips = await PaidPayments(fromUtc, toUtc, currencyId)
             .GroupBy(x => x.ProcessedByUserId)
             .Select(g => new { UserId = g.Key, Tips = g.Sum(x => x.TipAmount) })
             .ToDictionaryAsync(x => x.UserId, x => x.Tips, cancellationToken);
@@ -201,7 +206,9 @@ public class ReportService(
         {
             From = from,
             To = to,
+            CurrencyCode = settings.CurrencyCode,
             CurrencySymbol = settings.CurrencySymbol,
+            OtherCurrencies = await OtherCurrenciesAsync(fromUtc, toUtc, currencyId, cancellationToken),
             Waiters = waiters
                 .Select(w =>
                 {
@@ -242,8 +249,30 @@ public class ReportService(
         return new StaffReportDocument(report, settings.RestaurantName, clock.FormatLocal(clock.UtcNow)).GeneratePdf();
     }
 
-    private IQueryable<Order> PaidOrders(DateTime fromUtc, DateTime toUtc) =>
-        context.Orders.Where(x => x.Status == OrderStatus.Completed && x.ClosedAt >= fromUtc && x.ClosedAt < toUtc);
+    private IQueryable<Order> PaidOrders(DateTime fromUtc, DateTime toUtc, int currencyId) =>
+        context.Orders.Where(x => x.Status == OrderStatus.Completed && x.ClosedAt >= fromUtc && x.ClosedAt < toUtc
+                                  && x.CurrencyId == currencyId);
+
+    private IQueryable<Payment> PaidPayments(DateTime fromUtc, DateTime toUtc, int currencyId) =>
+        context.Payments.Where(x => PaidStatuses.Contains(x.Status) && x.CompletedAt >= fromUtc && x.CompletedAt < toUtc
+                                    && x.Order.CurrencyId == currencyId);
+
+    /// <summary>Paid orders of the period in any other currency, one total per currency.</summary>
+    private Task<List<OtherCurrencyResponse>> OtherCurrenciesAsync(DateTime fromUtc, DateTime toUtc, int currencyId,
+        CancellationToken cancellationToken) =>
+        context.Orders
+            .Where(x => x.Status == OrderStatus.Completed && x.ClosedAt >= fromUtc && x.ClosedAt < toUtc
+                        && x.CurrencyId != currencyId)
+            .GroupBy(x => new { x.Currency.Code, x.Currency.Symbol })
+            .Select(g => new OtherCurrencyResponse
+            {
+                CurrencyCode = g.Key.Code,
+                CurrencySymbol = g.Key.Symbol,
+                OrderCount = g.Count(),
+                Revenue = g.Sum(x => x.Total)
+            })
+            .OrderBy(x => x.CurrencyCode)
+            .ToListAsync(cancellationToken);
 
     /// <summary>Items that were actually charged: items on cancelled tickets are not sales.</summary>
     private IQueryable<OrderItem> SoldItems(IQueryable<Order> paidOrders) =>

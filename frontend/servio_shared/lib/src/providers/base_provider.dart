@@ -16,8 +16,19 @@ abstract class ReadProvider<T> {
     return PagedResult.fromJson(json as Map<String, dynamic>, fromJson);
   }
 
-  /// Every record for a dropdown; reference lists are small, so one page of the maximum size is enough.
-  Future<List<T>> getAll({Map<String, dynamic>? filter}) async => (await getPage(filter: filter, pageSize: 100)).items;
+  /// Largest page the API returns (BaseSearchObject.MaxPageSize on the server).
+  static const maxPageSize = 100;
+
+  /// Every matching record (the whole menu, all tables…): pages are loaded one after another until
+  /// [PagedResult.totalCount] is reached, because the API never returns more than [maxPageSize] at once.
+  Future<List<T>> getAll({Map<String, dynamic>? filter}) async {
+    final items = <T>[];
+    for (var page = 1; ; page++) {
+      final result = await getPage(filter: filter, page: page, pageSize: maxPageSize);
+      items.addAll(result.items);
+      if (result.items.isEmpty || items.length >= result.totalCount) return items;
+    }
+  }
 
   Future<T> getById(int id) async => fromJson(await api.get('$endpoint/$id') as Map<String, dynamic>);
 }

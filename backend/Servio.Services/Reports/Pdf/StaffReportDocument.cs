@@ -16,6 +16,7 @@ public class StaffReportDocument(StaffReportResponse report, string restaurantNa
 
         container.Page(page => ReportLayout.Page(page, restaurantName, "Staff performance report", report.From, report.To, generatedAt, col =>
         {
+            ReportLayout.CurrencyNote(col, report.CurrencyCode, report.OtherCurrencies);
             ReportLayout.Section(col, "Waiters", c => ReportLayout.Table(c,
                 ["Waiter", "Orders", "Guests", "Revenue", "Average bill", "Tips"],
                 report.Waiters.Select(x => new[]

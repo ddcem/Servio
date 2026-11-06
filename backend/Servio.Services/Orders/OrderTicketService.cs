@@ -37,10 +37,20 @@ public class OrderTicketService(
         : currentUser.IsInRole(Roles.Bar) ? PreparationStations.Bar
         : null;
 
-    protected override IQueryable<OrderTicket> Query =>
-        OwnStationName is { } station
-            ? Context.OrderTickets.Where(x => x.Station.Name == station)
-            : Context.OrderTickets;
+    /// <summary>Kitchen and bar see their own station; a waiter sees the tickets of orders they may read.</summary>
+    protected override IQueryable<OrderTicket> Query
+    {
+        get
+        {
+            if (OwnStationName is { } station)
+            {
+                return Context.OrderTickets.Where(x => x.Station.Name == station);
+            }
+
+            var visibleOrderIds = Context.Orders.VisibleTo(currentUser).Select(x => x.Id);
+            return Context.OrderTickets.Where(x => visibleOrderIds.Contains(x.OrderId));
+        }
+    }
 
     protected override Expression<Func<OrderTicket, OrderTicketResponse>> Projection => x => new OrderTicketResponse
     {
@@ -62,7 +72,7 @@ public class OrderTicketService(
             .Select(i => new OrderTicketItemResponse
             {
                 MenuItemId = i.MenuItemId,
-                MenuItemName = i.MenuItem.Name,
+                MenuItemName = i.MenuItemName,
                 Quantity = i.Quantity,
                 Note = i.Note
             })
@@ -172,10 +182,14 @@ public class OrderTicketService(
         await Context.Entry(ticket.Order).Collection(x => x.Items).Query().Include(x => x.OrderTicket).LoadAsync(cancellationToken);
         OrderCalculator.Recalculate(ticket.Order);
 
-        await dispatcher.NotifyRoleAsync(ticket.Station.Name, NotificationType.TicketCancelled,
-            new LocalizedText("Ticket {0} cancelled – table {1}", ticket.TicketNumber, ticket.Order.Table.Number),
-            new LocalizedText("{0}. Reason: {1}", DescribeItems(ticket), reason),
-            ticket: ticket, cancellationToken: cancellationToken);
+        // The waiter of the order learns about it unless they cancelled it themselves.
+        if (ticket.Order.WaiterId != currentUser.UserId)
+        {
+            await dispatcher.NotifyAsync(ticket.Order.WaiterId, NotificationType.TicketCancelled,
+                new LocalizedText("Ticket {0} cancelled – table {1}", ticket.TicketNumber, ticket.Order.Table.Number),
+                new LocalizedText("{0}. Reason: {1}", DescribeItems(ticket), reason),
+                ticket: ticket, cancellationToken: cancellationToken);
+        }
 
         await Context.SaveChangesAsync(cancellationToken);
         await PublishChangesAsync(cancellationToken);
@@ -230,7 +244,7 @@ public class OrderTicketService(
         await Query
             .Include(x => x.Station)
             .Include(x => x.Order).ThenInclude(x => x.Table)
-            .Include(x => x.Items).ThenInclude(x => x.MenuItem)
+            .Include(x => x.Items)
             .FirstOrDefaultAsync(x => x.Id == id, cancellationToken)
         ?? throw NotFound();
 
@@ -261,7 +275,7 @@ public class OrderTicketService(
     }
 
     private static string DescribeItems(OrderTicket ticket) =>
-        string.Join(", ", ticket.Items.OrderBy(x => x.Id).Select(x => $"{x.MenuItem.Name} ×{x.Quantity}"));
+        string.Join(", ", ticket.Items.OrderBy(x => x.Id).Select(x => $"{x.MenuItemName} ×{x.Quantity}"));
 
     private Task PublishChangesAsync(CancellationToken cancellationToken)
     {

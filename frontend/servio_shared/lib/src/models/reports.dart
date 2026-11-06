@@ -6,7 +6,9 @@ class SalesReport {
   const SalesReport({
     required this.from,
     required this.to,
+    required this.currencyCode,
     required this.currencySymbol,
+    required this.otherCurrencies,
     required this.revenue,
     required this.taxCollected,
     required this.tips,
@@ -26,7 +28,17 @@ class SalesReport {
   factory SalesReport.fromJson(Map<String, dynamic> json) => SalesReport(
     from: _date(json['from']),
     to: _date(json['to']),
+    currencyCode: json['currencyCode'] as String,
     currencySymbol: json['currencySymbol'] as String,
+    otherCurrencies: toList(
+      json['otherCurrencies'],
+      (e) => OtherCurrency(
+        e['currencyCode'] as String,
+        e['currencySymbol'] as String,
+        e['orderCount'] as int,
+        toDouble(e['revenue']),
+      ),
+    ),
     revenue: toDouble(json['revenue']),
     taxCollected: toDouble(json['taxCollected']),
     tips: toDouble(json['tips']),
@@ -51,7 +63,13 @@ class SalesReport {
 
   final DateTime from;
   final DateTime to;
+
+  /// All amounts are in this currency (the restaurant's current one).
+  final String currencyCode;
   final String currencySymbol;
+
+  /// Paid orders of the period in other currencies; they are not included in the amounts.
+  final List<OtherCurrency> otherCurrencies;
   final double revenue;
   final double taxCollected;
   final double tips;
@@ -66,6 +84,15 @@ class SalesReport {
   final List<ItemSales> leastSoldItems;
   final List<CategorySales> categories;
   final List<PaymentMethodSales> paymentMethods;
+}
+
+class OtherCurrency {
+  const OtherCurrency(this.currencyCode, this.currencySymbol, this.orderCount, this.revenue);
+
+  final String currencyCode;
+  final String currencySymbol;
+  final int orderCount;
+  final double revenue;
 }
 
 class DailySales {

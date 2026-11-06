@@ -144,6 +144,7 @@ Same shape as ReservationStatusHistory, FK → OrderTickets.
 | OrderId | FK → Orders | |
 | OrderTicketId | FK → OrderTickets | which station/round it went to |
 | MenuItemId | FK → MenuItems | |
+| MenuItemName | varchar(100) NOT NULL | **snapshot** of the item name, so renaming the menu item does not change old receipts |
 | Quantity | int NOT NULL | 1–50 |
 | UnitPrice | numeric(10,2) | **snapshot** (the menu price can change later) |
 | Note | varchar(200) NULL | "no onions" |

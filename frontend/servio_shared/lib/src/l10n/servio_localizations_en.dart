@@ -1127,6 +1127,16 @@ class ServioLocalizationsEn extends ServioLocalizations {
   }
 
   @override
+  String amountsInCurrency(String currency) {
+    return 'All amounts are in $currency. Paid orders in other currencies are not included:';
+  }
+
+  @override
+  String otherCurrencyOrders(String currency, int count, String total) {
+    return '$currency – orders: $count, total $total';
+  }
+
+  @override
   String get paymentsByMethod => 'Payments by method';
 
   @override

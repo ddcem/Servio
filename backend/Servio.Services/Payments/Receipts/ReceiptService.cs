@@ -35,7 +35,7 @@ public class ReceiptService(
                 Lines = x.Order.Items
                     .Where(i => i.OrderTicket.Status != TicketStatus.Cancelled)
                     .OrderBy(i => i.Id)
-                    .Select(i => new { i.MenuItem.Name, i.Quantity, i.UnitPrice })
+                    .Select(i => new { Name = i.MenuItemName, i.Quantity, i.UnitPrice })
                     .ToList(),
                 x.Order.Total,
                 x.Order.TaxRate,

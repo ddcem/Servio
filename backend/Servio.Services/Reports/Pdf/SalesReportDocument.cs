@@ -15,6 +15,7 @@ public class SalesReportDocument(SalesReportResponse report, string restaurantNa
 
         container.Page(page => ReportLayout.Page(page, restaurantName, "Sales report", report.From, report.To, generatedAt, col =>
         {
+            ReportLayout.CurrencyNote(col, report.CurrencyCode, report.OtherCurrencies);
             col.Item().Element(c => ReportLayout.Kpis(c,
                 ("Revenue", Amount(report.Revenue)),
                 ("Paid orders", report.OrderCount.ToString(CultureInfo.InvariantCulture)),

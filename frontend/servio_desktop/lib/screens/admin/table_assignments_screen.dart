@@ -83,7 +83,9 @@ class _TableAssignmentsScreenState extends State<TableAssignmentsScreen> {
   String? _nameOf(int? waiterId) => _waiters.where((w) => w.id == waiterId).firstOrNull?.fullName;
 
   /// Shows the move at once and saves it; the board is restored if the server refuses.
-  Future<void> _assign(List<RestaurantTable> tables, int? waiterId) async {
+  /// This is the only place that reports the outcome: [successMessage] (or a description of the move)
+  /// once the server confirms, otherwise only the error.
+  Future<void> _assign(List<RestaurantTable> tables, int? waiterId, {String? successMessage}) async {
     final moving = tables.where((t) => t.assignedWaiterId != waiterId).toList();
     if (moving.isEmpty) return;
     final before = _items!;
@@ -95,7 +97,9 @@ class _TableAssignmentsScreenState extends State<TableAssignmentsScreen> {
     try {
       await _tables.assign({for (final t in moving) t.id: waiterId});
       if (!mounted) return;
-      if (waiterId == null && moving.length == 1) {
+      if (successMessage != null) {
+        showSuccess(context, successMessage);
+      } else if (waiterId == null && moving.length == 1) {
         showSuccess(context, l10n.assignmentFreed(moving.single.number));
       } else if (moving.length == 1) {
         showSuccess(context, l10n.assignmentMoved(moving.single.number, name!));
@@ -120,8 +124,7 @@ class _TableAssignmentsScreenState extends State<TableAssignmentsScreen> {
       destructive: true,
     );
     if (!confirmed || !mounted) return;
-    await _assign(assigned, null);
-    if (mounted) showSuccess(context, l10n.planCleared);
+    await _assign(assigned, null, successMessage: l10n.planCleared);
   }
 
   @override

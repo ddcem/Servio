@@ -104,11 +104,11 @@ class _ReservationFormState extends State<_ReservationForm> {
           'tableId': _tableId,
           'guestName': _guestName.text.trim(),
           'guestPhone': _phone.text.trim(),
-          'guestEmail': _email.text.trim(),
+          'guestEmail': _email.text.trim().isEmpty ? null : _email.text.trim(),
           'partySize': int.parse(_partySize.text.trim()),
           'startTime': _start.toUtc().toIso8601String(),
           'endTime': _start.add(Duration(minutes: _duration)).toUtc().toIso8601String(),
-          'note': _note.text.trim(),
+          'note': _note.text.trim().isEmpty ? null : _note.text.trim(),
         };
         final provider = context.read<ReservationProvider>();
         final saved = _editing ? await provider.update(widget.reservation!.id, request) : await provider.insert(request);

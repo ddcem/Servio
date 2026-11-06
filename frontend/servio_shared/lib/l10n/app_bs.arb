@@ -304,6 +304,8 @@
   "promotionCandidates": "Kandidati za akciju ili uklanjanje",
   "salesByCategory": "Prodaja po kategorijama",
   "soldAndRevenue": "prodano: {count} · {revenue}",
+  "amountsInCurrency": "Svi iznosi su u valuti {currency}. Plaćene narudžbe u drugim valutama nisu uračunate:",
+  "otherCurrencyOrders": "{currency} – broj narudžbi: {count}, ukupno {total}",
   "paymentsByMethod": "Plaćanja po načinu",
   "paymentsAndAmount": "{count, plural, one{{count} plaćanje} few{{count} plaćanja} other{{count} plaćanja}} · {amount}",
   "staffPerformance": "Učinak osoblja",

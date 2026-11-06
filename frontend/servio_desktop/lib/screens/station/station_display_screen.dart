@@ -51,12 +51,12 @@ class _StationDisplayScreenState extends State<StationDisplayScreen> {
     try {
       _stationId ??= (await context.read<PreparationStationProvider>().getAll()).firstWhere((x) => x.name == widget.station).id;
       final results = await Future.wait([
-        _tickets.getPage(filter: {'StationId': _stationId, 'ActiveOnly': true}, pageSize: 100),
+        _tickets.getAll(filter: {'StationId': _stationId, 'ActiveOnly': true}),
         if (widget.viewOnly) _tickets.getStationSummaries(),
       ]);
       if (!mounted) return;
       setState(() {
-        _items = (results[0] as PagedResult<OrderTicket>).items;
+        _items = results[0] as List<OrderTicket>;
         if (widget.viewOnly) {
           _summary = (results[1] as List<StationSummary>).firstWhere((x) => x.stationId == _stationId);
         }

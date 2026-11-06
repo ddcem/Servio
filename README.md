@@ -177,8 +177,11 @@ Aplikacije su po zadanim postavkama na engleskom jeziku; jezik se mijenja na ekr
   obavijesti i postavke.
 * *Tables → Assign waiters* (*Stolovi → Dodijeli konobare*): prevlačenjem se stolovi dodjeljuju konobaru koji
   ih poslužuje u toj smjeni. Konobar može primati narudžbe samo za svoje i nedodijeljene stolove.
-* *Reports* (*Izvještaji*): današnje brojke, analiza perioda sa grafikonima te izvještaji **prodaje** i
-  **uposlenika** u PDF formatu.
+* *Reports* (*Izvještaji*): današnje brojke, analiza perioda sa grafikonima (dnevni prihod, najprodavaniji i
+  najslabije prodavani artikli) te izvještaji **prodaje** i **uposlenika** u PDF formatu. Iznosi u različitim
+  valutama se nikad ne sabiraju: izvještaj je u trenutnoj valuti restorana, a narudžbe u drugim valutama navedene
+  su posebno.
+* Ako administrator otkaže narudžbu ili bon, konobar te narudžbe odmah dobija obavijest na telefonu.
 
 **Jezici:** svaki korisnik može birati između **engleskog** i **bosanskog** jezika. Izbor se pamti u
 korisničkom računu, pa ga koriste i obavijesti, e-mailovi, računi i PDF izvještaji.

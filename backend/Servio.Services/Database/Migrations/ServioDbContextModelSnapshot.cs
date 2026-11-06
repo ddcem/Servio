@@ -319,6 +319,11 @@ namespace Servio.Services.Database.Migrations
                     b.Property<int>("MenuItemId")
                         .HasColumnType("integer");
 
+                    b.Property<string>("MenuItemName")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)");
+
                     b.Property<string>("Note")
                         .HasMaxLength(200)
                         .HasColumnType("character varying(200)");

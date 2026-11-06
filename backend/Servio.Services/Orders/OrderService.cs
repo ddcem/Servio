@@ -36,6 +36,8 @@ public class OrderService(
 
     protected override string EntityName => "Order";
 
+    protected override IQueryable<Order> Query => Context.Orders.VisibleTo(currentUser);
+
     protected override Expression<Func<Order, OrderResponse>> Projection => x => new OrderResponse
     {
         Id = x.Id,
@@ -63,7 +65,7 @@ public class OrderService(
             {
                 Id = i.Id,
                 MenuItemId = i.MenuItemId,
-                MenuItemName = i.MenuItem.Name,
+                MenuItemName = i.MenuItemName,
                 Quantity = i.Quantity,
                 UnitPrice = i.UnitPrice,
                 LineTotal = Math.Round(i.UnitPrice * i.Quantity, 2),
@@ -216,6 +218,7 @@ public class OrderService(
 
         var reason = request.Reason.Trim();
         var now = DateTime.UtcNow;
+        var cancelledTickets = new List<string>();
 
         foreach (var ticket in order.Tickets.Where(x => x.Status == TicketStatus.New))
         {
@@ -229,11 +232,18 @@ public class OrderService(
                 ChangedAt = now
             });
             ticket.Status = TicketStatus.Cancelled;
+            cancelledTickets.Add(ticket.TicketNumber);
+        }
 
-            await dispatcher.NotifyRoleAsync(ticket.Station.Name, NotificationType.TicketCancelled,
-                new LocalizedText("Ticket {0} cancelled – table {1}", ticket.TicketNumber, order.Table.Number),
-                new LocalizedText("The whole order was cancelled. Reason: {0}", reason),
-                ticket: ticket, cancellationToken: cancellationToken);
+        // The waiter of the order learns about it unless they cancelled it themselves.
+        if (order.WaiterId != currentUser.UserId)
+        {
+            await dispatcher.NotifyAsync(order.WaiterId, NotificationType.TicketCancelled,
+                new LocalizedText("Order {0} cancelled – table {1}", order.OrderNumber, order.Table.Number),
+                cancelledTickets.Count > 0
+                    ? new LocalizedText("Cancelled tickets: {0}. Reason: {1}", string.Join(", ", cancelledTickets), reason)
+                    : new LocalizedText("Reason: {0}", reason),
+                cancellationToken: cancellationToken);
         }
 
         order.Status = OrderStatus.Cancelled;
@@ -324,6 +334,7 @@ public class OrderService(
                     Order = order,
                     OrderTicket = ticket,
                     MenuItemId = menuItem.Id,
+                    MenuItemName = menuItem.Name,
                     Quantity = line.Quantity!.Value,
                     UnitPrice = menuItem.Price,
                     Note = Normalize(line.Note)

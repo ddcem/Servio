@@ -201,6 +201,7 @@ class _ReportsScreenState extends State<ReportsScreen> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
+        if (today.otherCurrencies.isNotEmpty) ...[_CurrencyNote(report: today), const SizedBox(height: 20)],
         Wrap(
           spacing: 20,
           runSpacing: 20,
@@ -242,7 +243,8 @@ class _ReportsScreenState extends State<ReportsScreen> {
             children: [
               Text(l10n.popularItemsToday, style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
               const SizedBox(height: 12),
-              if (today.topItems.isEmpty) Text(l10n.noSalesToday, style: const TextStyle(color: ServioColors.textMuted)),
+              if (today.topItems.isEmpty)
+                Text(l10n.noSalesToday, style: const TextStyle(color: ServioColors.textMuted)),
               for (final item in today.topItems.take(5)) _ItemRow(item: item, symbol: s),
             ],
           ),
@@ -258,6 +260,7 @@ class _ReportsScreenState extends State<ReportsScreen> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
+        if (sales.otherCurrencies.isNotEmpty) ...[_CurrencyNote(report: sales), const SizedBox(height: 20)],
         Wrap(
           spacing: 16,
           runSpacing: 16,
@@ -296,6 +299,8 @@ class _ReportsScreenState extends State<ReportsScreen> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(l10n.bestSellingItems, style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+                    const SizedBox(height: 12),
+                    _ItemsChart(items: sales.topItems, symbol: s, color: ServioColors.success),
                     const SizedBox(height: 8),
                     for (final item in sales.topItems) _ItemRow(item: item, symbol: s),
                   ],
@@ -312,8 +317,11 @@ class _ReportsScreenState extends State<ReportsScreen> {
                       children: [
                         Text(l10n.leastSellingItems, style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
                         Text(l10n.promotionCandidates, style: const TextStyle(color: ServioColors.textMuted)),
+                        const SizedBox(height: 12),
+                        _ItemsChart(items: sales.leastSoldItems, symbol: s, color: ServioColors.danger),
                         const SizedBox(height: 8),
-                        for (final item in sales.leastSoldItems) _ItemRow(item: item, symbol: s, highlight: ServioColors.danger),
+                        for (final item in sales.leastSoldItems)
+                          _ItemRow(item: item, symbol: s, highlight: ServioColors.danger),
                       ],
                     ),
                   ),
@@ -388,7 +396,9 @@ class _ReportsScreenState extends State<ReportsScreen> {
                   for (final st in staff.stations)
                     _Metric(
                       l10n.stationTickets(Stations.label(st.stationName), st.ticketCount),
-                      st.averageMinutesToReady == null ? '–' : l10n.minutesToReady(Formatters.decimal(st.averageMinutesToReady!)),
+                      st.averageMinutesToReady == null
+                          ? '–'
+                          : l10n.minutesToReady(Formatters.decimal(st.averageMinutesToReady!)),
                     ),
                 ],
               ),
@@ -427,7 +437,13 @@ class _PdfMenu extends StatelessWidget {
 }
 
 class _KpiCard extends StatelessWidget {
-  const _KpiCard({required this.colors, required this.icon, required this.label, required this.value, required this.footer});
+  const _KpiCard({
+    required this.colors,
+    required this.icon,
+    required this.label,
+    required this.value,
+    required this.footer,
+  });
 
   final List<Color> colors;
   final IconData icon;
@@ -624,4 +640,142 @@ class _RevenueChart extends StatelessWidget {
       ),
     );
   }
+}
+
+/// Shown only when the period also has paid orders in another currency: amounts are never added across currencies.
+class _CurrencyNote extends StatelessWidget {
+  const _CurrencyNote({required this.report});
+
+  final SalesReport report;
+
+  @override
+  Widget build(BuildContext context) => Container(
+    padding: const EdgeInsets.all(16),
+    decoration: BoxDecoration(
+      color: ServioColors.warningLight,
+      borderRadius: BorderRadius.circular(12),
+      border: Border.all(color: ServioColors.warning),
+    ),
+    child: Row(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        const Icon(Icons.currency_exchange, color: ServioColors.warning),
+        const SizedBox(width: 12),
+        Expanded(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(l10n.amountsInCurrency(report.currencyCode), style: const TextStyle(fontWeight: FontWeight.w600)),
+              for (final other in report.otherCurrencies)
+                Text(
+                  l10n.otherCurrencyOrders(
+                    other.currencyCode,
+                    other.orderCount,
+                    Formatters.money(other.revenue, other.currencySymbol),
+                  ),
+                ),
+            ],
+          ),
+        ),
+      ],
+    ),
+  );
+}
+
+/// Horizontal bars: one per item, its length the quantity sold. The chart is a bar chart turned a quarter
+/// to the right, so its axis labels are turned back to stay readable.
+class _ItemsChart extends StatelessWidget {
+  const _ItemsChart({required this.items, required this.symbol, required this.color});
+
+  final List<ItemSales> items;
+  final String symbol;
+  final Color color;
+
+  @override
+  Widget build(BuildContext context) {
+    if (items.isEmpty) return const SizedBox.shrink();
+    final maxQuantity = items.fold<int>(0, (max, i) => i.quantity > max ? i.quantity : max);
+    final step = _niceStep(maxQuantity);
+
+    return SizedBox(
+      height: items.length * 34 + 30,
+      child: BarChart(
+        BarChartData(
+          rotationQuarterTurns: 1,
+          maxY: maxQuantity == 0 ? 1 : maxQuantity * 1.1,
+          gridData: FlGridData(drawVerticalLine: false, horizontalInterval: step),
+          borderData: FlBorderData(show: false),
+          barTouchData: BarTouchData(
+            touchTooltipData: BarTouchTooltipData(
+              getTooltipItem: (group, _, rod, _) => BarTooltipItem(
+                '${items[group.x].name}\n${l10n.soldAndRevenue(items[group.x].quantity, Formatters.money(items[group.x].revenue, symbol))}',
+                const TextStyle(color: Colors.white),
+              ),
+            ),
+          ),
+          titlesData: FlTitlesData(
+            topTitles: const AxisTitles(),
+            rightTitles: const AxisTitles(),
+            leftTitles: AxisTitles(
+              sideTitles: SideTitles(
+                showTitles: true,
+                reservedSize: 24,
+                interval: step,
+                // Only round steps; the chart's extra headroom at the end gets no label.
+                getTitlesWidget: (value, meta) => value % step == 0
+                    ? RotatedBox(
+                        quarterTurns: -1,
+                        child: Text('${value.toInt()}', style: const TextStyle(fontSize: 11)),
+                      )
+                    : const SizedBox.shrink(),
+              ),
+            ),
+            bottomTitles: AxisTitles(
+              sideTitles: SideTitles(
+                showTitles: true,
+                reservedSize: 130,
+                getTitlesWidget: (value, meta) => RotatedBox(
+                  quarterTurns: -1,
+                  child: Padding(
+                    padding: const EdgeInsets.only(right: 8),
+                    child: Text(
+                      items[value.toInt()].name,
+                      style: const TextStyle(fontSize: 12),
+                      overflow: TextOverflow.ellipsis,
+                      textAlign: TextAlign.right,
+                    ),
+                  ),
+                ),
+              ),
+            ),
+          ),
+          barGroups: [
+            for (var i = 0; i < items.length; i++)
+              BarChartGroupData(
+                x: i,
+                barRods: [
+                  BarChartRodData(
+                    toY: items[i].quantity.toDouble(),
+                    width: 16,
+                    color: color,
+                    borderRadius: BorderRadius.circular(4),
+                  ),
+                ],
+              ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+/// A round step for about five axis labels: 1, 2, 5, 10, 20, 50, 100…
+double _niceStep(int max) {
+  if (max <= 5) return 1;
+  var magnitude = 1;
+  while (magnitude * 10 <= max / 5) {
+    magnitude *= 10;
+  }
+  final raw = max / 5 / magnitude;
+  return (raw <= 1 ? 1 : (raw <= 2 ? 2 : (raw <= 5 ? 5 : 10))) * magnitude.toDouble();
 }

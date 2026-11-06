@@ -1134,6 +1134,16 @@ class ServioLocalizationsBs extends ServioLocalizations {
   }
 
   @override
+  String amountsInCurrency(String currency) {
+    return 'Svi iznosi su u valuti $currency. Plaćene narudžbe u drugim valutama nisu uračunate:';
+  }
+
+  @override
+  String otherCurrencyOrders(String currency, int count, String total) {
+    return '$currency – broj narudžbi: $count, ukupno $total';
+  }
+
+  @override
   String get paymentsByMethod => 'Plaćanja po načinu';
 
   @override

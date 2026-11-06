@@ -17,9 +17,16 @@ public class ReservationUpsertRequest
     [RegularExpression(ValidationRules.PhonePattern, ErrorMessage = ValidationRules.PhoneMessage)]
     public string GuestPhone { get; set; } = string.Empty;
 
+    /// <summary>Optional. An empty value is stored as null before validation, so it never fails the email format check.</summary>
     [StringLength(100, ErrorMessage = "Email can be at most 100 characters long.")]
     [EmailAddress(ErrorMessage = ValidationRules.EmailMessage)]
-    public string? GuestEmail { get; set; }
+    public string? GuestEmail
+    {
+        get => _guestEmail;
+        set => _guestEmail = string.IsNullOrWhiteSpace(value) ? null : value.Trim();
+    }
+
+    private string? _guestEmail;
 
     [Required(ErrorMessage = "Party size is required.")]
     [Range(1, 20, ErrorMessage = "Party size must be between 1 and 20 guests.")]

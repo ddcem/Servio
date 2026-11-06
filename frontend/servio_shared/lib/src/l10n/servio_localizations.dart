@@ -1922,6 +1922,18 @@ abstract class ServioLocalizations {
   /// **'{count} sold · {revenue}'**
   String soldAndRevenue(int count, String revenue);
 
+  /// No description provided for @amountsInCurrency.
+  ///
+  /// In en, this message translates to:
+  /// **'All amounts are in {currency}. Paid orders in other currencies are not included:'**
+  String amountsInCurrency(String currency);
+
+  /// No description provided for @otherCurrencyOrders.
+  ///
+  /// In en, this message translates to:
+  /// **'{currency} – orders: {count}, total {total}'**
+  String otherCurrencyOrders(String currency, int count, String total);
+
   /// No description provided for @paymentsByMethod.
   ///
   /// In en, this message translates to:
